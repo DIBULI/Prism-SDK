@@ -505,7 +505,7 @@ void parse_frame(const prism::Frame& frame) {
 完整可编译的 Windows loader 位于
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)。程序加载
 `prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v4、SDK
-0.11.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
+1.0.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
 
 | Runtime API 字段 | 对应例子 |
 | --- | --- |

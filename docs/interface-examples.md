@@ -519,7 +519,7 @@ wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 The complete buildable Windows loader is
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp). After it
 loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
-ABI v4/SDK 0.11.0/MSVC compatibility, and stores the result in `api`, the
+ABI v4/SDK 1.0.0/MSVC compatibility, and stores the result in `api`, the
 function-pointer calls have these direct forms:
 
 | Runtime API field | Corresponding example |

@@ -1,10 +1,10 @@
-# Prism Host SDK 0.11.0 Developer Guide
+# Prism Host SDK 1.0.0 Developer Guide
 
 This guide is for application developers who receive only the public headers
 and prebuilt shared libraries. It describes every public feature in Prism Host
-SDK `0.11.0`, including lifecycle rules, data units, timestamp semantics, and
-usage constraints. The device Agent must be `0.11.0` and the wire protocol must
-be `10`. The SDK performs strict version validation when it opens a device and
+SDK `1.0.0`, including lifecycle rules, data units, timestamp semantics, and
+usage constraints. The device Agent must be `1.0.0` and the wire protocol must
+be `1`. The SDK performs strict version validation when it opens a device and
 does not provide a legacy-protocol compatibility mode.
 
 [简体中文](development-guide.zh-CN.md)
@@ -186,7 +186,7 @@ platform matrix.
 
 | Platform | Architecture | API model |
 | --- | --- | --- |
-| Ubuntu 24.04+ | x86-64 | Link `libprism_usb_sdk.so` directly and use the complete `Client` API |
+| Ubuntu 22.04+ | x86-64 | Link `libprism_usb_sdk.so` directly and use the complete `Client` API |
 | macOS 13+ | Apple Silicon arm64 | Link the SDK dylib, deploy the libusb dylib beside it, and use the complete `Client` API |
 | Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v4 |
 
@@ -221,7 +221,7 @@ Section 16 maps the Windows function table to the direct API.
 ### 2.1 Query the SDK version
 
 ```cpp
-std::cout << prism::hostSdkVersion() << '\n';  // 0.11.0
+std::cout << prism::hostSdkVersion() << '\n';  // 1.0.0
 ```
 
 <a id="sdk-device-open"></a>
@@ -484,7 +484,7 @@ all = client.setExposureConfiguration(all, prism::kExposureFieldAll);
 Field masks include `kExposureFieldTargetBrightness`, individual Camera 0..3
 bits, `kExposureFieldCameraAll`, and `kExposureFieldAll`.
 
-The current 0.11.0 API does not expose user-configurable automatic-exposure
+The current 1.0.0 API does not expose user-configurable automatic-exposure
 minimum/maximum exposure or minimum/maximum gain fields. Do not assume that
 capability exists in an application.
 
@@ -1096,7 +1096,7 @@ Before making a call, verify:
 
 - `abi_version == 4`;
 - `struct_size >= sizeof(prism::RuntimeApi)`;
-- `sdk_version == "0.11.0"`;
+- `sdk_version == "1.0.0"`;
 - `api->msvc_version / 100 == _MSC_VER / 100`, proving that the DLL and
   application use a compatible MSVC 14.x runtime family;
 - every function pointer that the application will use is non-null.

@@ -223,7 +223,7 @@ Device mode remains non-destructive: it does not synchronize clocks, save
 configuration, change exposure/network state, or install firmware. Close Prism
 Viewer and other USB consumers before running it.
 
-The script supports only the published runtime architectures: Ubuntu 24.04
+The script supports only the published runtime architectures: Ubuntu 22.04+
 x86-64, macOS arm64, and Windows x64. It intentionally does not delete or clean
 the selected build directory.
 

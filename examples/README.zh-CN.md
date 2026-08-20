@@ -202,7 +202,7 @@ python3 scripts/test_all_examples.py \
 设备模式仍然是非破坏性的：不会同步时钟、保存配置、修改曝光/网络或安装固件。运行前请
 关闭 Prism Viewer 和其他占用 USB 的程序。
 
-脚本只支持发布动态库对应的 Ubuntu 24.04 x86-64、macOS arm64 和 Windows x64。脚本
+脚本只支持发布动态库对应的 Ubuntu 22.04+ x86-64、macOS arm64 和 Windows x64。脚本
 不会删除或清空指定的 build 目录。
 
 ## 退出码

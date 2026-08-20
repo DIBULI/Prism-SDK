@@ -8,7 +8,7 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
 endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  project(PrismSdkExamples VERSION 0.11.0 LANGUAGES CXX)
+  project(PrismSdkExamples VERSION 1.0.0 LANGUAGES CXX)
   include(CTest)
 endif()
 
@@ -45,12 +45,17 @@ elseif(APPLE)
     IMPORTED_LOCATION "${_prism_sdk_runtime}")
 elseif(UNIX)
   string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" _prism_processor)
-  if(NOT _prism_processor MATCHES "^(x86_64|amd64)$")
-    message(FATAL_ERROR "The packaged Linux runtime supports x86-64 only")
+  if(_prism_processor MATCHES "^(x86_64|amd64)$")
+    set(_prism_sdk_runtime
+      "${PRISM_SDK_ROOT}/runtime/linux-x64/libprism_usb_sdk.so")
+  elseif(_prism_processor MATCHES "^(aarch64|arm64)$")
+    set(_prism_sdk_runtime
+      "${PRISM_SDK_ROOT}/runtime/linux-arm64/libprism_usb_sdk.so")
+  else()
+    message(FATAL_ERROR
+      "The packaged Linux runtime supports x86-64 and arm64 only")
   endif()
   unset(_prism_processor)
-  set(_prism_sdk_runtime
-    "${PRISM_SDK_ROOT}/runtime/linux-x64/libprism_usb_sdk.so")
   add_library(PrismUsbSdkRuntime SHARED IMPORTED)
   set_target_properties(PrismUsbSdkRuntime PROPERTIES
     IMPORTED_LOCATION "${_prism_sdk_runtime}")

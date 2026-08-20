@@ -3,10 +3,12 @@ name: Build SDK Examples
 on:
   push:
     branches:
-      - main
+      - master
+    tags:
+      - "v*"
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -14,7 +16,7 @@ permissions:
 
 concurrency:
   group: sdk-build-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   integrity:
@@ -66,6 +68,56 @@ jobs:
             test -x "build/examples/$example"
           done
           cmp runtime/linux-x64/libprism_usb_sdk.so \
+            build/examples/libprism_usb_sdk.so
+          readelf -d build/examples/prism-device-info-time-sync \
+            | grep -Fq "Library runpath: [\$ORIGIN]"
+
+      - name: Smoke-test SDK loading and enumeration
+        run: |
+          set +e
+          output="$(build/examples/prism-device-info-time-sync 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -eq 1
+          test "$output" = 'error: no Prism device found'
+
+  linux-arm64:
+    name: Ubuntu 24.04 arm64
+    needs: integrity
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify runner architecture
+        run: test "$(uname -m)" = "aarch64"
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libusb-1.0-0 libssl3t64
+
+      - name: Build and test every supported example
+        run: python3 scripts/test_all_examples.py --build-dir build
+
+      - name: Verify relocatable runtime
+        run: |
+          for example in \
+            prism-device-info-time-sync \
+            prism-camera-imu-capture \
+            prism-client-api-examples \
+            prism-configuration-api-examples \
+            prism-lidar-capture \
+            prism-parser-api-examples \
+            prism-stream-api-examples; do
+            test -x "build/examples/$example"
+          done
+          cmp runtime/linux-arm64/libprism_usb_sdk.so \
             build/examples/libprism_usb_sdk.so
           readelf -d build/examples/prism-device-info-time-sync \
             | grep -Fq "Library runpath: [\$ORIGIN]"
@@ -199,3 +251,37 @@ jobs:
           if ($stderr.Trim() -cne 'error: no Prism device found') {
             throw "Unexpected stderr: $stderr"
           }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux-x64, linux-arm64, macos-arm64, windows-x64]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Validate tag and package SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          test "$version" = "1.0.0"
+          git archive --format=tar --prefix="Prism-SDK-${version}/" HEAD \
+            | gzip -9 > "Prism-SDK-${version}.tar.gz"
+          sha256sum "Prism-SDK-${version}.tar.gz" \
+            > "Prism-SDK-${version}.tar.gz.sha256"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            Prism-SDK-1.0.0.tar.gz \
+            Prism-SDK-1.0.0.tar.gz.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --generate-notes

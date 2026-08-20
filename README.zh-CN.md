@@ -1,6 +1,6 @@
-# Prism Host SDK 0.11.0
+# Prism Host SDK 1.0.0
 
-[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
 
 [English](README.md)
 
@@ -14,7 +14,13 @@
 Prism-SDK/
 ├── include/prism/                 C++17 公共头文件
 ├── runtime/
-│   ├── linux-x64/                 Ubuntu 24.04 x86-64 动态库
+│   ├── linux-x64/                 默认 Ubuntu 22.04+ x86-64 动态库
+│   ├── linux-arm64/               默认 Ubuntu 22.04+ ARM64 动态库
+│   ├── ros/
+│   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK 前缀
+│   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK 前缀
+│   │   ├── ubuntu-24.04-x86_64/   ROS 2 Jazzy/Kilted SDK 前缀
+│   │   └── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK 前缀
 │   ├── macos-arm64/               macOS 13+ Apple Silicon 动态库
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          安装和使用文档
@@ -26,10 +32,10 @@ Prism-SDK/
 
 ## 兼容要求
 
-- Host SDK：`0.11.0`
+- Host SDK：`1.0.0`
 - Runtime API：`4`
-- USB protocol：`10`
-- 设备 Agent：必须为 `0.11.0`
+- USB protocol：`1`
+- 设备 Agent：必须为 `1.0.0`
 - C++：C++17 或更新版本
 - CMake：3.20 或更新版本
 
@@ -38,6 +44,11 @@ SDK 会严格检查版本。不要混用不同版本的头文件、动态库或 
 GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
 测试，并对发布的动态库执行加载冒烟测试。新增 `examples/*.cpp` 如果没有注册 CMake
 target，配置会直接失败，避免后续示例被 CI 静默漏编。
+
+两个 Linux 架构使用相同的 Ubuntu 22.04 ABI 基线。仓库还在 `runtime/ros`
+下提供 ROS Adapter 使用的完整多 Ubuntu ABI 二进制
+SDK 前缀。Adapter 会按 ROS 发行版选择对应前缀；普通桌面 SDK 用户默认使用
+`runtime/linux-x64/libprism_usb_sdk.so`。
 
 ## 编译示例
 

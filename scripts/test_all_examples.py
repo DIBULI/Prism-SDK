@@ -10,6 +10,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+import time
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,7 +51,7 @@ def verify_package() -> None:
 def host_kind() -> str:
     system = platform.system()
     machine = platform.machine().lower()
-    if system == "Linux" and machine in {"x86_64", "amd64"}:
+    if system == "Linux" and machine in {"x86_64", "amd64", "aarch64", "arm64"}:
         return "linux"
     if system == "Darwin" and machine == "arm64":
         return "macos"
@@ -102,6 +103,7 @@ def run_device_tests(
     kind: str,
     capture_seconds: int,
     lidar_model: str | None,
+    settle_seconds: float,
 ) -> None:
     suffix = ".exe" if kind == "windows" else ""
     run([str(executable_dir / f"prism-device-info-time-sync{suffix}")])
@@ -111,6 +113,14 @@ def run_device_tests(
         print("Windows device-information example passed.")
         return
 
+    # Closing a libusb process does not necessarily disable/re-enable the
+    # FunctionFS gadget immediately.  Give the Agent enough time to retire the
+    # previous authenticated session before the next standalone example claims
+    # the capture owner.  This keeps the automation deterministic without
+    # retrying or hiding an actual capture failure.
+    if settle_seconds > 0:
+        print(f"Waiting {settle_seconds:g}s for USB session release.", flush=True)
+        time.sleep(settle_seconds)
     run(
         [
             str(executable_dir / "prism-camera-imu-capture"),
@@ -119,6 +129,12 @@ def run_device_tests(
         ]
     )
     if lidar_model is not None:
+        if settle_seconds > 0:
+            print(
+                f"Waiting {settle_seconds:g}s for USB session release.",
+                flush=True,
+            )
+            time.sleep(settle_seconds)
         run(
             [
                 str(executable_dir / "prism-lidar-capture"),
@@ -138,6 +154,7 @@ def build_and_test(
     with_device: bool,
     capture_seconds: int,
     lidar_model: str | None,
+    device_settle_seconds: float,
 ) -> None:
     configure(build_dir, kind, generator)
     run(
@@ -177,7 +194,13 @@ def build_and_test(
             raise RuntimeError(f"example is not executable: {executable}")
     print(f"Built and verified {len(targets)} example targets for {kind}.")
     if with_device:
-        run_device_tests(executable_dir, kind, capture_seconds, lidar_model)
+        run_device_tests(
+            executable_dir,
+            kind,
+            capture_seconds,
+            lidar_model,
+            device_settle_seconds,
+        )
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -213,6 +236,15 @@ def parse_arguments() -> argparse.Namespace:
         choices=("mid360", "mid360s"),
         help="also test LiDAR capture with the explicitly selected model",
     )
+    parser.add_argument(
+        "--device-settle-seconds",
+        type=float,
+        default=3.0,
+        help=(
+            "wait between standalone device examples so FunctionFS can "
+            "release the previous session (default: %(default)s)"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -220,6 +252,8 @@ def main() -> int:
     arguments = parse_arguments()
     if arguments.capture_seconds <= 0:
         raise RuntimeError("--capture-seconds must be greater than zero")
+    if arguments.device_settle_seconds < 0:
+        raise RuntimeError("--device-settle-seconds cannot be negative")
     if arguments.lidar_model is not None and not arguments.with_device:
         raise RuntimeError("--lidar-model requires --with-device")
     verify_package()
@@ -231,6 +265,7 @@ def main() -> int:
             arguments.with_device,
             arguments.capture_seconds,
             arguments.lidar_model,
+            arguments.device_settle_seconds,
         )
     return 0
 

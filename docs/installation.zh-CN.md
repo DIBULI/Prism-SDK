@@ -4,20 +4,23 @@
 
 | 主机平台 | 架构 | 最低环境 | 动态库 |
 | --- | --- | --- | --- |
-| Linux | x86-64 | Ubuntu 24.04 | `runtime/linux-x64/libprism_usb_sdk.so` |
+| Linux | x86-64 | Ubuntu 22.04 或更新版本 | `runtime/linux-x64/libprism_usb_sdk.so` |
+| Linux | arm64 | Ubuntu 22.04 或更新版本 | `runtime/linux-arm64/libprism_usb_sdk.so` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-Linux 动态库要求 GLIBC 2.38 或更新版本，不兼容 Ubuntu 20.04/22.04。
+两个 Linux 动态库都要求 GLIBC 2.34 或更新版本以及 OpenSSL 3，不兼容 Ubuntu 20.04。
 
-## Linux x86-64
+## Linux x86-64 与 arm64
 
 安装构建工具和运行依赖：
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3t64
+sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3
 ```
+
+Ubuntu 24.04 请将 `libssl3` 替换为 `libssl3t64`。
 
 安装 udev 规则，使普通用户能够打开 VID:PID `2207:1201`：
 
@@ -63,7 +66,7 @@ libusb-1.0.0.dylib
 ## Windows x64
 
 使用 Visual Studio 2022 C++ x64 工具链和 CMake。公共 C++ ABI 要求 MSVC 14.x 和
-完全匹配的 SDK 0.11.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
+完全匹配的 SDK 1.0.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
 2015-2022 x64 Redistributable，并确保 Prism USB 接口使用 Windows WinUSB 驱动。将
 `prism_usb_sdk.dll` 放在应用程序旁。
 

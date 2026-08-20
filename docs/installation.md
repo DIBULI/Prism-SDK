@@ -4,21 +4,24 @@
 
 | Host platform | Architecture | Minimum environment | Runtime |
 | --- | --- | --- | --- |
-| Linux | x86-64 | Ubuntu 24.04 | `runtime/linux-x64/libprism_usb_sdk.so` |
+| Linux | x86-64 | Ubuntu 22.04 or later | `runtime/linux-x64/libprism_usb_sdk.so` |
+| Linux | arm64 | Ubuntu 22.04 or later | `runtime/linux-arm64/libprism_usb_sdk.so` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-The Linux runtime requires GLIBC 2.38 or later and is not compatible with
-Ubuntu 20.04 or 22.04.
+Both Linux runtimes require GLIBC 2.34 or later and OpenSSL 3. They are not
+compatible with Ubuntu 20.04.
 
-## Linux x86-64
+## Linux x86-64 and arm64
 
 Install build tools and runtime dependencies:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3t64
+sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3
 ```
+
+On Ubuntu 24.04, install `libssl3t64` instead of `libssl3`.
 
 Install a udev rule so non-root applications can open VID:PID `2207:1201`:
 
@@ -67,7 +70,7 @@ command-line program already using the Prism USB interface and reconnect it.
 ## Windows x64
 
 Use the Visual Studio 2022 C++ x64 toolchain and CMake. The public C++ ABI
-requires MSVC 14.x with the matching SDK 0.11.0 headers; MinGW is not supported.
+requires MSVC 14.x with the matching SDK 1.0.0 headers; MinGW is not supported.
 Install the current Microsoft Visual C++ 2015-2022 x64 Redistributable for
 deployment, and bind the Prism USB interface to the Windows WinUSB driver.
 Place `prism_usb_sdk.dll` beside the executable.

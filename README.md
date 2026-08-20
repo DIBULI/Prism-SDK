@@ -1,6 +1,6 @@
-# Prism Host SDK 0.11.0
+# Prism Host SDK 1.0.0
 
-[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
 
 [中文说明](README.zh-CN.md)
 
@@ -15,7 +15,13 @@ the SDK implementation or device firmware source code.
 Prism-SDK/
 ├── include/prism/                 Public C++17 headers
 ├── runtime/
-│   ├── linux-x64/                 Ubuntu 24.04 x86-64 shared library
+│   ├── linux-x64/                 Default Ubuntu 22.04+ x86-64 library
+│   ├── linux-arm64/               Default Ubuntu 22.04+ ARM64 library
+│   ├── ros/
+│   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK prefix
+│   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK prefix
+│   │   ├── ubuntu-24.04-x86_64/   ROS 2 Jazzy/Kilted SDK prefix
+│   │   └── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK prefix
 │   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          Installation and usage guides
@@ -27,10 +33,10 @@ Prism-SDK/
 
 ## Compatibility
 
-- Host SDK: `0.11.0`
+- Host SDK: `1.0.0`
 - Runtime API: `4`
-- USB protocol: `10`
-- Device Agent: exactly `0.11.0`
+- USB protocol: `1`
+- Device Agent: exactly `1.0.0`
 - Language: C++17 or later
 - CMake: 3.20 or later
 
@@ -41,6 +47,12 @@ GitHub Actions compiles every example source across the three-platform matrix,
 runs all no-device support tests, and runtime-smoke-tests the published dynamic
 libraries. CMake rejects an unregistered `examples/*.cpp` source, preventing a
 future example from silently escaping CI.
+
+Both Linux architectures are built against the same Ubuntu 22.04 ABI baseline.
+The repository also provides complete ABI-specific binary SDK prefixes under
+`runtime/ros` for the ROS Adapter. The Adapter selects the correct prefix for
+each ROS distribution; desktop SDK consumers use
+`runtime/linux-x64/libprism_usb_sdk.so` by default.
 
 ## Build the examples
 

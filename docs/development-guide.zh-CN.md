@@ -1,8 +1,8 @@
-# Prism Host SDK 0.11.0 开发手册
+# Prism Host SDK 1.0.0 开发手册
 
 本文面向只获得公共头文件和预编译动态库的应用开发者，说明 Prism Host SDK
-`0.11.0` 的全部公开功能、生命周期、数据单位、时间戳语义和使用约束。设备端
-Agent 必须为 `0.11.0`，线协议必须为 `10`；SDK 在打开设备时执行严格版本校验，
+`1.0.0` 的全部公开功能、生命周期、数据单位、时间戳语义和使用约束。设备端
+Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行严格版本校验，
 不提供旧协议兼容模式。
 
 统一头文件：
@@ -178,7 +178,7 @@ Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, 
 
 | 平台 | 架构 | 使用方式 |
 | --- | --- | --- |
-| Ubuntu 24.04+ | x86-64 | 直接链接 `libprism_usb_sdk.so`，使用完整 `Client` API |
+| Ubuntu 22.04+ | x86-64 | 直接链接 `libprism_usb_sdk.so`，使用完整 `Client` API |
 | macOS 13+ | Apple Silicon arm64 | 链接 SDK dylib，并随程序部署 libusb dylib，使用完整 `Client` API |
 | Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v4 调用 |
 
@@ -206,7 +206,7 @@ Windows 可使用函数表中的通用读写、`read_frame` 和 parser 实现等
 ### 2.1 查询 SDK 版本
 
 ```cpp
-std::cout << prism::hostSdkVersion() << '\n';  // 0.11.0
+std::cout << prism::hostSdkVersion() << '\n';  // 1.0.0
 ```
 
 <a id="sdk-device-open"></a>
@@ -453,7 +453,7 @@ all = client.setExposureConfiguration(all, prism::kExposureFieldAll);
 字段掩码支持 `kExposureFieldTargetBrightness`、Camera 0..3 单独 bit、
 `kExposureFieldCameraAll` 和 `kExposureFieldAll`。
 
-当前 0.11.0 API 没有用户可配置的“自动曝光最小/最大曝光、最小/最大 gain”字段；
+当前 1.0.0 API 没有用户可配置的“自动曝光最小/最大曝光、最小/最大 gain”字段；
 不要在应用中假定该能力存在。
 
 <a id="sdk-time-sync"></a>
@@ -1009,7 +1009,7 @@ if (api == nullptr) {
 
 - `abi_version == 4`；
 - `struct_size >= sizeof(prism::RuntimeApi)`；
-- `sdk_version == "0.11.0"`；
+- `sdk_version == "1.0.0"`；
 - `api->msvc_version / 100 == _MSC_VER / 100`，即 DLL 和应用属于兼容的
   MSVC 14.x runtime family；
 - 将要使用的函数指针非空。
