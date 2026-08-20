@@ -1,5 +1,8 @@
 # SDK 使用指南
 
+本页是快速入门流程。全部公开控制、数据流、parser、升级和 Windows Runtime API
+接口的说明与示例见 [完整 SDK 开发手册](development-guide.zh-CN.md)。
+
 ## Linux 与 macOS 基本流程
 
 本节的 `prism::Client` 直连接口适用于 Linux 和 macOS。Windows 包不包含 import
@@ -87,4 +90,4 @@ const auto result = client.synchronizeSystemTime();
 信息。版本不一致、Linux USB 权限不足、设备已被其他程序占用、USB 断开，以及采集时
 尝试设置时间，都属于需要明确提示的运行错误。
 
-完整类型和接口说明以 `include/prism/` 下的公共头文件为准。
+完整开发手册见上述链接；权威接口声明以 `include/prism/` 下的公共头文件为准。

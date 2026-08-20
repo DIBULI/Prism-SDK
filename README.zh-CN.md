@@ -18,7 +18,7 @@ Prism-SDK/
 │   ├── macos-arm64/               macOS 13+ Apple Silicon 动态库
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          安装和使用文档
-├── examples/                      设备信息与时间同步示例
+├── examples/                      经编译验证的 SDK 示例
 ├── CMakeLists.txt
 ├── ORIGIN.md                      发布来源记录
 └── SHA256SUMS                     文件完整性校验
@@ -35,7 +35,8 @@ Prism-SDK/
 
 SDK 会严格检查版本。不要混用不同版本的头文件、动态库或 Agent 固件。
 
-GitHub Actions 会在三个受支持的主机平台上自动编译示例，并执行动态库加载冒烟测试。
+GitHub Actions 会在三个受支持的主机平台上自动编译示例，并对跨平台
+设备示例执行动态库加载冒烟测试。
 
 ## 编译示例
 
@@ -66,8 +67,10 @@ Visual Studio 等多配置生成器会把程序放在所选配置目录中，例
 
 ## 文档
 
+- [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
+- [Complete SDK development guide](docs/development-guide.md)
 - [安装指南](docs/installation.zh-CN.md)
 - [SDK 使用指南](docs/usage.zh-CN.md)
 - [Installation guide](docs/installation.md)
 - [SDK usage guide](docs/usage.md)
-- [示例说明](examples/README.md)
+- [示例说明](examples/README.zh-CN.md)

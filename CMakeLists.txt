@@ -9,4 +9,6 @@ endif()
 
 project(PrismSdkExamples VERSION 0.11.0 LANGUAGES CXX)
 
+include(CTest)
+
 add_subdirectory(examples)

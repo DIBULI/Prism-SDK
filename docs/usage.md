@@ -1,5 +1,9 @@
 # SDK Usage
 
+This page is the short getting-started path. For every public control,
+streaming, parsing, update, and Windows Runtime API entry, see the
+[complete SDK development guide](development-guide.md).
+
 ## Basic lifecycle on Linux and macOS
 
 The direct `prism::Client` API shown in this section is linkable with the Linux
@@ -99,5 +103,5 @@ mismatch, USB permissions, an already-open device, unplug events, and attempts
 to set time while streaming are expected operational errors and should be shown
 clearly to the user.
 
-See the complete public type and method documentation in the headers under
-`include/prism/`.
+See the complete development guide above and the authoritative declarations in
+the public headers under `include/prism/`.

@@ -6,7 +6,7 @@
 
 This repository is the binary distribution of the Prism Host SDK. It contains
 public C++ headers, prebuilt dynamic libraries for the three supported host
-platforms, end-user documentation, and a CMake example. It does not contain
+platforms, end-user documentation, and CMake examples. It does not contain
 the SDK implementation or device firmware source code.
 
 ## Package contents
@@ -19,7 +19,7 @@ Prism-SDK/
 │   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          Installation and usage guides
-├── examples/                      Device information and time-sync example
+├── examples/                      Compile-tested SDK examples
 ├── CMakeLists.txt
 ├── ORIGIN.md                      Release provenance
 └── SHA256SUMS                     Package integrity hashes
@@ -37,10 +37,10 @@ Prism-SDK/
 The SDK intentionally performs a strict version handshake. Do not mix headers,
 dynamic libraries, or Agent firmware from different releases.
 
-GitHub Actions automatically compiles and runtime-smoke-tests the included
-example on all three supported host platforms.
+GitHub Actions automatically compiles the included examples and runtime-smoke-
+tests the cross-platform device example on all three supported host platforms.
 
-## Build the example
+## Build the examples
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -72,6 +72,8 @@ the sensor-board GPS/NMEA and PPS synchronization source.
 
 ## Documentation
 
+- [Complete SDK development guide](docs/development-guide.md)
+- [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
 - [Installation guide](docs/installation.md)
 - [SDK usage guide](docs/usage.md)
 - [安装指南](docs/installation.zh-CN.md)

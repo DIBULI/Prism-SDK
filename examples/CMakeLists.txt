@@ -8,7 +8,8 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
 endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  project(PrismDeviceInfoTimeSync VERSION 0.11.0 LANGUAGES CXX)
+  project(PrismSdkExamples VERSION 0.11.0 LANGUAGES CXX)
+  include(CTest)
 endif()
 
 get_filename_component(_prism_sdk_default_root
@@ -24,34 +25,12 @@ if(NOT EXISTS "${_prism_sdk_include}/prism/usb_sdk.hpp")
     "${PRISM_SDK_ROOT}")
 endif()
 
-add_executable(prism-device-info-time-sync device_info_time_sync.cpp)
-target_compile_features(prism-device-info-time-sync PRIVATE cxx_std_17)
-target_include_directories(prism-device-info-time-sync PRIVATE
-  "${_prism_sdk_include}")
-
-if(MSVC)
-  target_compile_options(prism-device-info-time-sync PRIVATE /W4 /permissive-)
-else()
-  target_compile_options(prism-device-info-time-sync PRIVATE
-    -Wall -Wextra -Wpedantic)
-endif()
-
 if(WIN32)
   if(NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "The packaged Windows runtime requires MSVC x64")
   endif()
   set(_prism_sdk_runtime
     "${PRISM_SDK_ROOT}/runtime/windows-x64/prism_usb_sdk.dll")
-  target_compile_definitions(prism-device-info-time-sync PRIVATE
-    WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0A00
-    _ITERATOR_DEBUG_LEVEL=0)
-  set_target_properties(prism-device-info-time-sync PROPERTIES
-    MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-  add_custom_command(TARGET prism-device-info-time-sync POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-      "${_prism_sdk_runtime}"
-      "$<TARGET_FILE_DIR:prism-device-info-time-sync>"
-    VERBATIM)
 elseif(APPLE)
   if(CMAKE_OSX_ARCHITECTURES AND
      NOT CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
@@ -64,18 +43,6 @@ elseif(APPLE)
   add_library(PrismUsbSdkRuntime SHARED IMPORTED)
   set_target_properties(PrismUsbSdkRuntime PROPERTIES
     IMPORTED_LOCATION "${_prism_sdk_runtime}")
-  target_link_libraries(prism-device-info-time-sync PRIVATE PrismUsbSdkRuntime)
-  set_target_properties(prism-device-info-time-sync PROPERTIES
-    BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH "@executable_path")
-  add_custom_command(TARGET prism-device-info-time-sync POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-      "${_prism_sdk_runtime}"
-      "$<TARGET_FILE_DIR:prism-device-info-time-sync>"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-      "${_prism_libusb_runtime}"
-      "$<TARGET_FILE_DIR:prism-device-info-time-sync>"
-    VERBATIM)
 elseif(UNIX)
   string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" _prism_processor)
   if(NOT _prism_processor MATCHES "^(x86_64|amd64)$")
@@ -87,21 +54,78 @@ elseif(UNIX)
   add_library(PrismUsbSdkRuntime SHARED IMPORTED)
   set_target_properties(PrismUsbSdkRuntime PROPERTIES
     IMPORTED_LOCATION "${_prism_sdk_runtime}")
-  target_link_libraries(prism-device-info-time-sync PRIVATE PrismUsbSdkRuntime)
-  set_target_properties(prism-device-info-time-sync PROPERTIES
-    BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH "$ORIGIN")
-  add_custom_command(TARGET prism-device-info-time-sync POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-      "${_prism_sdk_runtime}"
-      "$<TARGET_FILE_DIR:prism-device-info-time-sync>"
-    VERBATIM)
 else()
   message(FATAL_ERROR "Unsupported host platform")
 endif()
 
 if(NOT EXISTS "${_prism_sdk_runtime}")
   message(FATAL_ERROR "Missing packaged runtime: ${_prism_sdk_runtime}")
+endif()
+if(APPLE AND NOT EXISTS "${_prism_libusb_runtime}")
+  message(FATAL_ERROR "Missing packaged libusb runtime: ${_prism_libusb_runtime}")
+endif()
+
+function(prism_add_example target source)
+  add_executable(${target} "${source}")
+  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_include_directories(${target} PRIVATE "${_prism_sdk_include}")
+
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /permissive-)
+  else()
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+
+  if(WIN32)
+    target_compile_definitions(${target} PRIVATE
+      WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0A00
+      _ITERATOR_DEBUG_LEVEL=0)
+    set_target_properties(${target} PROPERTIES
+      MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${_prism_sdk_runtime}"
+        "$<TARGET_FILE_DIR:${target}>"
+      VERBATIM)
+  elseif(APPLE)
+    target_link_libraries(${target} PRIVATE PrismUsbSdkRuntime)
+    set_target_properties(${target} PROPERTIES
+      BUILD_WITH_INSTALL_RPATH TRUE
+      INSTALL_RPATH "@executable_path")
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${_prism_sdk_runtime}"
+        "$<TARGET_FILE_DIR:${target}>"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${_prism_libusb_runtime}"
+        "$<TARGET_FILE_DIR:${target}>"
+      VERBATIM)
+  else()
+    target_link_libraries(${target} PRIVATE PrismUsbSdkRuntime)
+    set_target_properties(${target} PROPERTIES
+      BUILD_WITH_INSTALL_RPATH TRUE
+      INSTALL_RPATH "$ORIGIN")
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${_prism_sdk_runtime}"
+        "$<TARGET_FILE_DIR:${target}>"
+      VERBATIM)
+  endif()
+endfunction()
+
+prism_add_example(prism-device-info-time-sync device_info_time_sync.cpp)
+
+# These examples use the direct Client and stream helper classes. The packaged
+# Windows SDK is consumed through RuntimeApi instead, so keep the direct examples
+# off the Windows build rather than presenting unsupported linkage instructions.
+if(NOT WIN32)
+  prism_add_example(prism-camera-imu-capture camera_imu_capture.cpp)
+  prism_add_example(prism-lidar-capture lidar_capture.cpp)
+
+  if(BUILD_TESTING)
+    add_test(NAME prism-camera-frame-tracker-self-test
+      COMMAND prism-camera-imu-capture --self-test)
+  endif()
 endif()
 
 unset(_prism_sdk_include)
