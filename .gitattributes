@@ -1,1 +1,3 @@
+* text=auto eol=lf
+
 runtime/macos-arm64/libusb-COPYING.txt -whitespace
