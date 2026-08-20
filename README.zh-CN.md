@@ -35,8 +35,9 @@ Prism-SDK/
 
 SDK 会严格检查版本。不要混用不同版本的头文件、动态库或 Agent 固件。
 
-GitHub Actions 会在三个受支持的主机平台上自动编译示例，并对跨平台
-设备示例执行动态库加载冒烟测试。
+GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
+测试，并对发布的动态库执行加载冒烟测试。新增 `examples/*.cpp` 如果没有注册 CMake
+target，配置会直接失败，避免后续示例被 CI 静默漏编。
 
 ## 编译示例
 
@@ -46,6 +47,12 @@ cmake --build build --config Release
 ```
 
 构建过程会把所需动态库复制到示例程序旁；macOS 还会复制配套的 libusb 动态库。
+
+运行 GitHub Actions 同款的发布文件、全部编译目标和 CTest 自动化验证：
+
+```bash
+python3 scripts/test_all_examples.py --build-dir build-all-examples
+```
 
 只打开设备并读取设备信息：
 
@@ -68,7 +75,9 @@ Visual Studio 等多配置生成器会把程序放在所选配置目录中，例
 ## 文档
 
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
+- [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)
+- [Per-interface SDK examples](docs/interface-examples.md)
 - [安装指南](docs/installation.zh-CN.md)
 - [SDK 使用指南](docs/usage.zh-CN.md)
 - [Installation guide](docs/installation.md)

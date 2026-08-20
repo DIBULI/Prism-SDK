@@ -37,8 +37,10 @@ Prism-SDK/
 The SDK intentionally performs a strict version handshake. Do not mix headers,
 dynamic libraries, or Agent firmware from different releases.
 
-GitHub Actions automatically compiles the included examples and runtime-smoke-
-tests the cross-platform device example on all three supported host platforms.
+GitHub Actions compiles every example source across the three-platform matrix,
+runs all no-device support tests, and runtime-smoke-tests the published dynamic
+libraries. CMake rejects an unregistered `examples/*.cpp` source, preventing a
+future example from silently escaping CI.
 
 ## Build the examples
 
@@ -49,6 +51,13 @@ cmake --build build --config Release
 
 The build copies the required runtime library next to the example executable.
 On macOS it also copies the bundled libusb dylib.
+
+Run the full automated package, build-target, and CTest verification used by
+GitHub Actions:
+
+```bash
+python3 scripts/test_all_examples.py --build-dir build-all-examples
+```
 
 Run the example without changing device time:
 
@@ -73,7 +82,9 @@ the sensor-board GPS/NMEA and PPS synchronization source.
 ## Documentation
 
 - [Complete SDK development guide](docs/development-guide.md)
+- [Per-interface SDK examples](docs/interface-examples.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
+- [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
 - [Installation guide](docs/installation.md)
 - [SDK usage guide](docs/usage.md)
 - [安装指南](docs/installation.zh-CN.md)

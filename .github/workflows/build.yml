@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify published files
-        run: sha256sum --check SHA256SUMS
+        run: python3 scripts/test_all_examples.py --verify-only
 
   linux-x64:
     name: Ubuntu 24.04 x64
@@ -50,21 +50,21 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libusb-1.0-0 libssl3t64
 
-      - name: Configure example
-        run: >-
-          cmake -S . -B build
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_CXX_FLAGS=-Werror
-
-      - name: Build example
-        run: cmake --build build --config Release --parallel --verbose
-
-      - name: Test example support logic
-        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Build and test every supported example
+        run: python3 scripts/test_all_examples.py --build-dir build
 
       - name: Verify relocatable runtime
         run: |
-          test -x build/examples/prism-device-info-time-sync
+          for example in \
+            prism-device-info-time-sync \
+            prism-camera-imu-capture \
+            prism-client-api-examples \
+            prism-configuration-api-examples \
+            prism-lidar-capture \
+            prism-parser-api-examples \
+            prism-stream-api-examples; do
+            test -x "build/examples/$example"
+          done
           cmp runtime/linux-x64/libprism_usb_sdk.so \
             build/examples/libprism_usb_sdk.so
           readelf -d build/examples/prism-device-info-time-sync \
@@ -94,23 +94,21 @@ jobs:
       - name: Verify runner architecture
         run: test "$(uname -m)" = "arm64"
 
-      - name: Configure example
-        run: >-
-          cmake -S . -B build
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_OSX_ARCHITECTURES=arm64
-          -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
-          -DCMAKE_CXX_FLAGS=-Werror
-
-      - name: Build example
-        run: cmake --build build --config Release --parallel --verbose
-
-      - name: Test example support logic
-        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Build and test every supported example
+        run: python3 scripts/test_all_examples.py --build-dir build
 
       - name: Verify relocatable runtime
         run: |
-          test -x build/examples/prism-device-info-time-sync
+          for example in \
+            prism-device-info-time-sync \
+            prism-camera-imu-capture \
+            prism-client-api-examples \
+            prism-configuration-api-examples \
+            prism-lidar-capture \
+            prism-parser-api-examples \
+            prism-stream-api-examples; do
+            test -x "build/examples/$example"
+          done
           cmp runtime/macos-arm64/libprism_usb_sdk.dylib \
             build/examples/libprism_usb_sdk.dylib
           cmp runtime/macos-arm64/libusb-1.0.0.dylib \
@@ -152,25 +150,23 @@ jobs:
             throw 'The Windows build must run in a 64-bit process.'
           }
 
-      - name: Configure example
+      - name: Build and test every supported example
         shell: pwsh
-        run: >-
-          cmake -S . -B build
-          -G "Visual Studio 17 2022"
-          -A x64
-
-      - name: Build example
-        shell: pwsh
-        run: cmake --build build --config Release --parallel --verbose
+        run: python scripts/test_all_examples.py --build-dir build
 
       - name: Verify copied runtime
         shell: pwsh
         run: |
-          $exe = 'build/examples/Release/prism-device-info-time-sync.exe'
+          $examples = @(
+            'build/examples/Release/prism-device-info-time-sync.exe',
+            'build/examples/Release/prism-windows-runtime-api-examples.exe'
+          )
           $copiedDll = 'build/examples/Release/prism_usb_sdk.dll'
           $sourceDll = 'runtime/windows-x64/prism_usb_sdk.dll'
-          if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
-            throw "Missing example executable: $exe"
+          foreach ($exe in $examples) {
+            if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+              throw "Missing example executable: $exe"
+            }
           }
           if (-not (Test-Path -LiteralPath $copiedDll -PathType Leaf)) {
             throw "Missing copied SDK runtime: $copiedDll"

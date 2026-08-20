@@ -126,12 +126,113 @@ Configure and probe the LiDAR network while all streams are idle before using
 this example. It reports synchronized timestamp counts separately; consumers
 that require UTC must reject samples whose `timestamp_synced` field is false.
 
+## Compile-checked API catalogues
+
+The repository also builds grouped source catalogues so every public interface
+is checked by a real compiler instead of appearing only in Markdown snippets:
+
+| Executable | Source | Platforms | Coverage |
+| --- | --- | --- | --- |
+| `prism-client-api-examples` | `client_api_examples.cpp` | Linux, macOS | Client lifecycle, discovery, device status, time, and Wi-Fi |
+| `prism-configuration-api-examples` | `configuration_api_examples.cpp` | Linux, macOS | Configuration, exposure, acquisition, LiDAR network, low-level command, and upgrade |
+| `prism-stream-api-examples` | `stream_api_examples.cpp` | Linux, macOS | `ImuStream` and both `LidarStream` constructors and lifecycles |
+| `prism-parser-api-examples` | `parser_api_examples.cpp` | Linux, macOS | Every public helper and frame parser |
+| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | All 43 Runtime API v4 function pointers |
+
+### `prism-client-api-examples`
+
+Each function in this source is a minimal, compile-checked example for Client
+construction and movement, enumeration and opening, explicit close, keepalive,
+device health/version queries, time measurement and synchronization, and Wi-Fi
+hotspot control. Its `main()` only prints a catalogue description.
+
+### `prism-configuration-api-examples`
+
+This source demonstrates persistent configuration, automatic and manual
+exposure, aggregate and individual Camera/IMU controls, video ACK, LiDAR start
+and status, LiDAR network management, raw `Frame` commands, package inspection,
+and guarded system upgrade. Its `main()` never performs these mutations.
+
+### `prism-stream-api-examples`
+
+This source demonstrates the complete `ImuStream` lifecycle and both
+`LidarStream` constructors: point-only and point-plus-LiDAR-IMU. Each example
+feeds frames from one Client receive loop, checks `active()`, and stops cleanly.
+
+### `prism-parser-api-examples`
+
+This source uses every public name helper and dispatches every public parser
+from its matching `FrameType`, including both non-owning and owning Camera
+chunk parsers. Its `main()` is a safe no-op catalogue.
+
+### `prism-windows-runtime-api-examples`
+
+This Windows-only source loads the adjacent SDK DLL, validates Runtime API v4,
+checks all 43 function pointers, and contains a compile-checked minimal call for
+every pointer. Running it requires no device and makes no device changes.
+
+The four Linux/macOS catalogue programs are safe no-op executables. The
+Windows catalogue loads the published DLL and verifies that all 43 Runtime API
+entries are present, but it does not open or modify a device. CTest runs these
+catalogues after compilation.
+
+There are eight example source files in total. Linux/macOS build seven targets;
+Windows builds two targets. The platform matrix therefore compiles every source
+file. CMake configuration fails if a new `examples/*.cpp` file is not registered
+as a target, so GitHub Actions cannot silently omit a future example.
+
+## Automated test script
+
+Run the same package verification, complete platform build, target inventory
+check, and CTest suite used by GitHub Actions:
+
+```bash
+python3 scripts/test_all_examples.py --build-dir build-all-examples
+```
+
+On Windows PowerShell:
+
+```powershell
+python scripts/test_all_examples.py --build-dir build-all-examples
+```
+
+To verify only the published-file checksums:
+
+```bash
+python3 scripts/test_all_examples.py --verify-only
+```
+
+With a USB device connected, run the read-only device query and a five-second
+Camera/board-IMU capture after the offline tests:
+
+```bash
+python3 scripts/test_all_examples.py \
+  --build-dir build-all-examples --with-device
+```
+
+If the LiDAR is powered and connected, explicitly select its model to include
+a five-second point-cloud and LiDAR-IMU capture:
+
+```bash
+python3 scripts/test_all_examples.py \
+  --build-dir build-all-examples --with-device \
+  --capture-seconds 5 --lidar-model mid360
+```
+
+Device mode remains non-destructive: it does not synchronize clocks, save
+configuration, change exposure/network state, or install firmware. Close Prism
+Viewer and other USB consumers before running it.
+
+The script supports only the published runtime architectures: Ubuntu 24.04
+x86-64, macOS arm64, and Windows x64. It intentionally does not delete or clean
+the selected build directory.
+
 ## Exit status
 
 All examples return zero on success and one on an argument, connection, or SDK
 error. Streaming examples return three if the requested interval completes
 without a complete Camera frame set or LiDAR point batch, respectively.
 
-For examples of every public SDK interface, including persistent settings,
+For the runnable snippets behind every public SDK interface, including persistent settings,
 exposure control, Wi-Fi, LiDAR network management, raw frame parsing, and
-system upgrades, see the complete [SDK development guide](../docs/development-guide.md).
+system upgrades, see the [per-interface SDK examples](../docs/interface-examples.md).

@@ -113,21 +113,95 @@ function(prism_add_example target source)
   endif()
 endfunction()
 
+set(_prism_cross_platform_example_sources
+  device_info_time_sync.cpp)
+set(_prism_direct_api_example_sources
+  camera_imu_capture.cpp
+  client_api_examples.cpp
+  configuration_api_examples.cpp
+  lidar_capture.cpp
+  parser_api_examples.cpp
+  stream_api_examples.cpp)
+set(_prism_windows_runtime_example_sources
+  windows_runtime_api_examples.cpp)
+set(_prism_registered_example_sources
+  ${_prism_cross_platform_example_sources}
+  ${_prism_direct_api_example_sources}
+  ${_prism_windows_runtime_example_sources})
+
+# Keep the source inventory strict: adding examples/*.cpp without registering a
+# build target must fail configuration instead of silently escaping CI.
+file(GLOB _prism_discovered_example_sources
+  RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
+  CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+list(SORT _prism_discovered_example_sources)
+list(SORT _prism_registered_example_sources)
+if(NOT "${_prism_discovered_example_sources}" STREQUAL
+       "${_prism_registered_example_sources}")
+  message(FATAL_ERROR
+    "Every examples/*.cpp file must be registered in examples/CMakeLists.txt. "
+    "Discovered: ${_prism_discovered_example_sources}; "
+    "registered: ${_prism_registered_example_sources}")
+endif()
+
 prism_add_example(prism-device-info-time-sync device_info_time_sync.cpp)
+set(_prism_supported_example_targets prism-device-info-time-sync)
 
 # These examples use the direct Client and stream helper classes. The packaged
 # Windows SDK is consumed through RuntimeApi instead, so keep the direct examples
 # off the Windows build rather than presenting unsupported linkage instructions.
-if(NOT WIN32)
+if(WIN32)
+  prism_add_example(prism-windows-runtime-api-examples
+    windows_runtime_api_examples.cpp)
+  list(APPEND _prism_supported_example_targets
+    prism-windows-runtime-api-examples)
+
+  if(BUILD_TESTING)
+    add_test(NAME prism-windows-runtime-api-smoke
+      COMMAND prism-windows-runtime-api-examples)
+  endif()
+else()
   prism_add_example(prism-camera-imu-capture camera_imu_capture.cpp)
+  prism_add_example(prism-client-api-examples client_api_examples.cpp)
+  prism_add_example(prism-configuration-api-examples
+    configuration_api_examples.cpp)
   prism_add_example(prism-lidar-capture lidar_capture.cpp)
+  prism_add_example(prism-parser-api-examples parser_api_examples.cpp)
+  prism_add_example(prism-stream-api-examples stream_api_examples.cpp)
+  list(APPEND _prism_supported_example_targets
+    prism-camera-imu-capture
+    prism-client-api-examples
+    prism-configuration-api-examples
+    prism-lidar-capture
+    prism-parser-api-examples
+    prism-stream-api-examples)
 
   if(BUILD_TESTING)
     add_test(NAME prism-camera-frame-tracker-self-test
       COMMAND prism-camera-imu-capture --self-test)
+    add_test(NAME prism-client-api-examples-smoke
+      COMMAND prism-client-api-examples)
+    add_test(NAME prism-configuration-api-examples-smoke
+      COMMAND prism-configuration-api-examples)
+    add_test(NAME prism-parser-api-examples-smoke
+      COMMAND prism-parser-api-examples)
+    add_test(NAME prism-stream-api-examples-smoke
+      COMMAND prism-stream-api-examples)
   endif()
 endif()
+
+# CI builds this target explicitly. It represents every example supported by
+# the current packaged runtime: seven on Linux/macOS and two on Windows, where
+# direct Client linkage is intentionally unavailable.
+add_custom_target(prism-all-examples
+  DEPENDS ${_prism_supported_example_targets})
 
 unset(_prism_sdk_include)
 unset(_prism_sdk_runtime)
 unset(_prism_libusb_runtime)
+unset(_prism_cross_platform_example_sources)
+unset(_prism_direct_api_example_sources)
+unset(_prism_windows_runtime_example_sources)
+unset(_prism_registered_example_sources)
+unset(_prism_discovered_example_sources)
+unset(_prism_supported_example_targets)

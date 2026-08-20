@@ -34,113 +34,152 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 - [Configuration, acquisition, and update](#api-config-capture-update)
 - [Stream wrappers](#api-stream-wrappers)
 - [Free helpers and parsers](#api-helpers-parsers)
+- [API and header index](#sdk-header-index)
 - [Windows Runtime API v4](#sdk-windows-runtime)
 
 <a id="api-client-control"></a>
 ### Client lifecycle and base control
 
-| Interface | Minimal call | Details |
-| --- | --- | --- |
-| Default constructor | `prism::Client client;` | [Client lifecycle](#sdk-client-lifecycle) |
-| Move construction/assignment | `prism::Client next = std::move(client);` | [Client lifecycle](#sdk-client-lifecycle) |
-| `enumerate` | `auto devices = prism::Client::enumerate();` | [Device enumeration and selection](#sdk-device-open) |
-| `openFirst` | `auto client = prism::Client::openFirst();` | [Device enumeration and selection](#sdk-device-open) |
-| `open` | `auto client = prism::Client::open(devices.front());` | [Device enumeration and selection](#sdk-device-open) |
-| `openFirstDevice` | `client.openFirstDevice();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `openDevice` | `client.openDevice(devices.front());` | [Client lifecycle](#sdk-client-lifecycle) |
-| `closeDevice` | `client.closeDevice();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `close` | `client.close();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `isOpen` | `bool opened = client.isOpen();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `path` | `std::wstring usb_path = client.path();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` | [Client lifecycle](#sdk-client-lifecycle) |
-| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` | [Keepalive](#sdk-keepalive) |
-| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` | [Keepalive](#sdk-keepalive) |
-| `hello` | `auto hello = client.hello();` | [HELLO and firmware versions](#sdk-hello-versions) |
-| `deviceInfo` | `auto info = client.deviceInfo();` | [Device health information](#sdk-device-info) |
-| `deviceVersions` | `auto versions = client.deviceVersions();` | [HELLO and firmware versions](#sdk-hello-versions) |
-| `boardTime` | `auto rk_time = client.boardTime();` | [Time, ping, and network](#sdk-time-network) |
-| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` | [Time synchronization](#sdk-time-sync) |
-| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` | [Time synchronization](#sdk-time-sync) |
-| `streamTransferActive` | `bool active = client.streamTransferActive();` | [Threads and safety](#sdk-thread-safety) |
-| `ping` | `uint64_t board_seq = client.ping();` | [Time, ping, and network](#sdk-time-network) |
-| `networkInfo` | `auto network = client.networkInfo();` | [Time, ping, and network](#sdk-time-network) |
-| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` | [Wi-Fi hotspot management](#sdk-wifi) |
-| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` | [Wi-Fi hotspot management](#sdk-wifi) |
+| Interface | Minimal call | Details | Example |
+| --- | --- | --- | --- |
+| Default constructor | `prism::Client client;` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-construction) |
+| `Client` destructor | `{ prism::Client client = prism::Client::openFirst(); }` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-construction) |
+| Move construction/assignment | `prism::Client next = std::move(client);` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-construction) |
+| `enumerate` | `auto devices = prism::Client::enumerate();` | [Device enumeration and selection](#sdk-device-open) | [Example](interface-examples.md#example-device-enumeration) |
+| `openFirst` | `auto client = prism::Client::openFirst();` | [Device enumeration and selection](#sdk-device-open) | [Example](interface-examples.md#example-device-enumeration) |
+| `open` | `auto client = prism::Client::open(devices.front());` | [Device enumeration and selection](#sdk-device-open) | [Example](interface-examples.md#example-device-enumeration) |
+| `openFirstDevice` | `client.openFirstDevice();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `openDevice` | `client.openDevice(devices.front());` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `closeDevice` | `client.closeDevice();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `close` | `client.close();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `isOpen` | `bool opened = client.isOpen();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `path` | `std::wstring usb_path = client.path();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` | [Client lifecycle](#sdk-client-lifecycle) | [Example](interface-examples.md#example-client-lifecycle) |
+| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` | [Keepalive](#sdk-keepalive) | [Example](interface-examples.md#example-keepalive) |
+| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` | [Keepalive](#sdk-keepalive) | [Example](interface-examples.md#example-keepalive) |
+| `hello` | `auto hello = client.hello();` | [HELLO and firmware versions](#sdk-hello-versions) | [Example](interface-examples.md#example-device-information) |
+| `deviceInfo` | `auto info = client.deviceInfo();` | [Device health information](#sdk-device-info) | [Example](interface-examples.md#example-device-information) |
+| `deviceVersions` | `auto versions = client.deviceVersions();` | [HELLO and firmware versions](#sdk-hello-versions) | [Example](interface-examples.md#example-device-information) |
+| `boardTime` | `auto rk_time = client.boardTime();` | [Time, ping, and network](#sdk-time-network) | [Example](interface-examples.md#example-device-information) |
+| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` | [Time synchronization](#sdk-time-sync) | [Example](interface-examples.md#example-time-sync) |
+| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` | [Time synchronization](#sdk-time-sync) | [Example](interface-examples.md#example-time-sync) |
+| `streamTransferActive` | `bool active = client.streamTransferActive();` | [Threads and safety](#sdk-thread-safety) | [Example](interface-examples.md#example-time-sync) |
+| `ping` | `uint64_t board_seq = client.ping();` | [Time, ping, and network](#sdk-time-network) | [Example](interface-examples.md#example-device-information) |
+| `networkInfo` | `auto network = client.networkInfo();` | [Time, ping, and network](#sdk-time-network) | [Example](interface-examples.md#example-device-information) |
+| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` | [Wi-Fi hotspot management](#sdk-wifi) | [Example](interface-examples.md#example-wifi) |
+| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` | [Wi-Fi hotspot management](#sdk-wifi) | [Example](interface-examples.md#example-wifi) |
 
 <a id="api-config-capture-update"></a>
 ### Configuration, acquisition, and update
 
-| Interface | Minimal call | Details |
-| --- | --- | --- |
-| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` | [Persistent device configuration](#sdk-configuration) |
-| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [Persistent device configuration](#sdk-configuration) |
-| `cameraExposure` | `auto exposure = client.cameraExposure();` | [Exposure and gain](#sdk-exposure) |
-| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [Exposure and gain](#sdk-exposure) |
-| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [Exposure and gain](#sdk-exposure) |
-| `setCameraExposure` | `client.setCameraExposure(0, camera);` | [Exposure and gain](#sdk-exposure) |
-| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `stopVideo` | `client.stopVideo();` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `stopImu` | `auto imu_status = client.stopImu();` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` | [JPEG assembly and ACK](#sdk-video-ack) |
-| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) |
-| `stopLidar` | `auto lidar = client.stopLidar();` | [LiDAR streams](#sdk-lidar-stream) |
-| `lidarStatus` | `auto lidar = client.lidarStatus();` | [LiDAR streams](#sdk-lidar-stream) |
-| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` | [LiDAR network](#sdk-lidar-network) |
-| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` | [LiDAR network](#sdk-lidar-network) |
-| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` | [LiDAR network](#sdk-lidar-network) |
-| `readFrame` | `prism::Frame frame = client.readFrame(3000);` | [Low-level Frame and commands](#sdk-low-level) |
-| `command` | `auto pong = client.command(prism::FrameType::Ping);` | [Low-level Frame and commands](#sdk-low-level) |
-| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` | [System upgrade](#sdk-system-upgrade) |
+| Interface | Minimal call | Details | Example |
+| --- | --- | --- | --- |
+| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` | [Persistent device configuration](#sdk-configuration) | [Example](interface-examples.md#example-device-configuration) |
+| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [Persistent device configuration](#sdk-configuration) | [Example](interface-examples.md#example-device-configuration) |
+| `cameraExposure` | `auto exposure = client.cameraExposure();` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `setCameraExposure` | `client.setCameraExposure(0, camera);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-camera-imu-control) |
+| `stopVideo` | `client.stopVideo();` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-camera-imu-control) |
+| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-camera-imu-control) |
+| `stopImu` | `auto imu_status = client.stopImu();` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-camera-imu-control) |
+| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` | [JPEG assembly and ACK](#sdk-video-ack) | [Example](interface-examples.md#example-video-ack) |
+| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-control) |
+| `stopLidar` | `auto lidar = client.stopLidar();` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-control) |
+| `lidarStatus` | `auto lidar = client.lidarStatus();` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-control) |
+| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` | [LiDAR network](#sdk-lidar-network) | [Example](interface-examples.md#example-lidar-network) |
+| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` | [LiDAR network](#sdk-lidar-network) | [Example](interface-examples.md#example-lidar-network) |
+| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` | [LiDAR network](#sdk-lidar-network) | [Example](interface-examples.md#example-lidar-network) |
+| `readFrame` | `prism::Frame frame = client.readFrame(3000);` | [Low-level Frame and commands](#sdk-low-level) | [Example](interface-examples.md#example-low-level) |
+| `command` | `auto pong = client.command(prism::FrameType::Ping);` | [Low-level Frame and commands](#sdk-low-level) | [Example](interface-examples.md#example-low-level) |
+| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` | [System upgrade](#sdk-system-upgrade) | [Example](interface-examples.md#example-system-upgrade) |
 
 <a id="api-stream-wrappers"></a>
 ### Stream wrappers
 
-| Interface | Minimal call | Details |
-| --- | --- | --- |
-| `ImuStream` constructor | `prism::ImuStream imu(client, on_imu);` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `ImuStream::active` | `bool active = imu.active();` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| `ImuStream::stop` | `imu.stop();` | [Camera/IMU acquisition](#sdk-camera-imu) |
-| Point-only `LidarStream` constructor | `prism::LidarStream lidar(client, on_points);` | [LiDAR streams](#sdk-lidar-stream) |
-| Dual-callback `LidarStream` constructor | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` | [LiDAR streams](#sdk-lidar-stream) |
-| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) |
-| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` | [LiDAR streams](#sdk-lidar-stream) |
-| `LidarStream::active` | `bool active = lidar.active();` | [LiDAR streams](#sdk-lidar-stream) |
-| `LidarStream::stop` | `lidar.stop();` | [LiDAR streams](#sdk-lidar-stream) |
+| Interface | Minimal call | Details | Example |
+| --- | --- | --- | --- |
+| `ImuStream` constructor | `prism::ImuStream imu(client, on_imu);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| `ImuStream` destructor | `{ prism::ImuStream imu(client, on_imu); }` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| `ImuStream::active` | `bool active = imu.active();` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| `ImuStream::stop` | `imu.stop();` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-imu-stream) |
+| Point-only `LidarStream` constructor | `prism::LidarStream lidar(client, on_points);` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| Dual-callback `LidarStream` constructor | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| `LidarStream` destructor | `{ prism::LidarStream lidar(client, on_points); }` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| `LidarStream::active` | `bool active = lidar.active();` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
+| `LidarStream::stop` | `lidar.stop();` | [LiDAR streams](#sdk-lidar-stream) | [Example](interface-examples.md#example-lidar-stream) |
 
 <a id="api-helpers-parsers"></a>
 ### Free helpers and parsers
 
-| Interface | Minimal call | Details |
-| --- | --- | --- |
-| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` | [SDK version](#sdk-version) |
-| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` | [Low-level Frame and commands](#sdk-low-level) |
-| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` | [Persistent device configuration](#sdk-configuration) |
-| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` | [Exposure and gain](#sdk-exposure) |
-| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` | [Device health information](#sdk-device-info) |
-| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` | [Device health information](#sdk-device-info) |
-| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` | [Device health information](#sdk-device-info) |
-| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [System upgrade](#sdk-system-upgrade) |
-| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [All parsers](#sdk-parsers) |
-| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [All parsers](#sdk-parsers) |
-| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [All parsers](#sdk-parsers) |
-| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [All parsers](#sdk-parsers) |
-| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [All parsers](#sdk-parsers) |
-| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` | [All parsers](#sdk-parsers) |
-| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` | [All parsers](#sdk-parsers) |
-| `parseImuSample` | `auto value = prism::parseImuSample(frame);` | [All parsers](#sdk-parsers) |
-| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` | [All parsers](#sdk-parsers) |
-| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` | [All parsers](#sdk-parsers) |
-| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` | [All parsers](#sdk-parsers) |
-| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` | [All parsers](#sdk-parsers) |
-| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [All parsers](#sdk-parsers) |
-| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [All parsers](#sdk-parsers) |
+| Interface | Minimal call | Details | Example |
+| --- | --- | --- | --- |
+| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` | [SDK version](#sdk-version) | [Example](interface-examples.md#example-host-version) |
+| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` | [Low-level Frame and commands](#sdk-low-level) | [Example](interface-examples.md#example-low-level) |
+| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` | [Persistent device configuration](#sdk-configuration) | [Example](interface-examples.md#example-device-configuration) |
+| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` | [Device health information](#sdk-device-info) | [Example](interface-examples.md#example-device-name-helpers) |
+| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` | [Device health information](#sdk-device-info) | [Example](interface-examples.md#example-device-name-helpers) |
+| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` | [Device health information](#sdk-device-info) | [Example](interface-examples.md#example-device-name-helpers) |
+| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [System upgrade](#sdk-system-upgrade) | [Example](interface-examples.md#example-system-upgrade) |
+| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseImuSample` | `auto value = prism::parseImuSample(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
+| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
 
 For Windows Runtime API v4, each minimal call has the form `api->field(client, ...)`.
 All 43 function-pointer fields are grouped by their direct-API equivalent in
 [Windows Runtime API v4](#sdk-windows-runtime).
+
+<a id="sdk-header-index"></a>
+## API index
+
+| Header | Public functionality |
+| --- | --- |
+| `client.hpp` | Client lifecycle, control, acquisition, low-level Frame, upgrade |
+| `common.hpp` | Constants, enums, DeviceInfo, Frame, HELLO, version helpers |
+| `configuration.hpp` | Persistent configuration, field masks, FPS/quality ranges |
+| `device_info.hpp` | DeviceInfo parser and status-name helpers |
+| `exposure.hpp` | Runtime exposure, gain, ranges, and parser |
+| `streams.hpp` | `ImuStream`, `LidarStream`, and callback types |
+| `telemetry.hpp` | Camera, IMU, LiDAR, network, heartbeat data and parsers |
+| `time_sync.hpp` | Time-measurement and time-setting results |
+| `update.hpp` | Complete system package, progress, status, and parsers |
+| `wifi.hpp` | Wi-Fi AP status and parser |
+| `runtime_api.hpp` | Windows Runtime API v4 |
+
+Complete buildable examples:
+
+- [cross-platform device information and time synchronization](../examples/device_info_time_sync.cpp);
+- [Camera/IMU capture, JPEG assembly, and ACK](../examples/camera_imu_capture.cpp);
+- [LiDAR point-cloud and LiDAR-IMU statistics](../examples/lidar_capture.cpp);
+- [Client lifecycle and basic control API catalogue](../examples/client_api_examples.cpp);
+- [configuration, exposure, acquisition, network, and update API catalogue](../examples/configuration_api_examples.cpp);
+- [high-level Stream API catalogue](../examples/stream_api_examples.cpp);
+- [helper and parser API catalogue](../examples/parser_api_examples.cpp);
+- [Windows Runtime API v4 catalogue](../examples/windows_runtime_api_examples.cpp).
+
+Every public Client operation, Stream interface, parser, and Runtime API v4
+function pointer is linked from the quick directory above to a corresponding
+example and to its detailed chapter below. The eight source files are grouped
+by feature rather than duplicating a nearly identical executable for every
+convenience overload, and every source is compiled by the GitHub Actions
+platform matrix.
 
 <a id="sdk-platform-models"></a>
 ## 1. Platforms and API models
@@ -1140,31 +1179,3 @@ macOS also requires `libusb-1.0.0.dylib`. Windows has only a DLL: use the
 Runtime API loader from Section 16 and place `prism_usb_sdk.dll` beside the
 executable. See the [installation guide](installation.md) for complete platform
 dependencies and deployment requirements.
-
-<a id="sdk-header-index"></a>
-## 18. API index
-
-| Header | Public functionality |
-| --- | --- |
-| `client.hpp` | Client lifecycle, control, acquisition, low-level Frame, upgrade |
-| `common.hpp` | Constants, enums, DeviceInfo, Frame, HELLO, version helpers |
-| `configuration.hpp` | Persistent configuration, field masks, FPS/quality ranges |
-| `device_info.hpp` | DeviceInfo parser and status-name helpers |
-| `exposure.hpp` | Runtime exposure, gain, ranges, and parser |
-| `streams.hpp` | `ImuStream`, `LidarStream`, and callback types |
-| `telemetry.hpp` | Camera, IMU, LiDAR, network, heartbeat data and parsers |
-| `time_sync.hpp` | Time-measurement and time-setting results |
-| `update.hpp` | Complete system package, progress, status, and parsers |
-| `wifi.hpp` | Wi-Fi AP status and parser |
-| `runtime_api.hpp` | Windows Runtime API v4 |
-
-Complete buildable examples:
-
-- [cross-platform device information and time synchronization](../examples/device_info_time_sync.cpp);
-- [Camera/IMU capture, JPEG assembly, and ACK](../examples/camera_imu_capture.cpp);
-- [LiDAR point-cloud and LiDAR-IMU statistics](../examples/lidar_capture.cpp).
-
-Every public Client operation, Stream interface, parser, and Runtime API v4
-function pointer has a minimal call snippet or mapping table in the preceding
-sections. Runnable programs are grouped by feature rather than duplicating a
-nearly identical executable for every convenience overload.
