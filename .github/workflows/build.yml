@@ -1,0 +1,199 @@
+name: Build SDK Examples
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    name: Verify package integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify published files
+        run: sha256sum --check SHA256SUMS
+
+  linux-x64:
+    name: Ubuntu 24.04 x64
+    needs: integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify runner architecture
+        run: test "$(uname -m)" = "x86_64"
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libusb-1.0-0 libssl3t64
+
+      - name: Configure example
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_FLAGS=-Werror
+
+      - name: Build example
+        run: cmake --build build --config Release --parallel --verbose
+
+      - name: Verify relocatable runtime
+        run: |
+          test -x build/examples/prism-device-info-time-sync
+          cmp runtime/linux-x64/libprism_usb_sdk.so \
+            build/examples/libprism_usb_sdk.so
+          readelf -d build/examples/prism-device-info-time-sync \
+            | grep -Fq "Library runpath: [\$ORIGIN]"
+
+      - name: Smoke-test SDK loading and enumeration
+        run: |
+          set +e
+          output="$(build/examples/prism-device-info-time-sync 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -eq 1
+          test "$output" = 'error: no Prism device found'
+
+  macos-arm64:
+    name: macOS 15 arm64
+    needs: integrity
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify runner architecture
+        run: test "$(uname -m)" = "arm64"
+
+      - name: Configure example
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES=arm64
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
+          -DCMAKE_CXX_FLAGS=-Werror
+
+      - name: Build example
+        run: cmake --build build --config Release --parallel --verbose
+
+      - name: Verify relocatable runtime
+        run: |
+          test -x build/examples/prism-device-info-time-sync
+          cmp runtime/macos-arm64/libprism_usb_sdk.dylib \
+            build/examples/libprism_usb_sdk.dylib
+          cmp runtime/macos-arm64/libusb-1.0.0.dylib \
+            build/examples/libusb-1.0.0.dylib
+          codesign --verify --strict build/examples/libprism_usb_sdk.dylib
+          codesign --verify --strict build/examples/libusb-1.0.0.dylib
+          otool -l build/examples/prism-device-info-time-sync \
+            | grep -A3 LC_RPATH \
+            | grep -Fq '@executable_path'
+          otool -l build/examples/prism-device-info-time-sync \
+            | grep -A6 LC_BUILD_VERSION \
+            | grep -Fq 'minos 13.0'
+
+      - name: Smoke-test SDK loading and enumeration
+        run: |
+          set +e
+          output="$(build/examples/prism-device-info-time-sync 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -eq 1
+          test "$output" = 'error: no Prism device found'
+
+  windows-x64:
+    name: Windows Server 2022 x64
+    needs: integrity
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify runner architecture
+        shell: pwsh
+        run: |
+          if (-not [Environment]::Is64BitProcess) {
+            throw 'The Windows build must run in a 64-bit process.'
+          }
+
+      - name: Configure example
+        shell: pwsh
+        run: >-
+          cmake -S . -B build
+          -G "Visual Studio 17 2022"
+          -A x64
+
+      - name: Build example
+        shell: pwsh
+        run: cmake --build build --config Release --parallel --verbose
+
+      - name: Verify copied runtime
+        shell: pwsh
+        run: |
+          $exe = 'build/examples/Release/prism-device-info-time-sync.exe'
+          $copiedDll = 'build/examples/Release/prism_usb_sdk.dll'
+          $sourceDll = 'runtime/windows-x64/prism_usb_sdk.dll'
+          if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+            throw "Missing example executable: $exe"
+          }
+          if (-not (Test-Path -LiteralPath $copiedDll -PathType Leaf)) {
+            throw "Missing copied SDK runtime: $copiedDll"
+          }
+          $copiedHash = (Get-FileHash -Algorithm SHA256 $copiedDll).Hash
+          $sourceHash = (Get-FileHash -Algorithm SHA256 $sourceDll).Hash
+          if ($copiedHash -cne $sourceHash) {
+            throw 'Copied SDK runtime differs from the published DLL.'
+          }
+
+      - name: Smoke-test SDK loading and enumeration
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path -LiteralPath 'build/examples/Release/prism-device-info-time-sync.exe').Path
+          $stdoutPath = Join-Path $env:RUNNER_TEMP 'prism-stdout.txt'
+          $stderrPath = Join-Path $env:RUNNER_TEMP 'prism-stderr.txt'
+          $process = Start-Process -FilePath $exe -Wait -PassThru -NoNewWindow `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+          $stdout = [IO.File]::ReadAllText($stdoutPath)
+          $stderr = [IO.File]::ReadAllText($stderrPath)
+          Write-Host $stdout
+          Write-Host $stderr
+          if ($process.ExitCode -ne 1) {
+            throw "Expected exit code 1, got $($process.ExitCode)."
+          }
+          if ($stdout.Trim().Length -ne 0) {
+            throw "Unexpected stdout: $stdout"
+          }
+          if ($stderr.Trim() -cne 'error: no Prism device found') {
+            throw "Unexpected stderr: $stderr"
+          }

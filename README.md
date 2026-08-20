@@ -1,5 +1,7 @@
 # Prism Host SDK 0.11.0
 
+[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+
 [中文说明](README.zh-CN.md)
 
 This repository is the binary distribution of the Prism Host SDK. It contains
@@ -34,6 +36,9 @@ Prism-SDK/
 
 The SDK intentionally performs a strict version handshake. Do not mix headers,
 dynamic libraries, or Agent firmware from different releases.
+
+GitHub Actions automatically compiles and runtime-smoke-tests the included
+example on all three supported host platforms.
 
 ## Build the example
 

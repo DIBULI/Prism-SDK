@@ -1,5 +1,7 @@
 # Prism Host SDK 0.11.0
 
+[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+
 [English](README.md)
 
 本仓库是 Prism Host SDK 的二进制发布仓库，只包含公共 C++ 头文件、三个受支持
@@ -32,6 +34,8 @@ Prism-SDK/
 - CMake：3.20 或更新版本
 
 SDK 会严格检查版本。不要混用不同版本的头文件、动态库或 Agent 固件。
+
+GitHub Actions 会在三个受支持的主机平台上自动编译示例，并执行动态库加载冒烟测试。
 
 ## 编译示例
 
