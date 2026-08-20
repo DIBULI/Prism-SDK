@@ -22,6 +22,127 @@ The snippets below focus on the relevant SDK calls and may omit standard-library
 includes, application callbacks, and shutdown signaling. The repository's
 `examples` directory contains complete buildable programs.
 
+<a id="api-quick-index"></a>
+## Per-interface minimal examples and quick navigation
+
+Use this directory to find the minimal call for every public entry point. The tables assume
+that `client` is open and `frame` has the required type. Calls with side effects must still
+follow the idle-state, explicit-confirmation, and rollback rules described later. Select
+“Details” to jump directly to the relevant section.
+
+- [Client lifecycle and base control](#api-client-control)
+- [Configuration, acquisition, and update](#api-config-capture-update)
+- [Stream wrappers](#api-stream-wrappers)
+- [Free helpers and parsers](#api-helpers-parsers)
+- [Windows Runtime API v4](#sdk-windows-runtime)
+
+<a id="api-client-control"></a>
+### Client lifecycle and base control
+
+| Interface | Minimal call | Details |
+| --- | --- | --- |
+| Default constructor | `prism::Client client;` | [Client lifecycle](#sdk-client-lifecycle) |
+| Move construction/assignment | `prism::Client next = std::move(client);` | [Client lifecycle](#sdk-client-lifecycle) |
+| `enumerate` | `auto devices = prism::Client::enumerate();` | [Device enumeration and selection](#sdk-device-open) |
+| `openFirst` | `auto client = prism::Client::openFirst();` | [Device enumeration and selection](#sdk-device-open) |
+| `open` | `auto client = prism::Client::open(devices.front());` | [Device enumeration and selection](#sdk-device-open) |
+| `openFirstDevice` | `client.openFirstDevice();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `openDevice` | `client.openDevice(devices.front());` | [Client lifecycle](#sdk-client-lifecycle) |
+| `closeDevice` | `client.closeDevice();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `close` | `client.close();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `isOpen` | `bool opened = client.isOpen();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `path` | `std::wstring usb_path = client.path();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` | [Client lifecycle](#sdk-client-lifecycle) |
+| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` | [Keepalive](#sdk-keepalive) |
+| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` | [Keepalive](#sdk-keepalive) |
+| `hello` | `auto hello = client.hello();` | [HELLO and firmware versions](#sdk-hello-versions) |
+| `deviceInfo` | `auto info = client.deviceInfo();` | [Device health information](#sdk-device-info) |
+| `deviceVersions` | `auto versions = client.deviceVersions();` | [HELLO and firmware versions](#sdk-hello-versions) |
+| `boardTime` | `auto rk_time = client.boardTime();` | [Time, ping, and network](#sdk-time-network) |
+| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` | [Time synchronization](#sdk-time-sync) |
+| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` | [Time synchronization](#sdk-time-sync) |
+| `streamTransferActive` | `bool active = client.streamTransferActive();` | [Threads and safety](#sdk-thread-safety) |
+| `ping` | `uint64_t board_seq = client.ping();` | [Time, ping, and network](#sdk-time-network) |
+| `networkInfo` | `auto network = client.networkInfo();` | [Time, ping, and network](#sdk-time-network) |
+| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` | [Wi-Fi hotspot management](#sdk-wifi) |
+| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` | [Wi-Fi hotspot management](#sdk-wifi) |
+
+<a id="api-config-capture-update"></a>
+### Configuration, acquisition, and update
+
+| Interface | Minimal call | Details |
+| --- | --- | --- |
+| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` | [Persistent device configuration](#sdk-configuration) |
+| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [Persistent device configuration](#sdk-configuration) |
+| `cameraExposure` | `auto exposure = client.cameraExposure();` | [Exposure and gain](#sdk-exposure) |
+| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [Exposure and gain](#sdk-exposure) |
+| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [Exposure and gain](#sdk-exposure) |
+| `setCameraExposure` | `client.setCameraExposure(0, camera);` | [Exposure and gain](#sdk-exposure) |
+| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `stopVideo` | `client.stopVideo();` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `stopImu` | `auto imu_status = client.stopImu();` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` | [JPEG assembly and ACK](#sdk-video-ack) |
+| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) |
+| `stopLidar` | `auto lidar = client.stopLidar();` | [LiDAR streams](#sdk-lidar-stream) |
+| `lidarStatus` | `auto lidar = client.lidarStatus();` | [LiDAR streams](#sdk-lidar-stream) |
+| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` | [LiDAR network](#sdk-lidar-network) |
+| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` | [LiDAR network](#sdk-lidar-network) |
+| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` | [LiDAR network](#sdk-lidar-network) |
+| `readFrame` | `prism::Frame frame = client.readFrame(3000);` | [Low-level Frame and commands](#sdk-low-level) |
+| `command` | `auto pong = client.command(prism::FrameType::Ping);` | [Low-level Frame and commands](#sdk-low-level) |
+| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` | [System upgrade](#sdk-system-upgrade) |
+
+<a id="api-stream-wrappers"></a>
+### Stream wrappers
+
+| Interface | Minimal call | Details |
+| --- | --- | --- |
+| `ImuStream` constructor | `prism::ImuStream imu(client, on_imu);` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `ImuStream::active` | `bool active = imu.active();` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| `ImuStream::stop` | `imu.stop();` | [Camera/IMU acquisition](#sdk-camera-imu) |
+| Point-only `LidarStream` constructor | `prism::LidarStream lidar(client, on_points);` | [LiDAR streams](#sdk-lidar-stream) |
+| Dual-callback `LidarStream` constructor | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` | [LiDAR streams](#sdk-lidar-stream) |
+| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` | [LiDAR streams](#sdk-lidar-stream) |
+| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` | [LiDAR streams](#sdk-lidar-stream) |
+| `LidarStream::active` | `bool active = lidar.active();` | [LiDAR streams](#sdk-lidar-stream) |
+| `LidarStream::stop` | `lidar.stop();` | [LiDAR streams](#sdk-lidar-stream) |
+
+<a id="api-helpers-parsers"></a>
+### Free helpers and parsers
+
+| Interface | Minimal call | Details |
+| --- | --- | --- |
+| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` | [SDK version](#sdk-version) |
+| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` | [Low-level Frame and commands](#sdk-low-level) |
+| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` | [Persistent device configuration](#sdk-configuration) |
+| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` | [Exposure and gain](#sdk-exposure) |
+| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` | [Device health information](#sdk-device-info) |
+| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` | [Device health information](#sdk-device-info) |
+| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` | [Device health information](#sdk-device-info) |
+| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [System upgrade](#sdk-system-upgrade) |
+| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [All parsers](#sdk-parsers) |
+| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [All parsers](#sdk-parsers) |
+| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [All parsers](#sdk-parsers) |
+| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [All parsers](#sdk-parsers) |
+| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [All parsers](#sdk-parsers) |
+| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` | [All parsers](#sdk-parsers) |
+| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` | [All parsers](#sdk-parsers) |
+| `parseImuSample` | `auto value = prism::parseImuSample(frame);` | [All parsers](#sdk-parsers) |
+| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` | [All parsers](#sdk-parsers) |
+| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` | [All parsers](#sdk-parsers) |
+| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` | [All parsers](#sdk-parsers) |
+| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` | [All parsers](#sdk-parsers) |
+| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [All parsers](#sdk-parsers) |
+| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [All parsers](#sdk-parsers) |
+
+For Windows Runtime API v4, each minimal call has the form `api->field(client, ...)`.
+All 43 function-pointer fields are grouped by their direct-API equivalent in
+[Windows Runtime API v4](#sdk-windows-runtime).
+
+<a id="sdk-platform-models"></a>
 ## 1. Platforms and API models
 
 | Platform | Architecture | API model |
@@ -57,12 +178,14 @@ Section 16 maps the Windows function table to the direct API.
 
 ## 2. Minimal lifecycle
 
+<a id="sdk-version"></a>
 ### 2.1 Query the SDK version
 
 ```cpp
 std::cout << prism::hostSdkVersion() << '\n';  // 0.11.0
 ```
 
+<a id="sdk-device-open"></a>
 ### 2.2 Enumerate and select a device by serial number
 
 ```cpp
@@ -94,6 +217,7 @@ A single-device application can use:
 auto client = prism::Client::openFirst();
 ```
 
+<a id="sdk-client-lifecycle"></a>
 ### 2.3 Reuse one Client object
 
 ```cpp
@@ -111,6 +235,7 @@ must be destroyed before the `Client` it references.
 
 ## 3. Versions, health, and basic information
 
+<a id="sdk-hello-versions"></a>
 ### 3.1 HELLO and firmware versions
 
 ```cpp
@@ -128,6 +253,7 @@ std::cout << hello.app << ' ' << hello.version << '\n'
 time, and the previous upgrade result. Use
 `process_id + process_started_monotonic_us` to detect an Agent restart.
 
+<a id="sdk-device-info"></a>
 ### 3.2 Fresh DeviceInfo status snapshot
 
 ```cpp
@@ -172,6 +298,7 @@ Do not hard-code two onboard IMUs. Derive the requested count from
 `sensorBoardErrorCodeName()` are display helpers. Use enum values for business
 logic.
 
+<a id="sdk-time-network"></a>
 ### 3.3 Time, ping, and network information
 
 ```cpp
@@ -187,6 +314,7 @@ std::cout << "rk_unix_ms=" << time.unix_ms << '\n'
           << "gateway=" << network.gateway << '\n';
 ```
 
+<a id="sdk-keepalive"></a>
 ### 3.4 Keepalive
 
 After a device is opened, the SDK sends a keepalive every 1000 ms by default.
@@ -201,6 +329,7 @@ client.setKeepaliveEnabled(true, 1000);  // valid interval: 100..4000 ms
 are absent for too long, the Agent stops acquisition, so disabling them is not
 a normal power-saving mechanism.
 
+<a id="sdk-configuration"></a>
 ## 4. Persistent device configuration
 
 ```cpp
@@ -246,6 +375,7 @@ A zero in `startVideo1280x1024(0)` or `startImu(count, 0)` means "use the saved
 value." A nonzero value overrides the saved value only for that acquisition
 session.
 
+<a id="sdk-exposure"></a>
 ## 5. Runtime exposure and gain
 
 Exposure configuration is not persistent and returns to its default after an
@@ -319,6 +449,7 @@ The current 0.11.0 API does not expose user-configurable automatic-exposure
 minimum/maximum exposure or minimum/maximum gain fields. Do not assume that
 capability exists in an application.
 
+<a id="sdk-time-sync"></a>
 ## 6. Time measurement and system-time synchronization
 
 Both operations require every data stream to be stopped.
@@ -362,6 +493,7 @@ not trustworthy. A verification failure throws; after a normal return,
 
 Both sample counts accept 3..64. `timeout_ms` accepts 100..10000.
 
+<a id="sdk-wifi"></a>
 ## 7. Wi-Fi hotspot management
 
 The Wi-Fi API manages only the device access point. It does not provide Wi-Fi
@@ -390,6 +522,7 @@ if (changed.error_code != 0) {
 point and DHCP are running. `present=false` is a status that applications can
 display; it is not a protocol error.
 
+<a id="sdk-camera-imu"></a>
 ## 8. Aggregate Camera and onboard-IMU acquisition
 
 Camera and onboard IMU belong to one aggregate acquisition session.
@@ -457,6 +590,7 @@ For a complete, buildable Camera/IMU receive-loop, chunk-assembly, and ACK
 example, see
 [`examples/camera_imu_capture.cpp`](../examples/camera_imu_capture.cpp).
 
+<a id="sdk-video-ack"></a>
 ### 8.2 JPEG chunk assembly and ACK
 
 `VideoChunkView` is a zero-copy view. Its `data` remains valid only while the
@@ -489,6 +623,7 @@ arrival satisfies credit completeness even when `meta.valid=false`; such a
 frame must still be ACKed but must not be consumed as valid sensor data. Clear
 all assembly state at the start of each capture.
 
+<a id="sdk-camera-metadata"></a>
 ### 8.3 Camera metadata and physical time
 
 ```cpp
@@ -508,6 +643,7 @@ clock is synchronized. Camera time is alignable only when
 `host_frame_id` to match JPEG data. `exposure_us`, `analog_gain_x1024`, and
 `digital_gain_x1024` contain the actual values for that frame.
 
+<a id="sdk-onboard-imu"></a>
 ### 8.4 Onboard IMU data
 
 `ImuSample` uses these units:
@@ -536,6 +672,7 @@ Stop the aggregate session with one stop call:
 imu.stop();  // Stops Camera and onboard IMU together.
 ```
 
+<a id="sdk-lidar-network"></a>
 ## 9. LiDAR network
 
 Reading, saving, and probing LiDAR network state are idle-only operations.
@@ -584,6 +721,7 @@ if (!probe.target_reachable) {
 test has not been completed, not that it failed. Display `link_up`,
 `address_applied`, `same_subnet`, and `target_reachable` separately.
 
+<a id="sdk-lidar-stream"></a>
 ## 10. LiDAR point cloud and LiDAR IMU
 
 The application must select the model explicitly. The Agent does not guess it
@@ -647,6 +785,7 @@ const auto running_status = client.lidarStatus();
 const auto stopped_status = client.stopLidar();
 ```
 
+<a id="sdk-combined-streams"></a>
 ## 11. Combined Camera, IMU, and LiDAR acquisition
 
 All three sources share one `readFrame()` loop:
@@ -703,6 +842,7 @@ onboard IMU, LiDAR points, and LiDAR IMU. Do not substitute
 `VideoChunk::timestamp_us` for Camera trigger time, and do not mix
 unsynchronized or raw LiDAR time into the same dataset.
 
+<a id="sdk-low-level"></a>
 ## 12. Heartbeat, Frame, and low-level commands
 
 ### 12.1 Heartbeat
@@ -737,6 +877,7 @@ intended for diagnostics; do not construct undocumented payloads. It waits for
 a matching response within the requested timeout and reports protocol or Agent
 errors as exceptions.
 
+<a id="sdk-parsers"></a>
 ## 13. All public parsers
 
 Every parser is strict. It throws if the `FrameType`, payload length, version,
@@ -793,6 +934,7 @@ Applications normally do not call status and configuration parsers directly,
 because the corresponding `Client` method already sends the command and parses
 the response.
 
+<a id="sdk-system-upgrade"></a>
 ## 14. System upgrade
 
 The public SDK accepts only a complete ZIP containing both Agent and
@@ -855,6 +997,7 @@ reenter the same `Client`.
 `parseUpgradeStatus()` and `parseSensorBoardUpgradeStatus()` are for custom
 low-level upgrade tools. Normal applications should use `upgradeSystem()`.
 
+<a id="sdk-thread-safety"></a>
 ## 15. Threads, safety, and exceptions
 
 - Only one process can own the device USB interface at a time.
@@ -892,6 +1035,7 @@ try {
 Do not continue using old stream wrappers after a `Client` disconnect. Destroy
 them, enumerate again, and create a new `Client`.
 
+<a id="sdk-windows-runtime"></a>
 ## 16. Windows Runtime API v4
 
 Resolve the runtime entry point:
@@ -969,6 +1113,7 @@ same dispatch described in Sections 8 through 11 with
 unchanged. Destroy every `Client` and every C++ object returned by the DLL
 before calling `FreeLibrary()`.
 
+<a id="sdk-build-integration"></a>
 ## 17. CMake integration and application distribution
 
 Build every example supported on the current platform from the repository
@@ -996,6 +1141,7 @@ Runtime API loader from Section 16 and place `prism_usb_sdk.dll` beside the
 executable. See the [installation guide](installation.md) for complete platform
 dependencies and deployment requirements.
 
+<a id="sdk-header-index"></a>
 ## 18. API index
 
 | Header | Public functionality |
@@ -1022,112 +1168,3 @@ Every public Client operation, Stream interface, parser, and Runtime API v4
 function pointer has a minimal call snippet or mapping table in the preceding
 sections. Runnable programs are grouped by feature rather than duplicating a
 nearly identical executable for every convenience overload.
-
-## 19. Per-interface minimal example index
-
-This section makes every public entry point easy to locate. It assumes that
-`client` is open and `frame` has the required type. Calls with side effects
-still require the idle state, explicit user confirmation, and rollback rules
-described earlier.
-
-### 19.1 Client lifecycle and base control
-
-| Interface | Minimal call |
-| --- | --- |
-| Default constructor | `prism::Client client;` |
-| Move construction/assignment | `prism::Client next = std::move(client);` |
-| `enumerate` | `auto devices = prism::Client::enumerate();` |
-| `openFirst` | `auto client = prism::Client::openFirst();` |
-| `open` | `auto client = prism::Client::open(devices.front());` |
-| `openFirstDevice` | `client.openFirstDevice();` |
-| `openDevice` | `client.openDevice(devices.front());` |
-| `closeDevice` | `client.closeDevice();` |
-| `close` | `client.close();` |
-| `isOpen` | `bool opened = client.isOpen();` |
-| `path` | `std::wstring usb_path = client.path();` |
-| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` |
-| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` |
-| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` |
-| `hello` | `auto hello = client.hello();` |
-| `deviceInfo` | `auto info = client.deviceInfo();` |
-| `deviceVersions` | `auto versions = client.deviceVersions();` |
-| `boardTime` | `auto rk_time = client.boardTime();` |
-| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` |
-| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` |
-| `streamTransferActive` | `bool active = client.streamTransferActive();` |
-| `ping` | `uint64_t board_seq = client.ping();` |
-| `networkInfo` | `auto network = client.networkInfo();` |
-| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` |
-| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` |
-
-### 19.2 Configuration, acquisition, and update
-
-| Interface | Minimal call |
-| --- | --- |
-| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` |
-| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` |
-| `cameraExposure` | `auto exposure = client.cameraExposure();` |
-| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` |
-| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` |
-| `setCameraExposure` | `client.setCameraExposure(0, camera);` |
-| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` |
-| `stopVideo` | `client.stopVideo();` |
-| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` |
-| `stopImu` | `auto imu_status = client.stopImu();` |
-| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` |
-| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` |
-| `stopLidar` | `auto lidar = client.stopLidar();` |
-| `lidarStatus` | `auto lidar = client.lidarStatus();` |
-| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` |
-| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` |
-| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` |
-| `readFrame` | `prism::Frame frame = client.readFrame(3000);` |
-| `command` | `auto pong = client.command(prism::FrameType::Ping);` |
-| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` |
-
-### 19.3 Stream wrappers
-
-| Interface | Minimal call |
-| --- | --- |
-| `ImuStream` constructor | `prism::ImuStream imu(client, on_imu);` |
-| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` |
-| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` |
-| `ImuStream::active` | `bool active = imu.active();` |
-| `ImuStream::stop` | `imu.stop();` |
-| Point-only `LidarStream` constructor | `prism::LidarStream lidar(client, on_points);` |
-| Dual-callback `LidarStream` constructor | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` |
-| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` |
-| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` |
-| `LidarStream::active` | `bool active = lidar.active();` |
-| `LidarStream::stop` | `lidar.stop();` |
-
-### 19.4 Free helpers and parsers
-
-| Interface | Minimal call |
-| --- | --- |
-| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` |
-| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` |
-| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` |
-| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` |
-| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` |
-| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` |
-| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` |
-| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` |
-| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` |
-| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` |
-| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` |
-| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` |
-| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` |
-| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` |
-| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` |
-| `parseImuSample` | `auto value = prism::parseImuSample(frame);` |
-| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` |
-| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` |
-| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` |
-| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` |
-| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` |
-| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` |
-
-For Windows Runtime API v4, each minimal call has the form
-`api->field(client, ...)`. All 43 function-pointer fields are grouped by their
-direct-API equivalent in Section 16.

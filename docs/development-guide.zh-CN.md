@@ -19,6 +19,125 @@ Agent 必须为 `0.11.0`，线协议必须为 `10`；SDK 在打开设备时执�
 下文的短代码片段专注于对应 SDK 调用，可能省略标准库头文件、业务回调、
 命令行解析和停机信号。仓库 `examples/` 下的程序才是可独立编译的完整示例。
 
+<a id="api-quick-index"></a>
+## 逐接口最小 Example 与快速目录
+
+本目录用于快速确认每个公开入口的调用形式。表内假设 `client` 已打开、`frame` 类型
+正确；会改变设备的调用仍必须遵守后文的 idle、用户确认和回滚要求。点击“详细说明”
+可直接跳转到对应章节。
+
+- [Client 生命周期和基础控制](#api-client-control)
+- [配置、采集和升级](#api-config-capture-update)
+- [Stream 包装类](#api-stream-wrappers)
+- [Free helper 和 parser](#api-helpers-parsers)
+- [Windows Runtime API v4](#sdk-windows-runtime)
+
+<a id="api-client-control"></a>
+### Client 生命周期和基础控制
+
+| 接口 | 最小调用 | 详细说明 |
+| --- | --- | --- |
+| 默认构造 | `prism::Client client;` | [Client 生命周期](#sdk-client-lifecycle) |
+| move 构造/赋值 | `prism::Client next = std::move(client);` | [Client 生命周期](#sdk-client-lifecycle) |
+| `enumerate` | `auto devices = prism::Client::enumerate();` | [设备枚举与选择](#sdk-device-open) |
+| `openFirst` | `auto client = prism::Client::openFirst();` | [设备枚举与选择](#sdk-device-open) |
+| `open` | `auto client = prism::Client::open(devices.front());` | [设备枚举与选择](#sdk-device-open) |
+| `openFirstDevice` | `client.openFirstDevice();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `openDevice` | `client.openDevice(devices.front());` | [Client 生命周期](#sdk-client-lifecycle) |
+| `closeDevice` | `client.closeDevice();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `close` | `client.close();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `isOpen` | `bool opened = client.isOpen();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `path` | `std::wstring usb_path = client.path();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` | [Client 生命周期](#sdk-client-lifecycle) |
+| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` | [Keepalive](#sdk-keepalive) |
+| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` | [Keepalive](#sdk-keepalive) |
+| `hello` | `auto hello = client.hello();` | [HELLO 与固件版本](#sdk-hello-versions) |
+| `deviceInfo` | `auto info = client.deviceInfo();` | [设备健康信息](#sdk-device-info) |
+| `deviceVersions` | `auto versions = client.deviceVersions();` | [HELLO 与固件版本](#sdk-hello-versions) |
+| `boardTime` | `auto rk_time = client.boardTime();` | [时间、Ping 与网络](#sdk-time-network) |
+| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` | [时间同步](#sdk-time-sync) |
+| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` | [时间同步](#sdk-time-sync) |
+| `streamTransferActive` | `bool active = client.streamTransferActive();` | [线程与安全约束](#sdk-thread-safety) |
+| `ping` | `uint64_t board_seq = client.ping();` | [时间、Ping 与网络](#sdk-time-network) |
+| `networkInfo` | `auto network = client.networkInfo();` | [时间、Ping 与网络](#sdk-time-network) |
+| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` | [Wi-Fi 热点管理](#sdk-wifi) |
+| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` | [Wi-Fi 热点管理](#sdk-wifi) |
+
+<a id="api-config-capture-update"></a>
+### 配置、采集和升级
+
+| 接口 | 最小调用 | 详细说明 |
+| --- | --- | --- |
+| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` | [持久化设备配置](#sdk-configuration) |
+| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [持久化设备配置](#sdk-configuration) |
+| `cameraExposure` | `auto exposure = client.cameraExposure();` | [曝光和增益](#sdk-exposure) |
+| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [曝光和增益](#sdk-exposure) |
+| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [曝光和增益](#sdk-exposure) |
+| `setCameraExposure` | `client.setCameraExposure(0, camera);` | [曝光和增益](#sdk-exposure) |
+| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `stopVideo` | `client.stopVideo();` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `stopImu` | `auto imu_status = client.stopImu();` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` | [JPEG 重组与 ACK](#sdk-video-ack) |
+| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `stopLidar` | `auto lidar = client.stopLidar();` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `lidarStatus` | `auto lidar = client.lidarStatus();` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` | [LiDAR 网络](#sdk-lidar-network) |
+| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` | [LiDAR 网络](#sdk-lidar-network) |
+| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` | [LiDAR 网络](#sdk-lidar-network) |
+| `readFrame` | `prism::Frame frame = client.readFrame(3000);` | [低级 Frame 与命令](#sdk-low-level) |
+| `command` | `auto pong = client.command(prism::FrameType::Ping);` | [低级 Frame 与命令](#sdk-low-level) |
+| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` | [系统升级](#sdk-system-upgrade) |
+
+<a id="api-stream-wrappers"></a>
+### Stream 包装类
+
+| 接口 | 最小调用 | 详细说明 |
+| --- | --- | --- |
+| `ImuStream` 构造 | `prism::ImuStream imu(client, on_imu);` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `ImuStream::active` | `bool active = imu.active();` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `ImuStream::stop` | `imu.stop();` | [Camera/IMU 采集](#sdk-camera-imu) |
+| `LidarStream` 点云构造 | `prism::LidarStream lidar(client, on_points);` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `LidarStream` 双回调构造 | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `LidarStream::active` | `bool active = lidar.active();` | [LiDAR 数据流](#sdk-lidar-stream) |
+| `LidarStream::stop` | `lidar.stop();` | [LiDAR 数据流](#sdk-lidar-stream) |
+
+<a id="api-helpers-parsers"></a>
+### Free helper 和 parser
+
+| 接口 | 最小调用 | 详细说明 |
+| --- | --- | --- |
+| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` | [SDK 版本](#sdk-version) |
+| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` | [低级 Frame 与命令](#sdk-low-level) |
+| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` | [持久化设备配置](#sdk-configuration) |
+| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` | [曝光和增益](#sdk-exposure) |
+| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` | [设备健康信息](#sdk-device-info) |
+| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` | [设备健康信息](#sdk-device-info) |
+| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` | [设备健康信息](#sdk-device-info) |
+| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [系统升级](#sdk-system-upgrade) |
+| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [全部 parser](#sdk-parsers) |
+| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [全部 parser](#sdk-parsers) |
+| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [全部 parser](#sdk-parsers) |
+| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [全部 parser](#sdk-parsers) |
+| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [全部 parser](#sdk-parsers) |
+| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` | [全部 parser](#sdk-parsers) |
+| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` | [全部 parser](#sdk-parsers) |
+| `parseImuSample` | `auto value = prism::parseImuSample(frame);` | [全部 parser](#sdk-parsers) |
+| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` | [全部 parser](#sdk-parsers) |
+| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` | [全部 parser](#sdk-parsers) |
+| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` | [全部 parser](#sdk-parsers) |
+| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` | [全部 parser](#sdk-parsers) |
+| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) |
+| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) |
+
+Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, ...)`；全部 43 个字段
+已在 [Windows Runtime API v4](#sdk-windows-runtime) 中按直接 API 分组映射。
+
+<a id="sdk-platform-models"></a>
 ## 1. 平台与 API 模型
 
 | 平台 | 架构 | 使用方式 |
@@ -47,12 +166,14 @@ Windows 可使用函数表中的通用读写、`read_frame` 和 parser 实现等
 
 ## 2. 最小生命周期
 
+<a id="sdk-version"></a>
 ### 2.1 查询 SDK 版本
 
 ```cpp
 std::cout << prism::hostSdkVersion() << '\n';  // 0.11.0
 ```
 
+<a id="sdk-device-open"></a>
 ### 2.2 枚举并按序列号选择设备
 
 ```cpp
@@ -82,6 +203,7 @@ auto client = prism::Client::open(*it);
 auto client = prism::Client::openFirst();
 ```
 
+<a id="sdk-client-lifecycle"></a>
 ### 2.3 复用一个 Client 对象
 
 ```cpp
@@ -98,6 +220,7 @@ client.closeDevice();
 
 ## 3. 版本、健康与基础信息
 
+<a id="sdk-hello-versions"></a>
 ### 3.1 HELLO 与固件版本
 
 ```cpp
@@ -114,6 +237,7 @@ std::cout << hello.app << ' ' << hello.version << '\n'
 `hello()` 还返回最大负载、Agent PID、进程启动单调时间和上一次升级结果。
 `process_id + process_started_monotonic_us` 可用于识别 Agent 是否重启。
 
+<a id="sdk-device-info"></a>
 ### 3.2 DeviceInfo 新鲜状态快照
 
 ```cpp
@@ -154,6 +278,7 @@ USB 接收循环竞争，仍应由同一 I/O owner 线程串行查询。
 `usbLinkSpeedName()`、`imuInitErrorReasonName()`、
 `sensorBoardErrorCodeName()` 只用于显示；业务判断应使用 enum 值。
 
+<a id="sdk-time-network"></a>
 ### 3.3 时间、Ping 与网络信息
 
 ```cpp
@@ -169,6 +294,7 @@ std::cout << "rk_unix_ms=" << time.unix_ms << '\n'
           << "gateway=" << network.gateway << '\n';
 ```
 
+<a id="sdk-keepalive"></a>
 ### 3.4 Keepalive
 
 打开设备后 SDK 默认每 1000 ms 自动发送 keepalive。生产程序应保持启用。
@@ -181,6 +307,7 @@ client.setKeepaliveEnabled(true, 1000);  // 允许 100..4000 ms
 `setKeepaliveEnabled(false)` 主要用于看门狗测试。长时间不发 keepalive 时 Agent 会停止
 采集，不能把它当作普通节能功能。
 
+<a id="sdk-configuration"></a>
 ## 4. 持久化设备配置
 
 ```cpp
@@ -221,6 +348,7 @@ if (!config.persisted) throw std::runtime_error("配置未持久化");
 `startVideo1280x1024(0)` 和 `startImu(count, 0)` 中的 0 表示使用已保存值；非零值只
 覆盖当前采集会话。
 
+<a id="sdk-exposure"></a>
 ## 5. 运行时曝光和增益
 
 曝光配置不持久化，Agent 或 sensor-board 重启后恢复默认值；允许在采集期间读写。
@@ -292,6 +420,7 @@ all = client.setExposureConfiguration(all, prism::kExposureFieldAll);
 当前 0.11.0 API 没有用户可配置的“自动曝光最小/最大曝光、最小/最大 gain”字段；
 不要在应用中假定该能力存在。
 
+<a id="sdk-time-sync"></a>
 ## 6. 时间测量与系统时间同步
 
 两种接口均要求所有数据流停止。
@@ -333,6 +462,7 @@ std::cout << "before=" << result.before.offset_us << '\n'
 `sample_count` 和 `verification_sample_count` 的允许范围均为 3..64，
 `timeout_ms` 为 100..10000。
 
+<a id="sdk-wifi"></a>
 ## 7. Wi‑Fi 热点管理
 
 Wi‑Fi API 只管理设备 AP，不提供 Wi‑Fi 传感器数据传输。查询和修改均要求数据流停止。
@@ -358,6 +488,7 @@ if (changed.error_code != 0) {
 `enabled` 表示持久化策略；`running` 只有 AP 和 DHCP 都运行时才为 true。
 `present=false` 不是协议错误，应用仍可展示状态。
 
+<a id="sdk-camera-imu"></a>
 ## 8. Camera 与板载 IMU 聚合采集
 
 Camera 和板载 IMU 属于同一个采集会话：`startVideo1280x1024()` 和 `startImu()` 都会
@@ -419,6 +550,7 @@ while (running) {
 可独立编译的 Camera/IMU 完整接收、chunk 重组和 ACK 示例见
 [`examples/camera_imu_capture.cpp`](../examples/camera_imu_capture.cpp)。
 
+<a id="sdk-video-ack"></a>
 ### 8.2 JPEG chunk 重组与 ACK
 
 `VideoChunkView` 是零拷贝视图，其 `data` 只在源 `Frame` 未销毁、移动或修改时有效。
@@ -445,6 +577,7 @@ if (frameSetComplete(next_frame_id)) {
 永久等待旧残帧。metadata 已到达即可用于 credit 完整性；`meta.valid=false` 的帧仍需 ACK，
 但不得作为有效传感器数据消费。每次新 capture 都应清空重组状态。
 
+<a id="sdk-camera-metadata"></a>
 ### 8.3 Camera metadata 与真实时间
 
 ```cpp
@@ -462,6 +595,7 @@ if (meta.valid && camera_time_synced && meta.trigger_time_ns != 0) {
 `host_frame_id` 用来匹配 JPEG；`exposure_us`、`analog_gain_x1024` 和
 `digital_gain_x1024` 是该帧实际值。
 
+<a id="sdk-onboard-imu"></a>
 ### 8.4 板载 IMU 数据
 
 `ImuSample` 单位：
@@ -487,6 +621,7 @@ Camera/LiDAR 时间比较。使用 `(sensor_id, sample_id)` 检查连续性；
 imu.stop();  // 同时停止 Camera 和板载 IMU
 ```
 
+<a id="sdk-lidar-network"></a>
 ## 9. LiDAR 网络
 
 LiDAR 网络查询、保存和探测都是 idle-only 操作。
@@ -531,6 +666,7 @@ if (!probe.target_reachable) {
 `target_reachable=false` 且 `error_code=0` 表示尚未完成本次连接测试，不等同于失败。
 `link_up`、`address_applied`、`same_subnet` 和 `target_reachable` 应分别展示。
 
+<a id="sdk-lidar-stream"></a>
 ## 10. LiDAR 点云与 LiDAR IMU
 
 型号必须由用户明确选择，Agent 不根据发现结果猜测：
@@ -584,6 +720,7 @@ const auto running_status = client.lidarStatus();
 const auto stopped_status = client.stopLidar();
 ```
 
+<a id="sdk-combined-streams"></a>
 ## 11. Camera、IMU、LiDAR 同时采集
 
 三个数据源共用同一个 `readFrame()` 循环：
@@ -638,6 +775,7 @@ Camera 必须同时满足 `meta.valid`、`meta.trigger_time_ns != 0` 和
 `timestamp_synced`。不能用 `VideoChunk::timestamp_us` 代替 Camera 触发时间，也不能把未同步或
 raw LiDAR 时间混入同一数据集。
 
+<a id="sdk-low-level"></a>
 ## 12. Heartbeat、Frame 与低级命令
 
 ### 12.1 Heartbeat
@@ -669,6 +807,7 @@ const prism::Frame pong = client.command(prism::FrameType::Ping);
 普通应用应优先使用类型化 Client API。`command()` 面向诊断工具；不要自行拼装未文档化
 payload。它会在指定超时内等待匹配响应，协议/Agent 错误以 exception 报告。
 
+<a id="sdk-parsers"></a>
 ## 13. 全部公开 parser
 
 所有 parser 都是严格 parser：FrameType、payload 长度、版本或字段非法会抛异常。
@@ -723,6 +862,7 @@ switch (frame.type) {
 
 通常不需要直接调用状态/配置 parser，因为对应 Client 方法已经完成 command 和解析。
 
+<a id="sdk-system-upgrade"></a>
 ## 14. 系统升级
 
 公开 SDK 只接受同时包含 Agent 和 sensor-board 固件的完整 ZIP，不提供单独刷写某一
@@ -780,6 +920,7 @@ if (!result.complete) throw std::runtime_error("系统升级未完成");
 `parseUpgradeStatus()` 和 `parseSensorBoardUpgradeStatus()` 仅供自定义低级升级工具；
 常规应用使用 `upgradeSystem()`。
 
+<a id="sdk-thread-safety"></a>
 ## 15. 线程、安全和异常
 
 - 同一时刻只允许一个进程占用设备 USB interface；
@@ -810,6 +951,7 @@ try {
 
 Client 断连后不要继续使用旧 Stream wrapper；销毁它们，重新枚举并建立新的 Client。
 
+<a id="sdk-windows-runtime"></a>
 ## 16. Windows Runtime API v4
 
 运行时入口：
@@ -885,6 +1027,7 @@ Windows 没有 `ImuStream`/`LidarStream` 包装类，应使用 `read_frame + swi
 实现第 8–11 节相同的分发逻辑。`VideoChunkView::data` 的生命周期规则完全相同。
 必须先销毁所有 Client 和由 DLL 返回的 C++ 对象，最后才能 `FreeLibrary()`。
 
+<a id="sdk-build-integration"></a>
 ## 17. CMake 集成与应用分发
 
 仓库根目录可直接编译所有适用于当前平台的示例：
@@ -908,6 +1051,7 @@ macOS 还需随应用分发 `libusb-1.0.0.dylib`。Windows 只包含 DLL，应�
 Runtime API loader，并将 `prism_usb_sdk.dll` 放在 exe 旁边。完整平台依赖和布署要求见
 [安装指南](installation.zh-CN.md)。
 
+<a id="sdk-header-index"></a>
 ## 18. API 索引
 
 | 头文件 | 公开功能 |
@@ -933,109 +1077,3 @@ Runtime API loader，并将 `prism_usb_sdk.dll` 放在 exe 旁边。完整平台
 每个公开 Client 操作、Stream 接口、parser 和 Runtime API v4 函数指针都在上述章节中有
 最小调用片段或映射表；可运行程序按功能类别集中，避免为每个便利重载复制一个几乎相同的
 executable。
-
-## 19. 逐接口最小 example 索引
-
-本节用于快速确认每个公开入口的调用形式。表内假设 `client` 已打开、`frame` 类型正确；
-会改变设备的调用仍必须遵守前文的 idle、用户确认和回滚要求。
-
-### 19.1 Client 生命周期和基础控制
-
-| 接口 | 最小调用 |
-| --- | --- |
-| 默认构造 | `prism::Client client;` |
-| move 构造/赋值 | `prism::Client next = std::move(client);` |
-| `enumerate` | `auto devices = prism::Client::enumerate();` |
-| `openFirst` | `auto client = prism::Client::openFirst();` |
-| `open` | `auto client = prism::Client::open(devices.front());` |
-| `openFirstDevice` | `client.openFirstDevice();` |
-| `openDevice` | `client.openDevice(devices.front());` |
-| `closeDevice` | `client.closeDevice();` |
-| `close` | `client.close();` |
-| `isOpen` | `bool opened = client.isOpen();` |
-| `path` | `std::wstring usb_path = client.path();` |
-| `serialNumber` | `std::wstring usb_serial = client.serialNumber();` |
-| `setKeepaliveEnabled` | `client.setKeepaliveEnabled(true, 1000);` |
-| `keepaliveEnabled` | `bool keepalive = client.keepaliveEnabled();` |
-| `hello` | `auto hello = client.hello();` |
-| `deviceInfo` | `auto info = client.deviceInfo();` |
-| `deviceVersions` | `auto versions = client.deviceVersions();` |
-| `boardTime` | `auto rk_time = client.boardTime();` |
-| `synchronizeTimeNtpLike` | `auto measured = client.synchronizeTimeNtpLike(12, 1000);` |
-| `synchronizeSystemTime` | `auto synced = client.synchronizeSystemTime(12, 6, 1000);` |
-| `streamTransferActive` | `bool active = client.streamTransferActive();` |
-| `ping` | `uint64_t board_seq = client.ping();` |
-| `networkInfo` | `auto network = client.networkInfo();` |
-| `wifiHotspotStatus` | `auto ap = client.wifiHotspotStatus();` |
-| `setWifiHotspotEnabled` | `auto ap = client.setWifiHotspotEnabled(true);` |
-
-### 19.2 配置、采集和升级
-
-| 接口 | 最小调用 |
-| --- | --- |
-| `deviceConfiguration` | `auto cfg = client.deviceConfiguration();` |
-| `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` |
-| `cameraExposure` | `auto exposure = client.cameraExposure();` |
-| `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` |
-| `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` |
-| `setCameraExposure` | `client.setCameraExposure(0, camera);` |
-| `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` |
-| `stopVideo` | `client.stopVideo();` |
-| `startImu` | `auto imu_status = client.startImu(info.detected_imu_count, 0);` |
-| `stopImu` | `auto imu_status = client.stopImu();` |
-| `sendVideoAck` | `client.sendVideoAck(last_complete_frame_id);` |
-| `startLidar` | `auto lidar = client.startLidar(prism::LidarModel::Mid360);` |
-| `stopLidar` | `auto lidar = client.stopLidar();` |
-| `lidarStatus` | `auto lidar = client.lidarStatus();` |
-| `lidarNetworkStatus` | `auto net = client.lidarNetworkStatus();` |
-| `saveLidarNetworkConfiguration` | `auto net = client.saveLidarNetworkConfiguration(configuration);` |
-| `probeLidarNetwork` | `auto net = client.probeLidarNetwork();` |
-| `readFrame` | `prism::Frame frame = client.readFrame(3000);` |
-| `command` | `auto pong = client.command(prism::FrameType::Ping);` |
-| `upgradeSystem` | `auto result = client.upgradeSystem(package_path, options, progress);` |
-
-### 19.3 Stream 包装类
-
-| 接口 | 最小调用 |
-| --- | --- |
-| `ImuStream` 构造 | `prism::ImuStream imu(client, on_imu);` |
-| `ImuStream::start` | `imu.start(info.detected_imu_count, 0);` |
-| `ImuStream::handleFrame` | `bool consumed = imu.handleFrame(frame);` |
-| `ImuStream::active` | `bool active = imu.active();` |
-| `ImuStream::stop` | `imu.stop();` |
-| `LidarStream` 点云构造 | `prism::LidarStream lidar(client, on_points);` |
-| `LidarStream` 双回调构造 | `prism::LidarStream lidar(client, on_points, on_lidar_imu);` |
-| `LidarStream::start` | `lidar.start(prism::LidarModel::Mid360);` |
-| `LidarStream::handleFrame` | `bool consumed = lidar.handleFrame(frame);` |
-| `LidarStream::active` | `bool active = lidar.active();` |
-| `LidarStream::stop` | `lidar.stop();` |
-
-### 19.4 Free helper 和 parser
-
-| 接口 | 最小调用 |
-| --- | --- |
-| `hostSdkVersion` | `std::string version = prism::hostSdkVersion();` |
-| `frameTypeName` | `std::string name = prism::frameTypeName(frame.type);` |
-| `isCameraFpsSupported` | `bool supported = prism::isCameraFpsSupported(30);` |
-| `cameraMaxExposureUs` | `uint32_t limit = prism::cameraMaxExposureUs(30);` |
-| `usbLinkSpeedName` | `const char* name = prism::usbLinkSpeedName(info.usb_speed);` |
-| `imuInitErrorReasonName` | `const char* name = prism::imuInitErrorReasonName(reason);` |
-| `sensorBoardErrorCodeName` | `const char* name = prism::sensorBoardErrorCodeName(code);` |
-| `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` |
-| `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` |
-| `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` |
-| `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` |
-| `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` |
-| `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` |
-| `parseVideoChunk` | `auto owned = prism::parseVideoChunk(frame);` |
-| `parseVideoMeta` | `auto value = prism::parseVideoMeta(frame);` |
-| `parseImuSample` | `auto value = prism::parseImuSample(frame);` |
-| `parseLidarStatus` | `auto value = prism::parseLidarStatus(frame);` |
-| `parseLidarNetworkStatus` | `auto value = prism::parseLidarNetworkStatus(frame);` |
-| `parseLidarPointBatch` | `auto value = prism::parseLidarPointBatch(frame);` |
-| `parseLidarImuSample` | `auto value = prism::parseLidarImuSample(frame);` |
-| `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` |
-| `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` |
-
-Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, ...)`；全部 43 个字段
-已在第 16 节按直接 API 分组映射。
