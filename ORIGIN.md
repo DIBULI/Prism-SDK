@@ -25,7 +25,7 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
   OPENSSL 3.0.0
 - Static archive: `runtime/linux-x64/libprism_usb_sdk.a`
 - Static SHA-256:
-  `3291bc77409be3926850178b7851cff955284cd5d0d3f315840caffcceae5451`
+  `20c1cb6fe21cc5adb5bd59390b085c5aecec9a5eabfb0ffdc9aea1ef581cee18`
 
 ## Linux arm64
 
@@ -38,7 +38,7 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 - ABI baseline: GLIBC 2.34 and GLIBCXX 3.4.29
 - Static archive: `runtime/linux-arm64/libprism_usb_sdk.a`
 - Static SHA-256:
-  `65d1c9d8307b15a956b5e7d47ea12b1cd872492d9db9773283696702857de4e2`
+  `52b681595459ac9f4bfddede7c8c217917954c3d74adfb106e82b64cce5a0394`
 
 ## ROS Adapter Linux prefixes
 
