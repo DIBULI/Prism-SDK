@@ -2,7 +2,7 @@ ed421f37b6b266fa85228d8e8dd54c083c0cac932a1fd4c17ebad31bbe33f6cc  ./.gitattribut
 6218baf17d9ddf11b448893509206552edb599774e6d8baf05d08efe23e72d39  ./.github/workflows/build.yml
 46e86fc91d09a34e157affc0ce8db0414ea54c9a632b8ade6cf56dd0095f9174  ./.gitignore
 6871d9db7f4652f6274c95f45f7435bb85630d0169f7122cc865eabb4d5ef158  ./CMakeLists.txt
-a9c3e220e7aa0eaf98bd1f182de6de442f5a8680db25dc966c64445424b5d233  ./ORIGIN.md
+6a5f111bdad9c3ddd751577bd624f477bcf8d933136c53d9a428fbc599ff4d6a  ./ORIGIN.md
 4cf3ffb21549a8c17ff2862bca7d29f0f2cab85b3de62af9eeec920e5c28e613  ./README.md
 06f1f70790363cfcd38867d7f20924c8d29c57a33790fcc284c10e6e114e70d3  ./README.zh-CN.md
 5e05a8a85ad99e262195c98675b3331b5865b50b1705e8ff5b03be736f787f15  ./THIRD_PARTY_NOTICES.md
@@ -41,7 +41,7 @@ f58afff850372a1a3ce026e1d362b48eb1b798051378f566ba25f5a08a3ac470  ./include/pris
 f876944a639b4aa0200140de7b02ec618f6b74d04d1a8a69ab18d2189328a4c8  ./runtime/linux-arm64/libprism_usb_sdk.so
 20c1cb6fe21cc5adb5bd59390b085c5aecec9a5eabfb0ffdc9aea1ef581cee18  ./runtime/linux-x64/libprism_usb_sdk.a
 92dca1e5b10f300542cfb4396a4d8e5176fc8324f2d12419eb1788c25007aba2  ./runtime/linux-x64/libprism_usb_sdk.so
-7788c7b7af6262f1139254a1cac60a8ebe00aed19b858a135b6e280598d9138d  ./runtime/macos-arm64/libprism_usb_sdk.dylib
+35afe9431db86ab8c7f4c73703b46fbeda08eb009007ee0070fdbfee0587c987  ./runtime/macos-arm64/libprism_usb_sdk.dylib
 6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01  ./runtime/macos-arm64/libusb-1.0.0.dylib
 5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a  ./runtime/macos-arm64/libusb-COPYING.txt
 5922ed61a10256afc887f6fe5b895e4497627c5e490b90e38039416c8ada7da3  ./runtime/ros/ubuntu-20.04-x86_64/include/prism/usb/client.hpp
