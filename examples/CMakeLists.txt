@@ -17,6 +17,8 @@ get_filename_component(_prism_sdk_default_root
 set(PRISM_SDK_ROOT "${_prism_sdk_default_root}" CACHE PATH
   "Root of the Prism Host SDK binary package")
 unset(_prism_sdk_default_root)
+option(PRISM_SDK_USE_STATIC
+  "Link the packaged Linux static Host SDK instead of its shared runtime" OFF)
 
 set(_prism_sdk_include "${PRISM_SDK_ROOT}/include")
 if(NOT EXISTS "${_prism_sdk_include}/prism/usb_sdk.hpp")
@@ -26,12 +28,18 @@ if(NOT EXISTS "${_prism_sdk_include}/prism/usb_sdk.hpp")
 endif()
 
 if(WIN32)
+  if(PRISM_SDK_USE_STATIC)
+    message(FATAL_ERROR "The packaged static Host SDK currently supports Linux only")
+  endif()
   if(NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "The packaged Windows runtime requires MSVC x64")
   endif()
   set(_prism_sdk_runtime
     "${PRISM_SDK_ROOT}/runtime/windows-x64/prism_usb_sdk.dll")
 elseif(APPLE)
+  if(PRISM_SDK_USE_STATIC)
+    message(FATAL_ERROR "The packaged static Host SDK currently supports Linux only")
+  endif()
   if(CMAKE_OSX_ARCHITECTURES AND
      NOT CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
     message(FATAL_ERROR "The packaged macOS runtime supports arm64 only")
@@ -46,17 +54,31 @@ elseif(APPLE)
 elseif(UNIX)
   string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" _prism_processor)
   if(_prism_processor MATCHES "^(x86_64|amd64)$")
-    set(_prism_sdk_runtime
-      "${PRISM_SDK_ROOT}/runtime/linux-x64/libprism_usb_sdk.so")
+    set(_prism_sdk_runtime_dir
+      "${PRISM_SDK_ROOT}/runtime/linux-x64")
   elseif(_prism_processor MATCHES "^(aarch64|arm64)$")
-    set(_prism_sdk_runtime
-      "${PRISM_SDK_ROOT}/runtime/linux-arm64/libprism_usb_sdk.so")
+    set(_prism_sdk_runtime_dir
+      "${PRISM_SDK_ROOT}/runtime/linux-arm64")
   else()
     message(FATAL_ERROR
       "The packaged Linux runtime supports x86-64 and arm64 only")
   endif()
   unset(_prism_processor)
-  add_library(PrismUsbSdkRuntime SHARED IMPORTED)
+  if(PRISM_SDK_USE_STATIC)
+    set(_prism_sdk_runtime
+      "${_prism_sdk_runtime_dir}/libprism_usb_sdk.a")
+    add_library(PrismUsbSdkRuntime STATIC IMPORTED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBUSB REQUIRED IMPORTED_TARGET libusb-1.0)
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+    set_target_properties(PrismUsbSdkRuntime PROPERTIES
+      INTERFACE_LINK_LIBRARIES "PkgConfig::LIBUSB;OpenSSL::Crypto")
+  else()
+    set(_prism_sdk_runtime
+      "${_prism_sdk_runtime_dir}/libprism_usb_sdk.so")
+    add_library(PrismUsbSdkRuntime SHARED IMPORTED)
+  endif()
+  unset(_prism_sdk_runtime_dir)
   set_target_properties(PrismUsbSdkRuntime PROPERTIES
     IMPORTED_LOCATION "${_prism_sdk_runtime}")
 else()
@@ -107,14 +129,16 @@ function(prism_add_example target source)
       VERBATIM)
   else()
     target_link_libraries(${target} PRIVATE PrismUsbSdkRuntime)
-    set_target_properties(${target} PROPERTIES
-      BUILD_WITH_INSTALL_RPATH TRUE
-      INSTALL_RPATH "$ORIGIN")
-    add_custom_command(TARGET ${target} POST_BUILD
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${_prism_sdk_runtime}"
-        "$<TARGET_FILE_DIR:${target}>"
-      VERBATIM)
+    if(NOT PRISM_SDK_USE_STATIC)
+      set_target_properties(${target} PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "$ORIGIN")
+      add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+          "${_prism_sdk_runtime}"
+          "$<TARGET_FILE_DIR:${target}>"
+        VERBATIM)
+    endif()
   endif()
 endfunction()
 

@@ -5,8 +5,8 @@
 [English](README.md)
 
 本仓库是 Prism Host SDK 的二进制发布仓库，只包含公共 C++ 头文件、三个受支持
-平台的预编译动态库、用户安装/使用文档和 CMake 示例，不包含 SDK 实现源码或设备
-固件源码。
+平台的预编译动态库、Linux x86-64/arm64 静态库、用户安装/使用文档和 CMake 示例，
+不包含 SDK 实现源码或设备固件源码。
 
 ## 仓库内容
 
@@ -14,8 +14,8 @@
 Prism-SDK/
 ├── include/prism/                 C++17 公共头文件
 ├── runtime/
-│   ├── linux-x64/                 默认 Ubuntu 22.04+ x86-64 动态库
-│   ├── linux-arm64/               默认 Ubuntu 22.04+ ARM64 动态库
+│   ├── linux-x64/                 Ubuntu 22.04+ x86-64 .so 与 .a
+│   ├── linux-arm64/               Ubuntu 22.04+ arm64 .so 与 .a
 │   ├── ros/
 │   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK 前缀
 │   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK 前缀
@@ -39,16 +39,33 @@ Prism-SDK/
 - C++：C++17 或更新版本
 - CMake：3.20 或更新版本
 
-SDK 会严格检查版本。不要混用不同版本的头文件、动态库或 Agent 固件。
+SDK 会严格检查版本。不要混用不同版本的头文件、库文件或 Agent 固件。
 
 GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
-测试，并对发布的动态库执行加载冒烟测试。新增 `examples/*.cpp` 如果没有注册 CMake
-target，配置会直接失败，避免后续示例被 CI 静默漏编。
+测试，对发布的动态库执行加载冒烟测试，并验证两个 Linux 架构的静态链接。新增
+`examples/*.cpp` 如果没有注册 CMake target，配置会直接失败，避免后续示例被 CI
+静默漏编。
 
 两个 Linux 架构使用相同的 Ubuntu 22.04 ABI 基线。仓库还在 `runtime/ros`
 下提供 ROS Adapter 使用的完整多 Ubuntu ABI 二进制
 SDK 前缀。Adapter 会按 ROS 发行版选择对应前缀；普通桌面 SDK 用户默认使用
-`runtime/linux-x64/libprism_usb_sdk.so`。
+`runtime/linux-x64/libprism_usb_sdk.so`。配置时设置
+`PRISM_SDK_USE_STATIC=ON` 可改用同目录的 `libprism_usb_sdk.a`。
+
+## Linux 静态 SDK
+
+安装 OpenSSL 与 libusb 开发包，然后在配置使用方时启用静态 SDK：
+
+```bash
+sudo apt-get install -y libssl-dev libusb-1.0-0-dev
+cmake -S . -B build-static \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DPRISM_SDK_USE_STATIC=ON
+cmake --build build-static --config Release
+```
+
+这样最终程序不再依赖 `libprism_usb_sdk.so`。OpenSSL 和 libusb 仍是传递链接依赖，
+默认使用它们的动态库；只有使用方显式选择兼容的静态版本时才会进一步静态链接。
 
 ## 编译示例
 

@@ -181,7 +181,7 @@ Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, 
 
 | 平台 | 架构 | 使用方式 |
 | --- | --- | --- |
-| Ubuntu 22.04+ | x86-64 | 直接链接 `libprism_usb_sdk.so`，使用完整 `Client` API |
+| Ubuntu 22.04+ | x86-64 或 arm64 | 链接 `libprism_usb_sdk.so` 或 `libprism_usb_sdk.a`，使用完整 `Client` API |
 | macOS 13+ | Apple Silicon arm64 | 链接 SDK dylib，并随程序部署 libusb dylib，使用完整 `Client` API |
 | Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v5 调用 |
 

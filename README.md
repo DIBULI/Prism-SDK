@@ -6,8 +6,9 @@
 
 This repository is the binary distribution of the Prism Host SDK. It contains
 public C++ headers, prebuilt dynamic libraries for the three supported host
-platforms, end-user documentation, and CMake examples. It does not contain
-the SDK implementation or device firmware source code.
+platforms, Linux x86-64/arm64 static libraries, end-user documentation, and
+CMake examples. It does not contain the SDK implementation or device firmware
+source code.
 
 ## Package contents
 
@@ -15,8 +16,8 @@ the SDK implementation or device firmware source code.
 Prism-SDK/
 ├── include/prism/                 Public C++17 headers
 ├── runtime/
-│   ├── linux-x64/                 Default Ubuntu 22.04+ x86-64 library
-│   ├── linux-arm64/               Default Ubuntu 22.04+ ARM64 library
+│   ├── linux-x64/                 Ubuntu 22.04+ x86-64 .so and .a
+│   ├── linux-arm64/               Ubuntu 22.04+ arm64 .so and .a
 │   ├── ros/
 │   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK prefix
 │   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK prefix
@@ -41,18 +42,38 @@ Prism-SDK/
 - CMake: 3.20 or later
 
 The SDK intentionally performs a strict version handshake. Do not mix headers,
-dynamic libraries, or Agent firmware from different releases.
+libraries, or Agent firmware from different releases.
 
 GitHub Actions compiles every example source across the three-platform matrix,
-runs all no-device support tests, and runtime-smoke-tests the published dynamic
-libraries. CMake rejects an unregistered `examples/*.cpp` source, preventing a
-future example from silently escaping CI.
+runs all no-device support tests, runtime-smoke-tests the published dynamic
+libraries, and verifies static linking on both Linux architectures. CMake
+rejects an unregistered `examples/*.cpp` source, preventing a future example
+from silently escaping CI.
 
 Both Linux architectures are built against the same Ubuntu 22.04 ABI baseline.
 The repository also provides complete ABI-specific binary SDK prefixes under
 `runtime/ros` for the ROS Adapter. The Adapter selects the correct prefix for
 each ROS distribution; desktop SDK consumers use
-`runtime/linux-x64/libprism_usb_sdk.so` by default.
+`runtime/linux-x64/libprism_usb_sdk.so` by default. Set
+`PRISM_SDK_USE_STATIC=ON` to use the matching `libprism_usb_sdk.a` instead.
+
+## Linux static SDK
+
+Install the OpenSSL and libusb development packages, then enable the static SDK
+option when configuring a consumer:
+
+```bash
+sudo apt-get install -y libssl-dev libusb-1.0-0-dev
+cmake -S . -B build-static \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DPRISM_SDK_USE_STATIC=ON
+cmake --build build-static --config Release
+```
+
+This removes the final application's dependency on `libprism_usb_sdk.so`.
+OpenSSL and libusb remain transitive dependencies and are dynamically linked by
+default unless the consumer explicitly selects compatible static builds of
+those projects.
 
 ## Build the examples
 

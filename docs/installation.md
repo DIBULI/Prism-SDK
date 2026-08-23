@@ -2,10 +2,10 @@
 
 ## Supported binary targets
 
-| Host platform | Architecture | Minimum environment | Runtime |
+| Host platform | Architecture | Minimum environment | Libraries |
 | --- | --- | --- | --- |
-| Linux | x86-64 | Ubuntu 22.04 or later | `runtime/linux-x64/libprism_usb_sdk.so` |
-| Linux | arm64 | Ubuntu 22.04 or later | `runtime/linux-arm64/libprism_usb_sdk.so` |
+| Linux | x86-64 | Ubuntu 22.04 or later | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
+| Linux | arm64 | Ubuntu 22.04 or later | `runtime/linux-arm64/libprism_usb_sdk.so` / `.a` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
@@ -39,6 +39,18 @@ USB cable. Only one application may own the Prism USB interface at a time.
 For development, either place `libprism_usb_sdk.so` next to an executable with
 an `$ORIGIN` RPATH, or add its directory to the loader search path. The included
 CMake example uses the application-private library approach.
+
+To link the Prism SDK implementation statically, install `libusb-1.0-0-dev`
+and `libssl-dev`, then configure the included example or your consumer with:
+
+```bash
+cmake -S . -B build-static -DPRISM_SDK_USE_STATIC=ON
+cmake --build build-static --config Release
+```
+
+The resulting executable does not depend on `libprism_usb_sdk.so`. OpenSSL and
+libusb remain dynamically linked unless the consumer deliberately selects
+compatible static builds of those dependencies.
 
 ## macOS arm64
 

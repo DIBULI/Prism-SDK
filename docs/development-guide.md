@@ -1,7 +1,7 @@
 # Prism Host SDK 1.0.0 Developer Guide
 
 This guide is for application developers who receive only the public headers
-and prebuilt shared libraries. It describes every public feature in Prism Host
+and prebuilt shared libraries plus Linux static archives. It describes every public feature in Prism Host
 SDK `1.0.0`, including lifecycle rules, data units, timestamp semantics, and
 usage constraints. The device Agent must be `1.0.0` and the wire protocol must
 be `1`. The SDK performs strict version validation when it opens a device and
@@ -189,7 +189,7 @@ platform matrix.
 
 | Platform | Architecture | API model |
 | --- | --- | --- |
-| Ubuntu 22.04+ | x86-64 | Link `libprism_usb_sdk.so` directly and use the complete `Client` API |
+| Ubuntu 22.04+ | x86-64 or arm64 | Link `libprism_usb_sdk.so` or `libprism_usb_sdk.a` and use the complete `Client` API |
 | macOS 13+ | Apple Silicon arm64 | Link the SDK dylib, deploy the libusb dylib beside it, and use the complete `Client` API |
 | Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v5 |
 

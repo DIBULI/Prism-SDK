@@ -46,11 +46,11 @@ jobs:
       - name: Verify runner architecture
         run: test "$(uname -m)" = "x86_64"
 
-      - name: Install runtime dependencies
+      - name: Install build and runtime dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libusb-1.0-0 libssl3t64
+            libusb-1.0-0-dev libssl-dev
 
       - name: Build and test every supported example
         run: python3 scripts/test_all_examples.py --build-dir build
@@ -82,6 +82,21 @@ jobs:
           test "$status" -eq 1
           test "$output" = 'error: no Prism device found'
 
+      - name: Build and test static SDK examples
+        run: |
+          cmake -S . -B build-static \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS=-Werror \
+            -DPRISM_SDK_USE_STATIC=ON
+          cmake --build build-static --parallel --target prism-all-examples
+          ctest --test-dir build-static --output-on-failure
+          test ! -e build-static/examples/libprism_usb_sdk.so
+          if readelf -d build-static/examples/prism-device-info-time-sync \
+              | grep -Fq libprism_usb_sdk.so; then
+            echo "Static example still depends on libprism_usb_sdk.so" >&2
+            exit 1
+          fi
+
   linux-arm64:
     name: Ubuntu 24.04 arm64
     needs: integrity
@@ -96,11 +111,11 @@ jobs:
       - name: Verify runner architecture
         run: test "$(uname -m)" = "aarch64"
 
-      - name: Install runtime dependencies
+      - name: Install build and runtime dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libusb-1.0-0 libssl3t64
+            libusb-1.0-0-dev libssl-dev
 
       - name: Build and test every supported example
         run: python3 scripts/test_all_examples.py --build-dir build
@@ -131,6 +146,21 @@ jobs:
           printf '%s\n' "$output"
           test "$status" -eq 1
           test "$output" = 'error: no Prism device found'
+
+      - name: Build and test static SDK examples
+        run: |
+          cmake -S . -B build-static \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS=-Werror \
+            -DPRISM_SDK_USE_STATIC=ON
+          cmake --build build-static --parallel --target prism-all-examples
+          ctest --test-dir build-static --output-on-failure
+          test ! -e build-static/examples/libprism_usb_sdk.so
+          if readelf -d build-static/examples/prism-device-info-time-sync \
+              | grep -Fq libprism_usb_sdk.so; then
+            echo "Static example still depends on libprism_usb_sdk.so" >&2
+            exit 1
+          fi
 
   macos-arm64:
     name: macOS 15 arm64

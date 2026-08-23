@@ -23,6 +23,9 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 - ELF Build ID: `8a12174f44dfd416573f93495c66ba7ff293257b`
 - Maximum required symbol versions: GLIBC 2.34, GLIBCXX 3.4.29,
   OPENSSL 3.0.0
+- Static archive: `runtime/linux-x64/libprism_usb_sdk.a`
+- Static SHA-256:
+  `3291bc77409be3926850178b7851cff955284cd5d0d3f315840caffcceae5451`
 
 ## Linux arm64
 
@@ -33,6 +36,9 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 - ELF Build ID: `d7f464a2b567620e943f3f8bd1da91ab0e9137a8`
 - Runtime dependencies: OpenSSL 3 and libusb 1.0
 - ABI baseline: GLIBC 2.34 and GLIBCXX 3.4.29
+- Static archive: `runtime/linux-arm64/libprism_usb_sdk.a`
+- Static SHA-256:
+  `65d1c9d8307b15a956b5e7d47ea12b1cd872492d9db9773283696702857de4e2`
 
 ## ROS Adapter Linux prefixes
 
@@ -83,4 +89,6 @@ the included example.
 - Linux and macOS runtimes report SDK 1.0.0 and Runtime API v5.
 - Runtime API v5 is accepted; earlier API versions are rejected.
 - Public headers compile and link against the frozen Linux and macOS runtimes.
+- Linux x86-64 and arm64 static archives build all examples without a
+  `libprism_usb_sdk.so` dependency and pass the six-test Host SDK suite.
 - The Windows runtime completed its Host SDK test suite before publication.
