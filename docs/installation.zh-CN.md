@@ -71,7 +71,7 @@ libusb-1.0.0.dylib
 `prism_usb_sdk.dll` 放在应用程序旁。
 
 本仓库只发布 DLL，不发布 import library。Windows 应用应通过 `LoadLibraryW` 加载
-DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 4。仓库
+DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 5。仓库
 示例已经实现该流程，并固定使用与 DLL 兼容的 `/MD` runtime 和 release iterator ABI，
 即使用户选择 Debug 配置也是如此。
 

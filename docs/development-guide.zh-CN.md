@@ -31,7 +31,7 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 - [Stream 包装类](#api-stream-wrappers)
 - [Free helper 和 parser](#api-helpers-parsers)
 - [API 与头文件索引](#sdk-header-index)
-- [Windows Runtime API v4](#sdk-windows-runtime)
+- [Windows Runtime API v5](#sdk-windows-runtime)
 
 <a id="api-client-control"></a>
 ### Client 生命周期和基础控制
@@ -74,6 +74,8 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 | `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [持久化设备配置](#sdk-configuration) | [示例](interface-examples.zh-CN.md#example-device-configuration) |
 | `cameraExposure` | `auto exposure = client.cameraExposure();` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
 | `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
+| `cameraExposureLimits` | `auto limits = client.cameraExposureLimits();` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
+| `setCameraExposureLimits` | `limits = client.setCameraExposureLimits(limits, prism::kExposureLimitsFieldAll);` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
 | `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
 | `setCameraExposure` | `client.setCameraExposure(0, camera);` | [曝光和增益](#sdk-exposure) | [示例](interface-examples.zh-CN.md#example-exposure) |
 | `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU 采集](#sdk-camera-imu) | [示例](interface-examples.zh-CN.md#example-camera-imu-control) |
@@ -125,6 +127,7 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 | `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [系统升级](#sdk-system-upgrade) | [示例](interface-examples.zh-CN.md#example-system-upgrade) |
 | `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
 | `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
+| `parseExposureLimits` | `auto value = prism::parseExposureLimits(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
 | `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
 | `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
 | `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-parser-dispatch) |
@@ -138,8 +141,8 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 | `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-system-upgrade) |
 | `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-system-upgrade) |
 
-Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, ...)`；全部 43 个字段
-已在 [Windows Runtime API v4](#sdk-windows-runtime) 中按直接 API 分组映射。
+Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, ...)`；全部 45 个字段
+已在 [Windows Runtime API v5](#sdk-windows-runtime) 中按直接 API 分组映射。
 
 <a id="sdk-header-index"></a>
 ## API 索引
@@ -156,7 +159,7 @@ Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, 
 | `time_sync.hpp` | 时间测量与设置结果 |
 | `update.hpp` | 完整系统升级包、进度、状态与 parser |
 | `wifi.hpp` | Wi‑Fi AP 状态与 parser |
-| `runtime_api.hpp` | Windows Runtime API v4 |
+| `runtime_api.hpp` | Windows Runtime API v5 |
 
 可编译的完整示例：
 
@@ -167,9 +170,9 @@ Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, 
 - [配置、曝光、采集、网络与升级 API 目录](../examples/configuration_api_examples.cpp)；
 - [高级 Stream API 目录](../examples/stream_api_examples.cpp)；
 - [helper 与 parser API 目录](../examples/parser_api_examples.cpp)；
-- [Windows Runtime API v4 目录](../examples/windows_runtime_api_examples.cpp)。
+- [Windows Runtime API v5 目录](../examples/windows_runtime_api_examples.cpp)。
 
-每个公开 Client 操作、Stream 接口、parser 和 Runtime API v4 函数指针，都可以从上方
+每个公开 Client 操作、Stream 接口、parser 和 Runtime API v5 函数指针，都可以从上方
 快速目录跳转到对应示例和下方详细章节。8 个源文件按功能类别集中，避免为每个便利重载
 复制一个几乎相同的 executable；GitHub Actions 平台矩阵会编译全部源文件。
 
@@ -180,13 +183,13 @@ Windows Runtime API v4 对应函数指针的最小形式是 `api->field(client, 
 | --- | --- | --- |
 | Ubuntu 22.04+ | x86-64 | 直接链接 `libprism_usb_sdk.so`，使用完整 `Client` API |
 | macOS 13+ | Apple Silicon arm64 | 链接 SDK dylib，并随程序部署 libusb dylib，使用完整 `Client` API |
-| Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v4 调用 |
+| Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v5 调用 |
 
 Windows 发布包不包含 import library，不能直接链接 `Client` 成员函数。完整、安全的
 DLL 加载流程见
 [`examples/device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)。
 
-Windows Runtime API v4 暴露大部分常用控制、采集和解析功能，但不暴露以下接口：
+Windows Runtime API v5 暴露大部分常用控制、采集和解析功能，但不暴露以下接口：
 
 - `boardTime()`、`ping()`；
 - `synchronizeTimeNtpLike()`；
@@ -428,10 +431,9 @@ camera.gain_x1024 = 2048;  // 2.0x
 client.setCameraExposure(0, camera);
 ```
 
-固定范围：曝光最小 200 us；最大值为
-`floor(1000000 / fps) - 5000` us；gain 为 `1024..126976`（1x..124x），步进 32。
-采集会话用非零 FPS 覆盖持久值时，必须用当前运行 FPS 计算上限，不能继续用
-持久配置的 FPS。
+硬件范围为曝光 200..995000 us，gain 1024..126976（1x..124x），步进 32。
+当前运行时配置可以进一步缩小该范围；实际最高曝光时间始终不会超过
+`floor(1000000 / fps) - 5000` us。
 
 恢复单路自动模式：
 
@@ -453,8 +455,23 @@ all = client.setExposureConfiguration(all, prism::kExposureFieldAll);
 字段掩码支持 `kExposureFieldTargetBrightness`、Camera 0..3 单独 bit、
 `kExposureFieldCameraAll` 和 `kExposureFieldAll`。
 
-当前 1.0.0 API 没有用户可配置的“自动曝光最小/最大曝光、最小/最大 gain”字段；
-不要在应用中假定该能力存在。
+### 5.5 配置自动曝光和 gain 上下限
+
+```cpp
+prism::ExposureLimits limits = client.cameraExposureLimits();
+limits.min_exposure_time_us = 500;
+limits.max_exposure_time_us = 20000;
+limits.min_gain_x1024 = 1024;   // 1x
+limits.max_gain_x1024 = 8192;   // 8x
+limits = client.setCameraExposureLimits(
+    limits, prism::kExposureLimitsFieldAll);
+std::cout << "effective max exposure="
+          << limits.effective_max_exposure_time_us << " us\n";
+```
+
+四路相机共用这组运行时限制，设备重启后恢复默认。自动增亮时先增加曝光，达到
+实际曝光上限后才提高 gain；自动减亮时先降低 gain，再减少曝光。Agent 会把已有
+手动值钳制进新范围。如果新的 FPS 无法满足最低曝光时间，FPS 修改会被拒绝。
 
 <a id="sdk-time-sync"></a>
 ## 6. 时间测量与系统时间同步
@@ -988,7 +1005,7 @@ try {
 Client 断连后不要继续使用旧 Stream wrapper；销毁它们，重新枚举并建立新的 Client。
 
 <a id="sdk-windows-runtime"></a>
-## 16. Windows Runtime API v4
+## 16. Windows Runtime API v5
 
 运行时入口：
 
@@ -1001,7 +1018,7 @@ if (entry == nullptr) {
 }
 const prism::RuntimeApi* api = entry(prism::kRuntimeApiVersion);
 if (api == nullptr) {
-  throw std::runtime_error("Prism Runtime API v4 不受支持");
+  throw std::runtime_error("Prism Runtime API v5 不受支持");
 }
 ```
 
@@ -1049,6 +1066,7 @@ Runtime API 字段与直接 API 的对应关系：
 | `wifi_hotspot_status/set_wifi_hotspot_enabled` | Wi‑Fi AP |
 | `device_configuration/save_device_configuration` | 持久配置 |
 | `camera_exposure/set_exposure_configuration` | 运行时曝光 |
+| `camera_exposure_limits/set_camera_exposure_limits` | 自动曝光和 gain 上下限 |
 | `start_video/stop_video/start_imu/stop_imu/send_video_ack` | Camera/IMU |
 | `start_lidar/stop_lidar/lidar_status` | LiDAR 控制 |
 | `lidar_network_status/save_lidar_network_configuration/probe_lidar_network` | LiDAR 网络 |

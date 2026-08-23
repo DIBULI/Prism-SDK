@@ -92,6 +92,10 @@ class Client {
   ExposureConfiguration setCameraExposure(
       uint8_t camera_index,
       const CameraExposureConfiguration& exposure);
+  ExposureLimits cameraExposureLimits();
+  ExposureLimits setCameraExposureLimits(
+      const ExposureLimits& limits,
+      uint32_t field_mask = kExposureLimitsFieldAll);
 
   // Camera and IMU share one aggregate capture session. Video start enables
   // both paths; startImu confirms the IMU selection/rate for that session.

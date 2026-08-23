@@ -9,6 +9,8 @@ namespace prism {
 
 constexpr uint16_t kExposureProtocolVersion = 2;
 constexpr uint16_t kExposurePayloadSize = 44;
+constexpr uint16_t kExposureLimitsProtocolVersion = 2;
+constexpr uint16_t kExposureLimitsPayloadSize = 28;
 
 constexpr uint32_t kExposureFieldTargetBrightness = 1u << 0;
 constexpr uint32_t kExposureFieldCamera0 = 1u << 1;
@@ -20,6 +22,14 @@ constexpr uint32_t kExposureFieldCameraAll =
     kExposureFieldCamera2 | kExposureFieldCamera3;
 constexpr uint32_t kExposureFieldAll =
     kExposureFieldTargetBrightness | kExposureFieldCameraAll;
+
+constexpr uint32_t kExposureLimitsFieldMinExposure = 1u << 0;
+constexpr uint32_t kExposureLimitsFieldMaxExposure = 1u << 1;
+constexpr uint32_t kExposureLimitsFieldMinGain = 1u << 2;
+constexpr uint32_t kExposureLimitsFieldMaxGain = 1u << 3;
+constexpr uint32_t kExposureLimitsFieldAll =
+    kExposureLimitsFieldMinExposure | kExposureLimitsFieldMaxExposure |
+    kExposureLimitsFieldMinGain | kExposureLimitsFieldMaxGain;
 
 constexpr uint8_t kCameraAutomaticMaskAll = 0x0f;
 constexpr uint8_t kAutoExposureMinTargetBrightness = 1;
@@ -64,7 +74,20 @@ struct ExposureConfiguration {
       kCameraDefaultGainX1024, kCameraDefaultGainX1024};
 };
 
+// Runtime-only automatic-exposure limits shared by all cameras. The Agent
+// clamps max_exposure_time_us to the active FPS headroom before sending it to
+// the sensor board and reports that value separately as effective_max.
+struct ExposureLimits {
+  uint32_t min_exposure_time_us = kCameraMinExposureUs;
+  uint32_t max_exposure_time_us = kCameraMaxExposureUs;
+  uint32_t effective_max_exposure_time_us =
+      cameraMaxExposureUs(30u);
+  uint32_t min_gain_x1024 = kCameraMinGainX1024;
+  uint32_t max_gain_x1024 = kCameraMaxGainX1024;
+};
+
 // Strictly parses the current fixed-size runtime exposure response.
 ExposureConfiguration parseExposureConfiguration(const Frame& frame);
+ExposureLimits parseExposureLimits(const Frame& frame);
 
 }  // namespace prism

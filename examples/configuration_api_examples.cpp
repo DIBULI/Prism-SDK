@@ -32,6 +32,33 @@ prism::ExposureConfiguration readExposure(prism::Client& client) {
   return client.cameraExposure();
 }
 
+prism::ExposureLimits readExposureLimits(prism::Client& client) {
+  return client.cameraExposureLimits();
+}
+
+prism::ExposureLimits setAutomaticExposureLimits(
+    prism::Client& client, uint32_t min_exposure_time_us,
+    uint32_t max_exposure_time_us, uint32_t min_gain_x1024,
+    uint32_t max_gain_x1024) {
+  if (min_exposure_time_us < prism::kCameraMinExposureUs ||
+      min_exposure_time_us > max_exposure_time_us ||
+      max_exposure_time_us > prism::kCameraMaxExposureUs ||
+      min_gain_x1024 < prism::kCameraMinGainX1024 ||
+      min_gain_x1024 > max_gain_x1024 ||
+      max_gain_x1024 > prism::kCameraMaxGainX1024 ||
+      min_gain_x1024 % prism::kCameraGainStepX1024 != 0 ||
+      max_gain_x1024 % prism::kCameraGainStepX1024 != 0) {
+    throw std::invalid_argument("invalid automatic exposure limits");
+  }
+  prism::ExposureLimits limits = client.cameraExposureLimits();
+  limits.min_exposure_time_us = min_exposure_time_us;
+  limits.max_exposure_time_us = max_exposure_time_us;
+  limits.min_gain_x1024 = min_gain_x1024;
+  limits.max_gain_x1024 = max_gain_x1024;
+  return client.setCameraExposureLimits(
+      limits, prism::kExposureLimitsFieldAll);
+}
+
 prism::ExposureConfiguration setExposureConfiguration(
     prism::Client& client, const prism::ExposureConfiguration& configuration) {
   return client.setExposureConfiguration(configuration, prism::kExposureFieldAll);

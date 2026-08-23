@@ -34,7 +34,7 @@ catalogue:
 - [Configuration, acquisition, network, and update](../examples/configuration_api_examples.cpp)
 - [High-level stream wrappers](../examples/stream_api_examples.cpp)
 - [Helpers and all public parsers](../examples/parser_api_examples.cpp)
-- [All 43 Windows Runtime API v4 entries](../examples/windows_runtime_api_examples.cpp)
+- [All 45 Windows Runtime API v5 entries](../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions builds every applicable catalogue on each supported platform.
 
@@ -202,6 +202,7 @@ being overwritten.
 
 ```cpp
 prism::ExposureConfiguration exposure = client.cameraExposure();
+prism::ExposureLimits limits = client.cameraExposureLimits();
 const auto persistent = client.deviceConfiguration();
 const uint32_t max_exposure_us =
     prism::cameraMaxExposureUs(persistent.camera_fps);
@@ -216,10 +217,19 @@ client.setCameraExposure(0, camera0);
 
 exposure.target_brightness = 35;
 client.setExposureConfiguration(exposure, prism::kExposureFieldTargetBrightness);
+
+limits.min_exposure_time_us = 500;
+limits.max_exposure_time_us = 20000;
+limits.min_gain_x1024 = 1024;
+limits.max_gain_x1024 = 8192;
+limits = client.setCameraExposureLimits(
+    limits, prism::kExposureLimitsFieldAll);
 ```
 
 During capture, calculate the limit from the active `VideoStatus::fps` instead
-of the persistent FPS. Exposure settings are runtime-only and are not saved.
+of the persistent FPS. The returned `effective_max_exposure_time_us` is the
+configured maximum clamped to that FPS. Exposure settings and limits are
+runtime-only and are not saved.
 
 <a id="example-camera-imu-control"></a>
 ### Start and stop the aggregate Camera/IMU session
@@ -464,6 +474,9 @@ void parse_frame(const prism::Frame& frame) {
     case prism::FrameType::ExposureResponse:
       consume(prism::parseExposureConfiguration(frame));
       break;
+    case prism::FrameType::ExposureLimitsResponse:
+      consume(prism::parseExposureLimits(frame));
+      break;
     case prism::FrameType::WifiHotspotStatus:
       consume(prism::parseWifiHotspotStatus(frame));
       break;
@@ -511,15 +524,15 @@ Strict parsers throw if the frame type, protocol version, or payload size is
 wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 `VideoChunk` owns its byte vector.
 
-## Windows Runtime API v4
+## Windows Runtime API v5
 
 <a id="example-windows-runtime"></a>
-### Load the table and call all 43 function-pointer interfaces
+### Load the table and call all 45 function-pointer interfaces
 
 The complete buildable Windows loader is
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp). After it
 loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
-ABI v4/SDK 1.0.0/MSVC compatibility, and stores the result in `api`, the
+ABI v5/SDK 1.0.0/MSVC compatibility, and stores the result in `api`, the
 function-pointer calls have these direct forms:
 
 | Runtime API field | Corresponding example |
@@ -567,8 +580,10 @@ function-pointer calls have these direct forms:
 | `usb_link_speed_name` | `const char* name = api->usb_link_speed_name(speed);` |
 | `sensor_board_error_code_name` | `const char* name = api->sensor_board_error_code_name(code);` |
 | `parse_lidar_imu_sample` | `auto value = api->parse_lidar_imu_sample(frame);` |
+| `camera_exposure_limits` | `auto value = api->camera_exposure_limits(client);` |
+| `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 Check every function pointer for null before use. Keep the DLL loaded until all
-SDK-returned objects and the Client have been destroyed. Runtime API v4 is a
+SDK-returned objects and the Client have been destroyed. Runtime API v5 is a
 subset of the direct Linux/macOS API; interfaces absent from this table are not
 available through the packaged Windows DLL.

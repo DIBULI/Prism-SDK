@@ -8,7 +8,7 @@
 
 namespace prism {
 
-constexpr uint32_t kRuntimeApiVersion = 4;
+constexpr uint32_t kRuntimeApiVersion = 5;
 inline constexpr char kRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_runtime_api";
 
@@ -75,6 +75,9 @@ struct RuntimeApi {
   const char* (*usb_link_speed_name)(UsbLinkSpeed);
   const char* (*sensor_board_error_code_name)(SensorBoardErrorCode);
   LidarImuSample (*parse_lidar_imu_sample)(const Frame&);
+  ExposureLimits (*camera_exposure_limits)(Client*);
+  ExposureLimits (*set_camera_exposure_limits)(
+      Client*, const ExposureLimits&, uint32_t);
 };
 
 using GetRuntimeApiFunction = const RuntimeApi* (*)(uint32_t);

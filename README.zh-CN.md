@@ -33,7 +33,7 @@ Prism-SDK/
 ## 兼容要求
 
 - Host SDK：`1.0.0`
-- Runtime API：`4`
+- Runtime API：`5`
 - USB protocol：`1`
 - 设备 Agent：必须为 `1.0.0`
 - C++：C++17 或更新版本

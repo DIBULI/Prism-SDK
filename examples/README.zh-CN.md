@@ -50,7 +50,7 @@ SDK 程序。
 
 `--sync-time` 是管理操作。主机时钟必须正确，而且 Camera、IMU 和 LiDAR 流必须全部
 停止。在 Windows 上，本示例还演示如何加载 `prism_usb_sdk.dll`，验证 Runtime API
-v4 后再调用接口。
+v5 后再调用接口。
 
 ## `prism-camera-imu-capture`
 
@@ -126,7 +126,7 @@ v4 后再调用接口。
 | `prism-configuration-api-examples` | `configuration_api_examples.cpp` | Linux、macOS | 配置、曝光、采集、LiDAR 网络、底层命令和升级 |
 | `prism-stream-api-examples` | `stream_api_examples.cpp` | Linux、macOS | `ImuStream` 与两个 `LidarStream` 构造方式及生命周期 |
 | `prism-parser-api-examples` | `parser_api_examples.cpp` | Linux、macOS | 全部公共 helper 与帧解析器 |
-| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | Runtime API v4 的全部 43 个函数指针 |
+| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | Runtime API v5 的全部 45 个函数指针 |
 
 ### `prism-client-api-examples`
 
@@ -153,11 +153,11 @@ v4 后再调用接口。
 
 ### `prism-windows-runtime-api-examples`
 
-该 Windows 专用源码加载相邻 SDK DLL、验证 Runtime API v4、检查全部 43 个函数指针，
+该 Windows 专用源码加载相邻 SDK DLL、验证 Runtime API v5、检查全部 45 个函数指针，
 并为每个指针提供一个经编译检查的最小调用。运行时不需要设备，也不会修改设备。
 
 四个 Linux/macOS 目录程序默认只输出说明，不会操作设备。Windows 目录程序会加载发布
-DLL 并确认 43 个 Runtime API 入口全部存在，但不会打开或修改设备。CTest 会在编译后
+DLL 并确认 45 个 Runtime API 入口全部存在，但不会打开或修改设备。CTest 会在编译后
 运行这些目录程序。
 
 仓库现在共有 8 个 example 源文件：Linux/macOS 编译 7 个目标，Windows 编译 2 个

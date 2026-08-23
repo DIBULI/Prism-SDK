@@ -64,6 +64,8 @@ void validateAllFunctions(const prism::RuntimeApi& api) {
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, save_device_configuration);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, camera_exposure);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, set_exposure_configuration);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, camera_exposure_limits);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, set_camera_exposure_limits);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, start_video);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, stop_video);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, start_imu);
@@ -144,7 +146,7 @@ class RuntimeModule {
 };
 
 // This function is compile-checked but deliberately not executed by main().
-// It provides one minimal call for every RuntimeApi v4 function pointer.
+// It provides one minimal call for every RuntimeApi v5 function pointer.
 [[maybe_unused]] void everyRuntimeApiCall(
     const prism::RuntimeApi& api, prism::Client* client,
     const prism::DeviceInfo& selected_device, const prism::Frame& frame,
@@ -174,6 +176,9 @@ class RuntimeModule {
   const auto current_exposure = api.camera_exposure(client);
   const auto saved_exposure = api.set_exposure_configuration(
       client, exposure, prism::kExposureFieldAll);
+  const auto current_limits = api.camera_exposure_limits(client);
+  const auto saved_limits = api.set_camera_exposure_limits(
+      client, current_limits, prism::kExposureLimitsFieldAll);
   const auto video = api.start_video(client, 0);
   api.stop_video(client);
   const auto imu = api.start_imu(client, 2, 0);
@@ -219,6 +224,8 @@ class RuntimeModule {
   (void)saved_configuration;
   (void)current_exposure;
   (void)saved_exposure;
+  (void)current_limits;
+  (void)saved_limits;
   (void)video;
   (void)imu;
   (void)stopped_imu;
@@ -247,7 +254,7 @@ int main() {
   try {
     RuntimeModule module;
     validateAllFunctions(module.api());
-    std::cout << "Validated all 43 RuntimeApi v4 function pointers.\n";
+    std::cout << "Validated all 45 RuntimeApi v5 function pointers.\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "error: " << error.what() << '\n';

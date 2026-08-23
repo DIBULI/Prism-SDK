@@ -54,6 +54,8 @@ enum class FrameType : uint8_t {
   ConfigSet = 0x33,
   ExposureGet = 0x34,
   ExposureSet = 0x35,
+  ExposureLimitsGet = 0x36,
+  ExposureLimitsSet = 0x37,
   HelloResponse = 0x81,
   TimeResponse = 0x82,
   Pong = 0x83,
@@ -76,6 +78,7 @@ enum class FrameType : uint8_t {
   SensorBoardUpgradeStatus = 0xa1,
   ConfigResponse = 0xb2,
   ExposureResponse = 0xb3,
+  ExposureLimitsResponse = 0xb4,
   Error = 0xff,
 };
 

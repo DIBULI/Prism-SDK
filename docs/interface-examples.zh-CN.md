@@ -31,7 +31,7 @@ using namespace std::chrono_literals;
 - [配置、采集、网络与升级](../examples/configuration_api_examples.cpp)
 - [高级 Stream 封装](../examples/stream_api_examples.cpp)
 - [helper 与全部公共解析器](../examples/parser_api_examples.cpp)
-- [Windows Runtime API v4 全部 43 个入口](../examples/windows_runtime_api_examples.cpp)
+- [Windows Runtime API v5 全部 45 个入口](../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions 会在每个受支持平台上编译该平台适用的全部目录程序。
 
@@ -194,6 +194,7 @@ if (user_confirmed_persistent_write) {
 
 ```cpp
 prism::ExposureConfiguration exposure = client.cameraExposure();
+prism::ExposureLimits limits = client.cameraExposureLimits();
 const auto persistent = client.deviceConfiguration();
 const uint32_t max_exposure_us =
     prism::cameraMaxExposureUs(persistent.camera_fps);
@@ -208,10 +209,18 @@ client.setCameraExposure(0, camera0);
 
 exposure.target_brightness = 35;
 client.setExposureConfiguration(exposure, prism::kExposureFieldTargetBrightness);
+
+limits.min_exposure_time_us = 500;
+limits.max_exposure_time_us = 20000;
+limits.min_gain_x1024 = 1024;
+limits.max_gain_x1024 = 8192;
+limits = client.setCameraExposureLimits(
+    limits, prism::kExposureLimitsFieldAll);
 ```
 
-采集中应根据当前 `VideoStatus::fps` 计算上限，而不是使用持久 FPS。曝光设置只在运行时
-生效，不会持久保存。
+采集中应根据当前 `VideoStatus::fps` 计算上限，而不是使用持久 FPS。返回的
+`effective_max_exposure_time_us` 是配置上限按当前 FPS 钳制后的实际值。曝光设置和
+上下限只在运行时生效，不会持久保存。
 
 <a id="example-camera-imu-control"></a>
 ### 启动和停止 Camera/IMU 聚合会话
@@ -451,6 +460,9 @@ void parse_frame(const prism::Frame& frame) {
     case prism::FrameType::ExposureResponse:
       consume(prism::parseExposureConfiguration(frame));
       break;
+    case prism::FrameType::ExposureLimitsResponse:
+      consume(prism::parseExposureLimits(frame));
+      break;
     case prism::FrameType::WifiHotspotStatus:
       consume(prism::parseWifiHotspotStatus(frame));
       break;
@@ -497,14 +509,14 @@ void parse_frame(const prism::Frame& frame) {
 严格 parser 会在 frame type、协议版本或 payload 大小错误时抛异常。`VideoChunkView`
 只在源 `Frame` 存活时有效；`VideoChunk` 拥有自己的字节 vector。
 
-## Windows Runtime API v4
+## Windows Runtime API v5
 
 <a id="example-windows-runtime"></a>
-### 加载表并调用全部 43 个函数指针接口
+### 加载表并调用全部 45 个函数指针接口
 
 完整可编译的 Windows loader 位于
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)。程序加载
-`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v4、SDK
+`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v5、SDK
 1.0.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
 
 | Runtime API 字段 | 对应例子 |
@@ -552,7 +564,9 @@ void parse_frame(const prism::Frame& frame) {
 | `usb_link_speed_name` | `const char* name = api->usb_link_speed_name(speed);` |
 | `sensor_board_error_code_name` | `const char* name = api->sensor_board_error_code_name(code);` |
 | `parse_lidar_imu_sample` | `auto value = api->parse_lidar_imu_sample(frame);` |
+| `camera_exposure_limits` | `auto value = api->camera_exposure_limits(client);` |
+| `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 使用前必须检查每个函数指针非空。直到所有 SDK 返回对象和 Client 都销毁后才能卸载 DLL。
-Runtime API v4 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
+Runtime API v5 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
 调用。

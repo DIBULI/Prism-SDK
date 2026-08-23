@@ -8,7 +8,7 @@ streaming, parsing, update, and Windows Runtime API entry, see the
 
 The direct `prism::Client` API shown in this section is linkable with the Linux
 and macOS runtimes. The Windows package intentionally has no import library;
-Windows applications must use Runtime API v4 as shown in
+Windows applications must use Runtime API v5 as shown in
 `examples/device_info_time_sync.cpp`.
 
 Include the umbrella header:
@@ -58,7 +58,7 @@ const auto measurement = client.synchronizeTimeNtpLike();
 ```
 
 This measurement is also idle-only: Camera, onboard IMU, and LiDAR transfers
-must all be stopped. Runtime API v4 does not expose this measurement-only call
+must all be stopped. Runtime API v5 does not expose this measurement-only call
 to Windows consumers.
 
 `synchronizeSystemTime()` makes the host wall clock authoritative for the

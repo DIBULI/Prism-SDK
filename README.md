@@ -34,7 +34,7 @@ Prism-SDK/
 ## Compatibility
 
 - Host SDK: `1.0.0`
-- Runtime API: `4`
+- Runtime API: `5`
 - USB protocol: `1`
 - Device Agent: exactly `1.0.0`
 - Language: C++17 or later

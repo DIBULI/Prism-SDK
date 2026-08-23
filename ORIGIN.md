@@ -8,10 +8,10 @@ No SDK implementation source code is included.
 - Host SDK: 1.0.0
 - Device Agent: 1.0.0
 - USB protocol: 1
-- Runtime API: 4
+- Runtime API: 5
 - Public headers: 12 C++17 headers under `include/prism/`
 
-The published headers and all three dynamic libraries have been verified as one
+The published headers and all four platform dynamic libraries have been verified as one
 compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 
 ## Linux x86-64
@@ -19,8 +19,8 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 - Environment: Ubuntu 22.04, GCC 11.4, Release
 - Runtime: `runtime/linux-x64/libprism_usb_sdk.so`
 - SHA-256:
-  `d2558c446378268f4a46b43a305ee9128a9cf018c72d1a8f8b4334ec2171fed0`
-- ELF Build ID: `fae7e625cd5d26f6f92c2e95c25268be7fb7f79a`
+  `73c8278aca4a50057d2fc0f897ac465a402bcbae2426a8f4c5b9eaa0ee5b2516`
+- ELF Build ID: `8a12174f44dfd416573f93495c66ba7ff293257b`
 - Maximum required symbol versions: GLIBC 2.34, GLIBCXX 3.4.29,
   OPENSSL 3.0.0
 
@@ -29,8 +29,8 @@ compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 - Environment: Ubuntu 22.04 cross toolchain, GCC 11.4, Release
 - Runtime: `runtime/linux-arm64/libprism_usb_sdk.so`
 - SHA-256:
-  `c95bc2af28668294e58cf3aa620ecdde9fc30ea4e69b94a555f6123f1091da4b`
-- ELF Build ID: `790d85a0965385eb98b77397f666479a3c7d4c61`
+  `0c76621dcaa0a049b16db2c6790be8d766b312911fc8797cf300d441c60287e9`
+- ELF Build ID: `d7f464a2b567620e943f3f8bd1da91ab0e9137a8`
 - Runtime dependencies: OpenSSL 3 and libusb 1.0
 - ABI baseline: GLIBC 2.34 and GLIBCXX 3.4.29
 
@@ -43,10 +43,10 @@ its Ubuntu base image; libraries from different rows must not be interchanged.
 
 | Prefix | Build environment | Runtime SHA-256 |
 | --- | --- | --- |
-| `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `debe2a3a7416edcb2c9ceebd8bfb3a06ea3eea0eb57ceb544ac1fea14a375b27` |
-| `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `d2558c446378268f4a46b43a305ee9128a9cf018c72d1a8f8b4334ec2171fed0` |
-| `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `aed16bf46556477e1285a13ad56438be4f65bf280175d375c179349ea682a7d1` |
-| `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `fb60b3cde585b37944df0c0df9b301a6cf2c89ecc45973321092eb856821d840` |
+| `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `03710c82755b6b2cdb924c425e85036f3a1cc751b841bd0680c9446a1e7888c1` |
+| `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `73c8278aca4a50057d2fc0f897ac465a402bcbae2426a8f4c5b9eaa0ee5b2516` |
+| `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `a58f369676f6b58d615d09ab3e9ebbac2c5c4f398dfd6dcc66a87a44f2f56f4f` |
+| `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `518976542e7862c2cce540e7d5692d174c87021a18b32ef04b8c7a9e847619d1` |
 
 Each prefix was built from the same SDK 1.0.0 interface and passed the complete
 six-test Host SDK suite in its target container.
@@ -57,7 +57,7 @@ six-test Host SDK suite in its target container.
 - Minimum deployment target: macOS 13.0
 - Runtime: `runtime/macos-arm64/libprism_usb_sdk.dylib`
 - Runtime SHA-256:
-  `9317a80bf597933039c5fb7030448b65f1085e611cbc1b2482cc05de675c416c`
+  `03db8a8ff801f2623046818e2703b817308c4a8276b32dbcabbb1fb1664d93a4`
 - Bundled dependency: `runtime/macos-arm64/libusb-1.0.0.dylib`
 - libusb SHA-256:
   `6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01`
@@ -71,16 +71,16 @@ license text is included beside the dylib.
 - Environment: Windows Server 2022, MSVC x64, Release
 - Runtime: `runtime/windows-x64/prism_usb_sdk.dll`
 - SHA-256:
-  `abe12bb66b63102237b691466a680aa45ecaa0442e68a55cc65a0057b6e1a87d`
+  `952681071ea9f8e17162927dbc12b06e4884b0a9636417e35c506a41ec05a8eb`
 - Linker toolchain: MSVC 14.44
 
 The Windows package intentionally contains only the dynamic library. Consumers
-load Runtime API v4 with `LoadLibraryW` and `GetProcAddress`, as demonstrated by
+load Runtime API v5 with `LoadLibraryW` and `GetProcAddress`, as demonstrated by
 the included example.
 
 ## Release verification
 
-- Linux and macOS runtimes report SDK 1.0.0 and Runtime API v4.
-- Runtime API v4 is accepted; earlier API versions are rejected.
+- Linux and macOS runtimes report SDK 1.0.0 and Runtime API v5.
+- Runtime API v5 is accepted; earlier API versions are rejected.
 - Public headers compile and link against the frozen Linux and macOS runtimes.
 - The Windows runtime completed its Host SDK test suite before publication.

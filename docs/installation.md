@@ -77,7 +77,7 @@ Place `prism_usb_sdk.dll` beside the executable.
 
 This package intentionally ships only the DLL, not an import library. Windows
 applications should load `prism_usb_sdk.dll` with `LoadLibraryW`, resolve
-`prism_usb_sdk_get_runtime_api`, and validate Runtime API version 4 before use.
+`prism_usb_sdk_get_runtime_api`, and validate Runtime API version 5 before use.
 The included example implements this pattern and always uses the DLL-compatible
 `/MD` runtime and release iterator ABI, including when a Debug configuration is
 selected.

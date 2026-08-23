@@ -33,6 +33,11 @@ void parseFrame(const prism::Frame& frame) {
       (void)value;
       break;
     }
+    case prism::FrameType::ExposureLimitsResponse: {
+      const prism::ExposureLimits value = prism::parseExposureLimits(frame);
+      (void)value;
+      break;
+    }
     case prism::FrameType::WifiHotspotStatus: {
       const prism::WifiHotspotStatus value = prism::parseWifiHotspotStatus(frame);
       (void)value;

@@ -35,7 +35,7 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 - [Stream wrappers](#api-stream-wrappers)
 - [Free helpers and parsers](#api-helpers-parsers)
 - [API and header index](#sdk-header-index)
-- [Windows Runtime API v4](#sdk-windows-runtime)
+- [Windows Runtime API v5](#sdk-windows-runtime)
 
 <a id="api-client-control"></a>
 ### Client lifecycle and base control
@@ -78,6 +78,8 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 | `saveDeviceConfiguration` | `cfg = client.saveDeviceConfiguration(cfg, prism::kDeviceConfigFieldCameraFps);` | [Persistent device configuration](#sdk-configuration) | [Example](interface-examples.md#example-device-configuration) |
 | `cameraExposure` | `auto exposure = client.cameraExposure();` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
 | `setExposureConfiguration` | `exposure = client.setExposureConfiguration(exposure, prism::kExposureFieldAll);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `cameraExposureLimits` | `auto limits = client.cameraExposureLimits();` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
+| `setCameraExposureLimits` | `limits = client.setCameraExposureLimits(limits, prism::kExposureLimitsFieldAll);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
 | `setAutoExposureTargetBrightness` | `client.setAutoExposureTargetBrightness(35);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
 | `setCameraExposure` | `client.setCameraExposure(0, camera);` | [Exposure and gain](#sdk-exposure) | [Example](interface-examples.md#example-exposure) |
 | `startVideo1280x1024` | `auto video = client.startVideo1280x1024(0);` | [Camera/IMU acquisition](#sdk-camera-imu) | [Example](interface-examples.md#example-camera-imu-control) |
@@ -129,6 +131,7 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 | `inspectSystemUpgradePackage` | `auto package = prism::inspectSystemUpgradePackage(package_path);` | [System upgrade](#sdk-system-upgrade) | [Example](interface-examples.md#example-system-upgrade) |
 | `parseDeviceInfo` | `auto value = prism::parseDeviceInfo(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
 | `parseExposureConfiguration` | `auto value = prism::parseExposureConfiguration(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
+| `parseExposureLimits` | `auto value = prism::parseExposureLimits(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
 | `parseWifiHotspotStatus` | `auto value = prism::parseWifiHotspotStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
 | `parseHeartbeat` | `auto value = prism::parseHeartbeat(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
 | `parseVideoChunkView` | `auto view = prism::parseVideoChunkView(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-parser-dispatch) |
@@ -142,9 +145,9 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 | `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
 | `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
 
-For Windows Runtime API v4, each minimal call has the form `api->field(client, ...)`.
-All 43 function-pointer fields are grouped by their direct-API equivalent in
-[Windows Runtime API v4](#sdk-windows-runtime).
+For Windows Runtime API v5, each minimal call has the form `api->field(client, ...)`.
+All 45 function-pointer fields are grouped by their direct-API equivalent in
+[Windows Runtime API v5](#sdk-windows-runtime).
 
 <a id="sdk-header-index"></a>
 ## API index
@@ -161,7 +164,7 @@ All 43 function-pointer fields are grouped by their direct-API equivalent in
 | `time_sync.hpp` | Time-measurement and time-setting results |
 | `update.hpp` | Complete system package, progress, status, and parsers |
 | `wifi.hpp` | Wi-Fi AP status and parser |
-| `runtime_api.hpp` | Windows Runtime API v4 |
+| `runtime_api.hpp` | Windows Runtime API v5 |
 
 Complete buildable examples:
 
@@ -172,9 +175,9 @@ Complete buildable examples:
 - [configuration, exposure, acquisition, network, and update API catalogue](../examples/configuration_api_examples.cpp);
 - [high-level Stream API catalogue](../examples/stream_api_examples.cpp);
 - [helper and parser API catalogue](../examples/parser_api_examples.cpp);
-- [Windows Runtime API v4 catalogue](../examples/windows_runtime_api_examples.cpp).
+- [Windows Runtime API v5 catalogue](../examples/windows_runtime_api_examples.cpp).
 
-Every public Client operation, Stream interface, parser, and Runtime API v4
+Every public Client operation, Stream interface, parser, and Runtime API v5
 function pointer is linked from the quick directory above to a corresponding
 example and to its detailed chapter below. The eight source files are grouped
 by feature rather than duplicating a nearly identical executable for every
@@ -188,14 +191,14 @@ platform matrix.
 | --- | --- | --- |
 | Ubuntu 22.04+ | x86-64 | Link `libprism_usb_sdk.so` directly and use the complete `Client` API |
 | macOS 13+ | Apple Silicon arm64 | Link the SDK dylib, deploy the libusb dylib beside it, and use the complete `Client` API |
-| Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v4 |
+| Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v5 |
 
 The Windows package does not include an import library, so applications cannot
 link directly to `Client` member functions. See
 [`examples/device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)
 for a complete and safe DLL-loading flow.
 
-Windows Runtime API v4 exposes most common control, acquisition, and parsing
+Windows Runtime API v5 exposes most common control, acquisition, and parsing
 features, but it does not expose:
 
 - `boardTime()` or `ping()`;
@@ -459,10 +462,10 @@ camera.gain_x1024 = 2048;  // 2.0x
 client.setCameraExposure(0, camera);
 ```
 
-The fixed limits are a minimum exposure of 200 us and a maximum of
-`floor(1000000 / fps) - 5000` us. Gain is `1024..126976` (1x..124x) in steps
-of 32. If a nonzero FPS overrides the persistent value for the active session,
-calculate this limit from the current runtime FPS, not the saved FPS.
+The hardware ranges are 200..995000 us and gain 1024..126976 (1x..124x) in
+steps of 32. The current configured limits can further narrow those ranges,
+and the effective maximum exposure never exceeds
+`floor(1000000 / fps) - 5000` us.
 
 Return one camera to automatic mode:
 
@@ -484,9 +487,25 @@ all = client.setExposureConfiguration(all, prism::kExposureFieldAll);
 Field masks include `kExposureFieldTargetBrightness`, individual Camera 0..3
 bits, `kExposureFieldCameraAll`, and `kExposureFieldAll`.
 
-The current 1.0.0 API does not expose user-configurable automatic-exposure
-minimum/maximum exposure or minimum/maximum gain fields. Do not assume that
-capability exists in an application.
+### 5.5 Configure automatic exposure and gain limits
+
+```cpp
+prism::ExposureLimits limits = client.cameraExposureLimits();
+limits.min_exposure_time_us = 500;
+limits.max_exposure_time_us = 20000;
+limits.min_gain_x1024 = 1024;   // 1x
+limits.max_gain_x1024 = 8192;   // 8x
+limits = client.setCameraExposureLimits(
+    limits, prism::kExposureLimitsFieldAll);
+std::cout << "effective max exposure="
+          << limits.effective_max_exposure_time_us << " us\n";
+```
+
+These limits are shared by all four cameras and are runtime-only. Automatic
+control raises exposure first, then gain after reaching the effective exposure
+maximum. When reducing brightness it lowers gain first, then exposure. The
+Agent clamps existing manual values into the new range. An FPS change is
+rejected when its frame-period limit is below the configured minimum exposure.
 
 <a id="sdk-time-sync"></a>
 ## 6. Time measurement and system-time synchronization
@@ -1075,7 +1094,7 @@ Do not continue using old stream wrappers after a `Client` disconnect. Destroy
 them, enumerate again, and create a new `Client`.
 
 <a id="sdk-windows-runtime"></a>
-## 16. Windows Runtime API v4
+## 16. Windows Runtime API v5
 
 Resolve the runtime entry point:
 
@@ -1088,7 +1107,7 @@ if (entry == nullptr) {
 }
 const prism::RuntimeApi* api = entry(prism::kRuntimeApiVersion);
 if (api == nullptr) {
-  throw std::runtime_error("Prism Runtime API v4 is unavailable");
+  throw std::runtime_error("Prism Runtime API v5 is unavailable");
 }
 ```
 
@@ -1136,6 +1155,7 @@ Runtime API fields map to the direct API as follows:
 | `wifi_hotspot_status/set_wifi_hotspot_enabled` | Wi-Fi AP |
 | `device_configuration/save_device_configuration` | Persistent configuration |
 | `camera_exposure/set_exposure_configuration` | Runtime exposure |
+| `camera_exposure_limits/set_camera_exposure_limits` | Automatic exposure and gain limits |
 | `start_video/stop_video/start_imu/stop_imu/send_video_ack` | Camera/IMU |
 | `start_lidar/stop_lidar/lidar_status` | LiDAR control |
 | `lidar_network_status/save_lidar_network_configuration/probe_lidar_network` | LiDAR network |
