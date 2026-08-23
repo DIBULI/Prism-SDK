@@ -92,8 +92,37 @@ if(APPLE AND NOT EXISTS "${_prism_libusb_runtime}")
   message(FATAL_ERROR "Missing packaged libusb runtime: ${_prism_libusb_runtime}")
 endif()
 
+# All examples share one output directory.  Copying the same runtime from
+# several POST_BUILD commands races under a parallel build, so stage it once
+# through a shared dependency instead.
+set(_prism_runtime_stage_commands)
+if(CMAKE_CONFIGURATION_TYPES)
+  set(_prism_runtime_stage_dir "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+else()
+  set(_prism_runtime_stage_dir "${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+if(WIN32 OR APPLE OR (UNIX AND NOT PRISM_SDK_USE_STATIC))
+  list(APPEND _prism_runtime_stage_commands
+    COMMAND "${CMAKE_COMMAND}" -E make_directory
+      "${_prism_runtime_stage_dir}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${_prism_sdk_runtime}"
+      "${_prism_runtime_stage_dir}")
+endif()
+if(APPLE)
+  list(APPEND _prism_runtime_stage_commands
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${_prism_libusb_runtime}"
+      "${_prism_runtime_stage_dir}")
+endif()
+add_custom_target(prism-stage-runtime
+  ${_prism_runtime_stage_commands}
+  COMMENT "Staging the Prism SDK runtime"
+  VERBATIM)
+
 function(prism_add_example target source)
   add_executable(${target} "${source}")
+  add_dependencies(${target} prism-stage-runtime)
   target_compile_features(${target} PRIVATE cxx_std_17)
   target_include_directories(${target} PRIVATE "${_prism_sdk_include}")
 
@@ -109,35 +138,17 @@ function(prism_add_example target source)
       _ITERATOR_DEBUG_LEVEL=0)
     set_target_properties(${target} PROPERTIES
       MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-    add_custom_command(TARGET ${target} POST_BUILD
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${_prism_sdk_runtime}"
-        "$<TARGET_FILE_DIR:${target}>"
-      VERBATIM)
   elseif(APPLE)
     target_link_libraries(${target} PRIVATE PrismUsbSdkRuntime)
     set_target_properties(${target} PROPERTIES
       BUILD_WITH_INSTALL_RPATH TRUE
       INSTALL_RPATH "@executable_path")
-    add_custom_command(TARGET ${target} POST_BUILD
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${_prism_sdk_runtime}"
-        "$<TARGET_FILE_DIR:${target}>"
-      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${_prism_libusb_runtime}"
-        "$<TARGET_FILE_DIR:${target}>"
-      VERBATIM)
   else()
     target_link_libraries(${target} PRIVATE PrismUsbSdkRuntime)
     if(NOT PRISM_SDK_USE_STATIC)
       set_target_properties(${target} PROPERTIES
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "$ORIGIN")
-      add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-          "${_prism_sdk_runtime}"
-          "$<TARGET_FILE_DIR:${target}>"
-        VERBATIM)
     endif()
   endif()
 endfunction()
@@ -228,6 +239,8 @@ add_custom_target(prism-all-examples
 unset(_prism_sdk_include)
 unset(_prism_sdk_runtime)
 unset(_prism_libusb_runtime)
+unset(_prism_runtime_stage_commands)
+unset(_prism_runtime_stage_dir)
 unset(_prism_cross_platform_example_sources)
 unset(_prism_direct_api_example_sources)
 unset(_prism_windows_runtime_example_sources)

@@ -462,7 +462,7 @@ camera.gain_x1024 = 2048;  // 2.0x
 client.setCameraExposure(0, camera);
 ```
 
-The hardware ranges are 200..995000 us and gain 1024..126976 (1x..124x) in
+The hardware ranges are 50..995000 us and gain 1024..126976 (1x..124x) in
 steps of 32. The current configured limits can further narrow those ranges,
 and the effective maximum exposure never exceeds
 `floor(1000000 / fps) - 5000` us.
