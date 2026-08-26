@@ -359,7 +359,7 @@ std::cout << config.camera_fps << ' '
 支持范围：
 
 - Camera FPS：任意整数 `1..30`；可先调用 `isCameraFpsSupported(fps)`；
-- IMU rate：`500` 或 `1000` Hz；
+- IMU rate：`800` Hz（ICM45686 固定输出频率）；
 - MJPEG quality：`1..99`，默认 `88`。
 
 局部保存并回读：

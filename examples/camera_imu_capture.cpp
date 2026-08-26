@@ -66,7 +66,7 @@ Options parseOptions(int argc, char** argv) {
     } else if (argument == "--help" || argument == "-h") {
       std::cout
           << "usage: " << argv[0]
-          << " [--seconds 1..3600] [--fps 0..30] [--imu-rate 0|500|1000]\n"
+          << " [--seconds 1..3600] [--fps 0..30] [--imu-rate 0|800]\n"
           << "       " << argv[0] << " --self-test\n"
           << "  zero fps/rate uses the persistent device configuration\n";
       std::exit(0);
@@ -83,9 +83,9 @@ Options parseOptions(int argc, char** argv) {
       !prism::isCameraFpsSupported(options.camera_fps)) {
     throw std::invalid_argument("--fps must be zero or in the range 1..30");
   }
-  if (options.imu_rate_hz != 0 && options.imu_rate_hz != 500 &&
-      options.imu_rate_hz != 1000) {
-    throw std::invalid_argument("--imu-rate must be 0, 500, or 1000");
+  if (options.imu_rate_hz != 0 &&
+      options.imu_rate_hz != prism::kOnboardImuRateHz) {
+    throw std::invalid_argument("--imu-rate must be 0 or 800");
   }
   return options;
 }

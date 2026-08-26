@@ -74,15 +74,15 @@ Use the persistent Camera FPS and IMU rate for ten seconds:
 ./build/examples/prism-camera-imu-capture
 ```
 
-Temporarily request 20 FPS and 500 Hz for thirty seconds:
+Temporarily request 20 FPS and the ICM45686 800 Hz rate for thirty seconds:
 
 ```bash
 ./build/examples/prism-camera-imu-capture \
-  --seconds 30 --fps 20 --imu-rate 500
+  --seconds 30 --fps 20 --imu-rate 800
 ```
 
 `--fps 0` and `--imu-rate 0` select the persistent device values. Camera FPS
-may be any integer from 1 through 30; IMU rate may be 500 or 1000 Hz. These
+may be any integer from 1 through 30; the IMU rate is fixed at 800 Hz. These
 start parameters are not saved as persistent configuration.
 
 The example uses `parseVideoChunkView()` only while its source `Frame` is

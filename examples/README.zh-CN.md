@@ -68,15 +68,15 @@ v5 后再调用接口。
 ./build/examples/prism-camera-imu-capture
 ```
 
-临时使用 20 FPS 和 500 Hz 采集 30 秒：
+临时使用 20 FPS 和 ICM45686 的 800 Hz 频率采集 30 秒：
 
 ```bash
 ./build/examples/prism-camera-imu-capture \
-  --seconds 30 --fps 20 --imu-rate 500
+  --seconds 30 --fps 20 --imu-rate 800
 ```
 
 `--fps 0` 和 `--imu-rate 0` 表示使用设备持久配置。Camera FPS 可为 1 至 30 的任意
-整数，IMU 频率可为 500 或 1000 Hz；这些启动参数不会写入持久配置。
+整数，IMU 频率固定为 800 Hz；这些启动参数不会写入持久配置。
 
 示例仅在源 `Frame` 仍然存活时使用 `parseVideoChunkView()`。如果需要跨线程传递或在
 下一次接收循环中继续使用 JPEG，必须先复制数据。

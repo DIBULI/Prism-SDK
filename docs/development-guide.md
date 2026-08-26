@@ -385,7 +385,7 @@ Supported ranges:
 
 - Camera FPS: any integer from `1` through `30`; call
   `isCameraFpsSupported(fps)` when validating user input;
-- IMU rate: `500` or `1000` Hz;
+- IMU rate: `800` Hz (the fixed ICM45686 output rate);
 - MJPEG quality: `1..99`, default `88`.
 
 Save selected fields and read back the applied configuration:
