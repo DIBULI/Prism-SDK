@@ -64,7 +64,7 @@ six-test Host SDK suite in its target container.
 - Minimum deployment target: macOS 13.0
 - Runtime: `runtime/macos-arm64/libprism_usb_sdk.dylib`
 - Runtime SHA-256:
-  `615396aa3ea5f11e8bec8da6df7185d2e681e7e3b6b31a2a45622f15ad7e0551`
+  `9f215299b523324de2549ac6d4690441299e3b006831284625f3b4de05a5ff84`
 - Bundled dependency: `runtime/macos-arm64/libusb-1.0.0.dylib`
 - libusb SHA-256:
   `6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01`
