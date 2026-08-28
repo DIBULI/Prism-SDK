@@ -15,31 +15,37 @@ No SDK implementation source code is included.
 The published headers and all four platform dynamic libraries have been verified as one
 compatible 1.0.0 ABI set. Do not mix them with another SDK release.
 
+The runtimes were rebuilt from `DIBULI/Prism-agent` commit
+`cc443541bfe71722ce6d49480761a52121c32146`. They retain the fixed 800 Hz
+ICM45686 reporting and accept the Agent's `50..995000 us` exposure limits.
+Linux builds and tests are recorded in Actions run `33150407098`; the Windows
+build and tests are recorded in Actions run `33150407054`.
+
 ## Linux x86-64
 
 - Environment: Ubuntu 22.04, GCC 11.4, Release
 - Runtime: `runtime/linux-x64/libprism_usb_sdk.so`
 - SHA-256:
-  `0eefa16ad23324c5a6bd3ba8263906e01ca6f1971ae59c96ec9f99ba6e99d244`
-- ELF Build ID: `32489ce23e10d4be824c090657a772fb649a3cb5`
+  `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28`
+- ELF Build ID: `a7981f3b8d6a9bfda76b07516e9c88d982631728`
 - Maximum required symbol versions: GLIBC 2.34, GLIBCXX 3.4.29,
   OPENSSL 3.0.0
 - Static archive: `runtime/linux-x64/libprism_usb_sdk.a`
 - Static SHA-256:
-  `cfbb8c7ab1b1923cc60de24c10a5d13845c15949187c1610d0068a25d34fa669`
+  `cc53bbd78e4481aabad83282023770b7ed7cf8bf5e6d98033130154c3cb41dfe`
 
 ## Linux arm64
 
 - Environment: Ubuntu 22.04 cross toolchain, GCC 11.4, Release
 - Runtime: `runtime/linux-arm64/libprism_usb_sdk.so`
 - SHA-256:
-  `39e3c02db743af8193f5782fe5eb14aa1726675505a82b33c3af060e359ac841`
-- ELF Build ID: `ddbf6927dfd345653974db6c40f3d4d9d2e56e2f`
+  `86c702bdb40a307df590da6d4c5ed720923d75feb9d5a771b70514577e4d8e5a`
+- ELF Build ID: `4b259fb06cf960c68c673000ba1f671c0747ba63`
 - Runtime dependencies: OpenSSL 3 and libusb 1.0
 - ABI baseline: GLIBC 2.34 and GLIBCXX 3.4.29
 - Static archive: `runtime/linux-arm64/libprism_usb_sdk.a`
 - Static SHA-256:
-  `b6763de2c6c164e9b0e3f76f4ec6cdcc086d8d2a62aacfe3a74d6d3d60a893f9`
+  `45dde324e5bff5285de24944741ae67b425a4b8d6f50a788200a78c0655086a8`
 
 ## ROS Adapter Linux prefixes
 
@@ -50,10 +56,10 @@ its Ubuntu base image; libraries from different rows must not be interchanged.
 
 | Prefix | Build environment | Runtime SHA-256 |
 | --- | --- | --- |
-| `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `f1d2174b3917d02b6b52ad581efd0d5ab9e2a27b5957779471e6b19f7051eefb` |
-| `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `0eefa16ad23324c5a6bd3ba8263906e01ca6f1971ae59c96ec9f99ba6e99d244` |
-| `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `a813bceb42f297569bbf4b043aa2b9b9430a34db32b91954bccd23f83b5c3e3a` |
-| `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `8a6dcaa2cfa5c20155d83a83524b1768505a5adc77d981f4334c8cc3015803e5` |
+| `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `917665c9e8204e3c117ab6e60ecdfff263f36e46ecd12d89b406f4f8cffe548f` |
+| `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28` |
+| `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `bc09e37a26f23ee4ec69a0dd3dbcc103f731c94966691ed0b051422e1ae05cba` |
+| `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `ec4a321203b630af3781cd01b0ac9f5eceb2668ce9573dc36d7671433087dc4d` |
 
 Each prefix was built from the same SDK 1.0.0 interface and passed the complete
 six-test Host SDK suite in its target container.
@@ -64,7 +70,7 @@ six-test Host SDK suite in its target container.
 - Minimum deployment target: macOS 13.0
 - Runtime: `runtime/macos-arm64/libprism_usb_sdk.dylib`
 - Runtime SHA-256:
-  `9f215299b523324de2549ac6d4690441299e3b006831284625f3b4de05a5ff84`
+  `070f33890c47d54189a0ac13726ed9ff4dceff798ea93090995950853ecd7de5`
 - Bundled dependency: `runtime/macos-arm64/libusb-1.0.0.dylib`
 - libusb SHA-256:
   `6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01`
@@ -78,7 +84,7 @@ license text is included beside the dylib.
 - Environment: Windows Server 2022, MSVC x64, Release
 - Runtime: `runtime/windows-x64/prism_usb_sdk.dll`
 - SHA-256:
-  `6ee2def2aaf702147303e1d4d2b20ba4ef0a0531951e4585fe4aa73c52268bf9`
+  `5992b255f93c1cbef52bf227fc354ee6fe1f7621225fbc6d5d88a4981e3b8cb1`
 - Linker toolchain: MSVC 14.44
 
 The Windows package intentionally contains only the dynamic library. Consumers
@@ -93,3 +99,6 @@ the included example.
 - Linux x86-64 and arm64 static archives build all examples without a
   `libprism_usb_sdk.so` dependency and pass the six-test Host SDK suite.
 - The Windows runtime completed its Host SDK test suite before publication.
+- Every published runtime is rejected by package verification unless it
+  contains the `50..995000 us` exposure validator and excludes the obsolete
+  `200..995000 us` validator.

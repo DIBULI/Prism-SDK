@@ -15,6 +15,8 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURATION = "Release"
+EXPECTED_EXPOSURE_LIMIT = b"camera exposure time must be 50..995000 us"
+OBSOLETE_EXPOSURE_LIMIT = b"camera exposure time must be 200..995000 us"
 
 
 def run(command: list[str]) -> None:
@@ -46,6 +48,23 @@ def verify_package() -> None:
     if checked == 0:
         raise RuntimeError("SHA256SUMS is empty")
     print(f"Verified {checked} published files.")
+
+    runtime_paths = sorted((ROOT / "runtime").glob("**/libprism_usb_sdk.*"))
+    runtime_paths += sorted((ROOT / "runtime/windows-x64").glob("prism_usb_sdk.dll"))
+    if not runtime_paths:
+        raise RuntimeError("no published SDK runtimes found")
+    for path in runtime_paths:
+        contents = path.read_bytes()
+        relative_path = path.relative_to(ROOT)
+        if EXPECTED_EXPOSURE_LIMIT not in contents:
+            raise RuntimeError(
+                f"runtime lacks the 50 us exposure limit: {relative_path}"
+            )
+        if OBSOLETE_EXPOSURE_LIMIT in contents:
+            raise RuntimeError(
+                f"runtime contains the obsolete 200 us limit: {relative_path}"
+            )
+    print(f"Verified exposure-limit semantics in {len(runtime_paths)} runtimes.")
 
 
 def host_kind() -> str:

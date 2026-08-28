@@ -2,7 +2,7 @@ ed421f37b6b266fa85228d8e8dd54c083c0cac932a1fd4c17ebad31bbe33f6cc  ./.gitattribut
 0ab63851cf9fb17819b8c99ef6095d0942d5d49f0f101ceb1c27c3b456a148d8  ./.github/workflows/build.yml
 46e86fc91d09a34e157affc0ce8db0414ea54c9a632b8ade6cf56dd0095f9174  ./.gitignore
 6871d9db7f4652f6274c95f45f7435bb85630d0169f7122cc865eabb4d5ef158  ./CMakeLists.txt
-60173cb12f3454be037b6ba5ffd2235d16acdd7690aa7cbe8a5ebd54bc50ea6b  ./ORIGIN.md
+b89ff3f6f8135812559a396159c74b4dcb7d9b9d90dd3930cbfc5bc9c991fda0  ./ORIGIN.md
 4cf3ffb21549a8c17ff2862bca7d29f0f2cab85b3de62af9eeec920e5c28e613  ./README.md
 06f1f70790363cfcd38867d7f20924c8d29c57a33790fcc284c10e6e114e70d3  ./README.zh-CN.md
 5e05a8a85ad99e262195c98675b3331b5865b50b1705e8ff5b03be736f787f15  ./THIRD_PARTY_NOTICES.md
@@ -37,11 +37,11 @@ f58afff850372a1a3ce026e1d362b48eb1b798051378f566ba25f5a08a3ac470  ./include/pris
 5c075178f0231130da331e515ab5683a31cd106646bbe64a2128fecc10fc3e4a  ./include/prism/usb/update.hpp
 46424fa37a0f1d52c74deeba80a9c7a7292b309c496018f184ea5e0096af140b  ./include/prism/usb/wifi.hpp
 9e70110f1451aff6b11347505ba2e2147e7763815852620e658f743c58dfbe89  ./include/prism/usb_sdk.hpp
-b6763de2c6c164e9b0e3f76f4ec6cdcc086d8d2a62aacfe3a74d6d3d60a893f9  ./runtime/linux-arm64/libprism_usb_sdk.a
-39e3c02db743af8193f5782fe5eb14aa1726675505a82b33c3af060e359ac841  ./runtime/linux-arm64/libprism_usb_sdk.so
-cfbb8c7ab1b1923cc60de24c10a5d13845c15949187c1610d0068a25d34fa669  ./runtime/linux-x64/libprism_usb_sdk.a
-0eefa16ad23324c5a6bd3ba8263906e01ca6f1971ae59c96ec9f99ba6e99d244  ./runtime/linux-x64/libprism_usb_sdk.so
-9f215299b523324de2549ac6d4690441299e3b006831284625f3b4de05a5ff84  ./runtime/macos-arm64/libprism_usb_sdk.dylib
+45dde324e5bff5285de24944741ae67b425a4b8d6f50a788200a78c0655086a8  ./runtime/linux-arm64/libprism_usb_sdk.a
+86c702bdb40a307df590da6d4c5ed720923d75feb9d5a771b70514577e4d8e5a  ./runtime/linux-arm64/libprism_usb_sdk.so
+cc53bbd78e4481aabad83282023770b7ed7cf8bf5e6d98033130154c3cb41dfe  ./runtime/linux-x64/libprism_usb_sdk.a
+73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28  ./runtime/linux-x64/libprism_usb_sdk.so
+070f33890c47d54189a0ac13726ed9ff4dceff798ea93090995950853ecd7de5  ./runtime/macos-arm64/libprism_usb_sdk.dylib
 6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01  ./runtime/macos-arm64/libusb-1.0.0.dylib
 5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a  ./runtime/macos-arm64/libusb-COPYING.txt
 5922ed61a10256afc887f6fe5b895e4497627c5e490b90e38039416c8ada7da3  ./runtime/ros/ubuntu-20.04-x86_64/include/prism/usb/client.hpp
@@ -59,8 +59,8 @@ f58afff850372a1a3ce026e1d362b48eb1b798051378f566ba25f5a08a3ac470  ./runtime/ros/
 f515f1c1bdb4c8ccdd40e1a566520460036288a633eedd47629c89f14daa451a  ./runtime/ros/ubuntu-20.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkConfig.cmake
 34614d49d63d0aacf9a461389aca8501bb4fec55fc034c4aa22d9f9f0c3af3ef  ./runtime/ros/ubuntu-20.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkConfigVersion.cmake
 d20cfbf0f4728f292fbe22e570dd0af84134628f8961487ad424fff9fc6d8c98  ./runtime/ros/ubuntu-20.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets-release.cmake
-e29a1e701c815afb9c66cfe7f37eff2879b8478255fb5f47ef894b126ce3de0a  ./runtime/ros/ubuntu-20.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets.cmake
-f1d2174b3917d02b6b52ad581efd0d5ab9e2a27b5957779471e6b19f7051eefb  ./runtime/ros/ubuntu-20.04-x86_64/lib/libprism_usb_sdk.so
+b1592c261a36b3f7e7ccf1411e4aa9764131a0de0a98a6aac70f1fb9340dd8be  ./runtime/ros/ubuntu-20.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets.cmake
+917665c9e8204e3c117ab6e60ecdfff263f36e46ecd12d89b406f4f8cffe548f  ./runtime/ros/ubuntu-20.04-x86_64/lib/libprism_usb_sdk.so
 4272cc0e8d270fddbed0dd973f1d1de0d57356c5881249d377c5c0485cfe3f1c  ./runtime/ros/ubuntu-20.04-x86_64/lib/udev/rules.d/99-prism-usb.rules
 5922ed61a10256afc887f6fe5b895e4497627c5e490b90e38039416c8ada7da3  ./runtime/ros/ubuntu-22.04-x86_64/include/prism/usb/client.hpp
 6bfba183b9828dc54aff2b426aa55b87d1d5ed7fcb4a26b18a283edd944b0e7a  ./runtime/ros/ubuntu-22.04-x86_64/include/prism/usb/common.hpp
@@ -78,7 +78,7 @@ f515f1c1bdb4c8ccdd40e1a566520460036288a633eedd47629c89f14daa451a  ./runtime/ros/
 fa734aa11246c91ad674f86dd6a8d19ad0fa8f901eef3c9d6723e6c5fbc6a7d5  ./runtime/ros/ubuntu-22.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkConfigVersion.cmake
 5bee22777e95c2de26e22236f39f38a63ea1ec080fd9df39c84c17a56b171f36  ./runtime/ros/ubuntu-22.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets-release.cmake
 fbac916e99cad2c943b826588ae0901b9cca8279b49b7915375cf1e90635fbf4  ./runtime/ros/ubuntu-22.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets.cmake
-0eefa16ad23324c5a6bd3ba8263906e01ca6f1971ae59c96ec9f99ba6e99d244  ./runtime/ros/ubuntu-22.04-x86_64/lib/libprism_usb_sdk.so
+73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28  ./runtime/ros/ubuntu-22.04-x86_64/lib/libprism_usb_sdk.so
 4272cc0e8d270fddbed0dd973f1d1de0d57356c5881249d377c5c0485cfe3f1c  ./runtime/ros/ubuntu-22.04-x86_64/lib/udev/rules.d/99-prism-usb.rules
 5922ed61a10256afc887f6fe5b895e4497627c5e490b90e38039416c8ada7da3  ./runtime/ros/ubuntu-24.04-x86_64/include/prism/usb/client.hpp
 6bfba183b9828dc54aff2b426aa55b87d1d5ed7fcb4a26b18a283edd944b0e7a  ./runtime/ros/ubuntu-24.04-x86_64/include/prism/usb/common.hpp
@@ -96,7 +96,7 @@ f515f1c1bdb4c8ccdd40e1a566520460036288a633eedd47629c89f14daa451a  ./runtime/ros/
 34614d49d63d0aacf9a461389aca8501bb4fec55fc034c4aa22d9f9f0c3af3ef  ./runtime/ros/ubuntu-24.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkConfigVersion.cmake
 d20cfbf0f4728f292fbe22e570dd0af84134628f8961487ad424fff9fc6d8c98  ./runtime/ros/ubuntu-24.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets-release.cmake
 e29a1e701c815afb9c66cfe7f37eff2879b8478255fb5f47ef894b126ce3de0a  ./runtime/ros/ubuntu-24.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets.cmake
-a813bceb42f297569bbf4b043aa2b9b9430a34db32b91954bccd23f83b5c3e3a  ./runtime/ros/ubuntu-24.04-x86_64/lib/libprism_usb_sdk.so
+bc09e37a26f23ee4ec69a0dd3dbcc103f731c94966691ed0b051422e1ae05cba  ./runtime/ros/ubuntu-24.04-x86_64/lib/libprism_usb_sdk.so
 4272cc0e8d270fddbed0dd973f1d1de0d57356c5881249d377c5c0485cfe3f1c  ./runtime/ros/ubuntu-24.04-x86_64/lib/udev/rules.d/99-prism-usb.rules
 5922ed61a10256afc887f6fe5b895e4497627c5e490b90e38039416c8ada7da3  ./runtime/ros/ubuntu-26.04-x86_64/include/prism/usb/client.hpp
 6bfba183b9828dc54aff2b426aa55b87d1d5ed7fcb4a26b18a283edd944b0e7a  ./runtime/ros/ubuntu-26.04-x86_64/include/prism/usb/common.hpp
@@ -114,7 +114,7 @@ f515f1c1bdb4c8ccdd40e1a566520460036288a633eedd47629c89f14daa451a  ./runtime/ros/
 34614d49d63d0aacf9a461389aca8501bb4fec55fc034c4aa22d9f9f0c3af3ef  ./runtime/ros/ubuntu-26.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkConfigVersion.cmake
 d20cfbf0f4728f292fbe22e570dd0af84134628f8961487ad424fff9fc6d8c98  ./runtime/ros/ubuntu-26.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets-release.cmake
 5e0bd58a657d00739f12a0edb229add2d068ffc6d3250316bf108ab0fd013769  ./runtime/ros/ubuntu-26.04-x86_64/lib/cmake/PrismUsbSdk/PrismUsbSdkTargets.cmake
-8a6dcaa2cfa5c20155d83a83524b1768505a5adc77d981f4334c8cc3015803e5  ./runtime/ros/ubuntu-26.04-x86_64/lib/libprism_usb_sdk.so
+ec4a321203b630af3781cd01b0ac9f5eceb2668ce9573dc36d7671433087dc4d  ./runtime/ros/ubuntu-26.04-x86_64/lib/libprism_usb_sdk.so
 4272cc0e8d270fddbed0dd973f1d1de0d57356c5881249d377c5c0485cfe3f1c  ./runtime/ros/ubuntu-26.04-x86_64/lib/udev/rules.d/99-prism-usb.rules
-6ee2def2aaf702147303e1d4d2b20ba4ef0a0531951e4585fe4aa73c52268bf9  ./runtime/windows-x64/prism_usb_sdk.dll
-23ee0267345ac3e4c687e00098b91728faf8e33859c36df23e4f960b75a4730c  ./scripts/test_all_examples.py
+5992b255f93c1cbef52bf227fc354ee6fe1f7621225fbc6d5d88a4981e3b8cb1  ./runtime/windows-x64/prism_usb_sdk.dll
+39cc4dd9095becd8eec82644fc2dc832803f36be94a393cde284832bd670262f  ./scripts/test_all_examples.py
