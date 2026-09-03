@@ -46,6 +46,17 @@ Prism-SDK/
 Agent 1.0.0 的版本握手。不要混用不同分发版本的头文件和库，也不要连接非
 1.0.0 的 Agent。
 
+### 各 Release Tag 兼容关系
+
+| SDK Release Tag | 分发版本 | Host SDK 运行时/ABI | 支持的 Agent | 已验证的 sensor-board | USB 协议 |
+| --- | --- | --- | --- | --- | --- |
+| `v1.0.0` | `1.0.0` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+| `v1.0.2` | `1.0.2` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+
+Host SDK 会在打开设备时拒绝不兼容的 Agent。Agent 会上报 sensor-board 版本，
+但 Host SDK 不会单独拒绝该版本，因此请使用表中对应 Release Tag 已验证的
+sensor-board 版本。Prism-SDK 没有发布 `v1.0.1` Release Tag。
+
 GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
 测试，对发布的动态库执行加载冒烟测试，并验证两个 Linux 架构的静态链接。新增
 `examples/*.cpp` 如果没有注册 CMake target，配置会直接失败，避免后续示例被 CI

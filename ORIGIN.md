@@ -9,6 +9,7 @@ No SDK implementation source code is included.
 - Distribution release: 1.0.2
 - Host SDK runtime/ABI: 1.0.0
 - Device Agent: 1.0.0
+- Qualified sensor-board: 0.4.25
 - USB protocol: 1
 - Runtime API: 5
 - Public headers: 12 C++17 headers under `include/prism/`

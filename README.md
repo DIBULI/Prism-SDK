@@ -49,6 +49,18 @@ SDK source baseline. The runtime intentionally performs a strict 1.0.0
 SDK/Agent handshake. Do not mix headers and libraries from different
 distribution releases, or use an Agent other than 1.0.0.
 
+### Compatibility by release tag
+
+| SDK release tag | Distribution | Host SDK runtime/ABI | Supported Agent | Qualified sensor-board | USB protocol |
+| --- | --- | --- | --- | --- | --- |
+| `v1.0.0` | `1.0.0` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+| `v1.0.2` | `1.0.2` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+
+The Host SDK rejects an incompatible Agent during the opening handshake. The
+sensor-board version is reported by the Agent but is not independently rejected
+by the Host SDK, so use the qualified sensor-board version shown for the tag.
+There is no Prism-SDK `v1.0.1` release tag.
+
 GitHub Actions compiles every example source across the three-platform matrix,
 runs all no-device support tests, runtime-smoke-tests the published dynamic
 libraries, and verifies static linking on both Linux architectures. CMake
