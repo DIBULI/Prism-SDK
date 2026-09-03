@@ -102,6 +102,9 @@ jobs:
     needs: integrity
     runs-on: ubuntu-24.04
     container: ubuntu:${{ matrix.ubuntu }}
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 20
     strategy:
       fail-fast: false
