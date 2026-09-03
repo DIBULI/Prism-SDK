@@ -61,12 +61,13 @@ Ubuntu release, following the same approach as Prism Viewer.
 | `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28` |
 | `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `bc09e37a26f23ee4ec69a0dd3dbcc103f731c94966691ed0b051422e1ae05cba` |
 | `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `ec4a321203b630af3781cd01b0ac9f5eceb2668ce9573dc36d7671433087dc4d` |
-| `linux-arm64` | Target ROS/Ubuntu environment; OpenSSL and libusb resolved at consumer link time | `45dde324e5bff5285de24944741ae67b425a4b8d6f50a788200a78c0655086a8` |
+| `linux-arm64` | Ubuntu 20.04, GCC 9; OpenSSL and libusb resolved at consumer link time | `a3d7b7920c1e65973c75fd9780c0b3fccbf854eb75825ba44af29abfef814ae6` |
 
 Each prefix uses the same SDK 1.0.0 interface. The ARM64 prefix reuses the
-published `runtime/linux-arm64/libprism_usb_sdk.a`; it does not impose the
-shared library's GLIBC 2.34 or OpenSSL 3 runtime requirements. Its exported
-CMake target resolves the target system's libusb and OpenSSL libraries.
+same source revision as the published runtimes, rebuilt with Ubuntu 20.04/GCC
+9 as the oldest supported ABI. It does not impose the shared library's GLIBC
+2.34 or OpenSSL 3 runtime requirements. Its exported CMake target resolves the
+target system's Threads, libusb, and OpenSSL libraries.
 
 ## macOS arm64
 

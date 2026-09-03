@@ -25,9 +25,11 @@ endmacro()
 ####################################################################################
 
 include(CMakeFindDependencyMacro)
+find_dependency(Threads)
 find_dependency(PkgConfig)
 pkg_check_modules(LIBUSB REQUIRED IMPORTED_TARGET libusb-1.0)
 find_dependency(OpenSSL COMPONENTS Crypto)
+
 
 include("${CMAKE_CURRENT_LIST_DIR}/PrismUsbSdkTargets.cmake")
 

@@ -8,6 +8,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 # Import target "Prism::UsbSdk" for configuration "Release"
 set_property(TARGET Prism::UsbSdk APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(Prism::UsbSdk PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C;CXX"
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libprism_usb_sdk.a"
   )
 
