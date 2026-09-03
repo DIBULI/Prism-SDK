@@ -1,4 +1,4 @@
-# Prism Host SDK 1.0.0
+# Prism SDK Distribution 1.0.2
 
 [![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
 
@@ -35,15 +35,19 @@ Prism-SDK/
 
 ## Compatibility
 
-- Host SDK: `1.0.0`
+- Distribution release: `1.0.2`
+- Host SDK runtime/ABI: `1.0.0`
 - Runtime API: `5`
 - USB protocol: `1`
 - Device Agent: exactly `1.0.0`
 - Language: C++17 or later
 - CMake: 3.20 or later
 
-The SDK intentionally performs a strict version handshake. Do not mix headers,
-libraries, or Agent firmware from different releases.
+Release 1.0.2 packages the existing Host SDK 1.0.0 interface for all supported
+platforms and adds the Linux ARM64 deliverables compiled from that same 1.0.0
+SDK source baseline. The runtime intentionally performs a strict 1.0.0
+SDK/Agent handshake. Do not mix headers and libraries from different
+distribution releases, or use an Agent other than 1.0.0.
 
 GitHub Actions compiles every example source across the three-platform matrix,
 runs all no-device support tests, runtime-smoke-tests the published dynamic
@@ -116,6 +120,8 @@ the sensor-board GPS/NMEA and PPS synchronization source.
 
 ## Documentation
 
+- [Release 1.0.2 update notes](docs/update/v1.0.2.md)
+- [1.0.2 更新说明](docs/update/v1.0.2.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)
 - [Per-interface SDK examples](docs/interface-examples.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)

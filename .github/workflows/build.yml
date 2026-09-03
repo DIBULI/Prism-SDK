@@ -299,7 +299,7 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          test "$version" = "1.0.0"
+          test "$version" = "1.0.2"
           git archive --format=tar --prefix="Prism-SDK-${version}/" HEAD \
             | gzip -9 > "Prism-SDK-${version}.tar.gz"
           sha256sum "Prism-SDK-${version}.tar.gz" \
@@ -312,14 +312,14 @@ jobs:
           if gh release view "$GITHUB_REF_NAME" \
               --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.0.tar.gz \
-              Prism-SDK-1.0.0.tar.gz.sha256 \
+              Prism-SDK-1.0.2.tar.gz \
+              Prism-SDK-1.0.2.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.0.tar.gz \
-              Prism-SDK-1.0.0.tar.gz.sha256 \
+              Prism-SDK-1.0.2.tar.gz \
+              Prism-SDK-1.0.2.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --generate-notes

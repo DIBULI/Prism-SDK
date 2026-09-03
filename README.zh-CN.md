@@ -1,4 +1,4 @@
-# Prism Host SDK 1.0.0
+# Prism SDK 分发版本 1.0.2
 
 [![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
 
@@ -33,14 +33,18 @@ Prism-SDK/
 
 ## 兼容要求
 
-- Host SDK：`1.0.0`
+- 分发版本：`1.0.2`
+- Host SDK 运行时/ABI：`1.0.0`
 - Runtime API：`5`
 - USB protocol：`1`
 - 设备 Agent：必须为 `1.0.0`
 - C++：C++17 或更新版本
 - CMake：3.20 或更新版本
 
-SDK 会严格检查版本。不要混用不同版本的头文件、库文件或 Agent 固件。
+1.0.2 分发包面向全部受支持平台打包既有 Host SDK 1.0.0 接口，并新增从同一
+1.0.0 SDK 源码基线编译的 Linux ARM64 产物。运行时仍严格执行 SDK 1.0.0 与
+Agent 1.0.0 的版本握手。不要混用不同分发版本的头文件和库，也不要连接非
+1.0.0 的 Agent。
 
 GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
 测试，对发布的动态库执行加载冒烟测试，并验证两个 Linux 架构的静态链接。新增
@@ -104,6 +108,8 @@ Visual Studio 等多配置生成器会把程序放在所选配置目录中，例
 
 ## 文档
 
+- [1.0.2 更新说明](docs/update/v1.0.2.zh-CN.md)
+- [Release 1.0.2 update notes](docs/update/v1.0.2.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
 - [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)

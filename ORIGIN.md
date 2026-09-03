@@ -1,19 +1,24 @@
-# Prism Host SDK 1.0.0 release manifest
+# Prism SDK Distribution 1.0.2 release manifest
 
-This repository is the public binary distribution of Prism Host SDK 1.0.0.
+This repository is the public binary distribution release 1.0.2 of Prism Host
+SDK. Its runtime/API compatibility baseline remains Host SDK 1.0.0.
 No SDK implementation source code is included.
 
 ## Interface compatibility
 
-- Host SDK: 1.0.0
+- Distribution release: 1.0.2
+- Host SDK runtime/ABI: 1.0.0
 - Device Agent: 1.0.0
 - USB protocol: 1
 - Runtime API: 5
 - Public headers: 12 C++17 headers under `include/prism/`
 - Onboard IMU: ICM45686 at a fixed 800 Hz
 
-The published headers and all four platform dynamic libraries have been verified as one
-compatible 1.0.0 ABI set. Do not mix them with another SDK release.
+The published headers, all four platform dynamic libraries, and both Linux
+static libraries have been verified as one compatible 1.0.0 ABI set. The Linux
+ARM64 artifacts were compiled from the same 1.0.0 SDK source baseline; 1.0.2 is
+the distribution version and does not change the strict Agent 1.0.0 handshake.
+Do not mix files from another SDK distribution.
 
 The runtimes were rebuilt from `DIBULI/Prism-agent` commit
 `cc443541bfe71722ce6d49480761a52121c32146`. They retain the fixed 800 Hz
