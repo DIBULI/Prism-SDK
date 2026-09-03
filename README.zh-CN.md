@@ -20,7 +20,8 @@ Prism-SDK/
 │   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK 前缀
 │   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK 前缀
 │   │   ├── ubuntu-24.04-x86_64/   ROS 2 Jazzy/Kilted SDK 前缀
-│   │   └── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK 前缀
+│   │   ├── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK 前缀
+│   │   └── linux-arm64/            所有受支持 ROS/Ubuntu ARM64 版本
 │   ├── macos-arm64/               macOS 13+ Apple Silicon 动态库
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          安装和使用文档
@@ -46,9 +47,10 @@ GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运�
 `examples/*.cpp` 如果没有注册 CMake target，配置会直接失败，避免后续示例被 CI
 静默漏编。
 
-两个 Linux 架构使用相同的 Ubuntu 22.04 ABI 基线。仓库还在 `runtime/ros`
-下提供 ROS Adapter 使用的完整多 Ubuntu ABI 二进制
-SDK 前缀。Adapter 会按 ROS 发行版选择对应前缀；普通桌面 SDK 用户默认使用
+普通 Linux 动态库使用 Ubuntu 22.04 ABI 基线。仓库还在 `runtime/ros` 下提供
+ROS Adapter 使用的完整二进制 SDK 前缀：x86-64 按 Ubuntu ABI 分别提供动态库
+前缀，ARM64 则提供一份在目标 ROS 环境内完成链接的静态库前缀，与 Prism Viewer
+跨 Ubuntu 的处理方式一致。普通桌面 SDK 用户默认使用
 `runtime/linux-x64/libprism_usb_sdk.so`。配置时设置
 `PRISM_SDK_USE_STATIC=ON` 可改用同目录的 `libprism_usb_sdk.a`。
 

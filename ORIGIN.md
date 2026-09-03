@@ -49,20 +49,24 @@ build and tests are recorded in Actions run `33150407054`.
 
 ## ROS Adapter Linux prefixes
 
-The SDK repository includes four complete binary installation prefixes under
-`runtime/ros`. They contain only the public headers, dynamic library, CMake
-package metadata, and udev rule. The ROS Adapter selects the prefix matching
-its Ubuntu base image; libraries from different rows must not be interchanged.
+The SDK repository includes five complete binary installation prefixes under
+`runtime/ros`. They contain only the public headers, a shared or static
+library, CMake package metadata, and the udev rule. x86-64 uses the prefix
+matching its Ubuntu base image. ARM64 uses one static prefix for every target
+Ubuntu release, following the same approach as Prism Viewer.
 
-| Prefix | Build environment | Runtime SHA-256 |
+| Prefix | Link environment | Runtime SHA-256 |
 | --- | --- | --- |
 | `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `917665c9e8204e3c117ab6e60ecdfff263f36e46ecd12d89b406f4f8cffe548f` |
 | `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28` |
 | `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `bc09e37a26f23ee4ec69a0dd3dbcc103f731c94966691ed0b051422e1ae05cba` |
 | `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `ec4a321203b630af3781cd01b0ac9f5eceb2668ce9573dc36d7671433087dc4d` |
+| `linux-arm64` | Target ROS/Ubuntu environment; OpenSSL and libusb resolved at consumer link time | `45dde324e5bff5285de24944741ae67b425a4b8d6f50a788200a78c0655086a8` |
 
-Each prefix was built from the same SDK 1.0.0 interface and passed the complete
-six-test Host SDK suite in its target container.
+Each prefix uses the same SDK 1.0.0 interface. The ARM64 prefix reuses the
+published `runtime/linux-arm64/libprism_usb_sdk.a`; it does not impose the
+shared library's GLIBC 2.34 or OpenSSL 3 runtime requirements. Its exported
+CMake target resolves the target system's libusb and OpenSSL libraries.
 
 ## macOS arm64
 

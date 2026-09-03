@@ -22,7 +22,8 @@ Prism-SDK/
 │   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK prefix
 │   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK prefix
 │   │   ├── ubuntu-24.04-x86_64/   ROS 2 Jazzy/Kilted SDK prefix
-│   │   └── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK prefix
+│   │   ├── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK prefix
+│   │   └── linux-arm64/            All supported ROS/Ubuntu ARM64 releases
 │   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          Installation and usage guides
@@ -50,11 +51,12 @@ libraries, and verifies static linking on both Linux architectures. CMake
 rejects an unregistered `examples/*.cpp` source, preventing a future example
 from silently escaping CI.
 
-Both Linux architectures are built against the same Ubuntu 22.04 ABI baseline.
-The repository also provides complete ABI-specific binary SDK prefixes under
-`runtime/ros` for the ROS Adapter. The Adapter selects the correct prefix for
-each ROS distribution; desktop SDK consumers use
-`runtime/linux-x64/libprism_usb_sdk.so` by default. Set
+The normal Linux shared libraries use an Ubuntu 22.04 ABI baseline. The
+repository also provides complete binary SDK prefixes under `runtime/ros` for
+the ROS Adapter. x86-64 has one shared-library prefix per Ubuntu ABI. ARM64 has
+one static-library prefix that is linked inside each target ROS environment,
+matching the cross-Ubuntu strategy used by Prism Viewer. Desktop SDK consumers
+use `runtime/linux-x64/libprism_usb_sdk.so` by default. Set
 `PRISM_SDK_USE_STATIC=ON` to use the matching `libprism_usb_sdk.a` instead.
 
 ## Linux static SDK
