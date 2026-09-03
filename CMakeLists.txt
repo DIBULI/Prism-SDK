@@ -7,7 +7,7 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
     "Minimum macOS version supported by the packaged SDK")
 endif()
 
-project(PrismSdkExamples VERSION 1.0.2 LANGUAGES CXX)
+project(PrismSdkExamples VERSION 1.0.0 LANGUAGES CXX)
 
 include(CTest)
 

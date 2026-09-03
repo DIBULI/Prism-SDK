@@ -4,13 +4,14 @@
 
 | Host platform | Architecture | Minimum environment | Libraries |
 | --- | --- | --- | --- |
-| Linux | x86-64 | Ubuntu 22.04 or later | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
+| Linux | x86-64 | Ubuntu 20.04 or later | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
 | Linux | arm64 | Ubuntu 22.04 or later | `runtime/linux-arm64/libprism_usb_sdk.so` / `.a` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-Both Linux runtimes require GLIBC 2.34 or later and OpenSSL 3. They are not
-compatible with Ubuntu 20.04.
+The x86-64 shared runtime uses a GLIBC 2.25/GLIBCXX 3.4.22 baseline, statically
+embeds OpenSSL, and requires only the stable `libusb-1.0.so.0` external ABI.
+The ARM64 shared runtime requires GLIBC 2.34, OpenSSL 3, and libusb 1.0.
 
 ## Linux x86-64 and arm64
 
@@ -18,10 +19,12 @@ Install build tools and runtime dependencies:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3
+sudo apt-get install -y build-essential cmake libusb-1.0-0
 ```
 
-On Ubuntu 24.04, install `libssl3t64` instead of `libssl3`.
+For the ARM64 shared runtime, also install `libssl3` on Ubuntu 22.04 or
+`libssl3t64` on Ubuntu 24.04. The unified x86-64 shared runtime has no dynamic
+OpenSSL dependency.
 
 Install a udev rule so non-root applications can open VID:PID `2207:1201`:
 

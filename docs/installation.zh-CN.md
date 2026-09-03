@@ -4,12 +4,14 @@
 
 | 主机平台 | 架构 | 最低环境 | 库文件 |
 | --- | --- | --- | --- |
-| Linux | x86-64 | Ubuntu 22.04 或更新版本 | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
+| Linux | x86-64 | Ubuntu 20.04 或更新版本 | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
 | Linux | arm64 | Ubuntu 22.04 或更新版本 | `runtime/linux-arm64/libprism_usb_sdk.so` / `.a` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-两个 Linux 动态库都要求 GLIBC 2.34 或更新版本以及 OpenSSL 3，不兼容 Ubuntu 20.04。
+x86-64 动态库采用 GLIBC 2.25/GLIBCXX 3.4.22 基线，静态包含 OpenSSL，并且只要求
+稳定的 `libusb-1.0.so.0` 外部 ABI。ARM64 动态库要求 GLIBC 2.34、OpenSSL 3 和
+libusb 1.0。
 
 ## Linux x86-64 与 arm64
 
@@ -17,10 +19,11 @@
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libusb-1.0-0 libssl3
+sudo apt-get install -y build-essential cmake libusb-1.0-0
 ```
 
-Ubuntu 24.04 请将 `libssl3` 替换为 `libssl3t64`。
+使用 ARM64 动态库时，Ubuntu 22.04 还需安装 `libssl3`，Ubuntu 24.04 则安装
+`libssl3t64`。统一的 x86-64 动态库没有 OpenSSL 动态依赖。
 
 安装 udev 规则，使普通用户能够打开 VID:PID `2207:1201`：
 

@@ -97,6 +97,58 @@ jobs:
             exit 1
           fi
 
+  linux-x64-compatibility:
+    name: Ubuntu ${{ matrix.ubuntu }} x64 unified shared runtime
+    needs: integrity
+    runs-on: ubuntu-24.04
+    container: ubuntu:${{ matrix.ubuntu }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["20.04", "22.04", "24.04", "26.04"]
+    steps:
+      - name: Install build and runtime dependencies
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential ca-certificates cmake git \
+            libusb-1.0-0-dev python3 python3-pip
+          if [ "$UBUNTU_VERSION" = "20.04" ]; then
+            python3 -m pip install --no-cache-dir cmake==3.31.6
+          fi
+
+      - name: Check out SDK package
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Build and test unified shared runtime
+        run: python3 scripts/test_all_examples.py --build-dir build-compat
+
+      - name: Verify dynamic dependency boundary
+        run: |
+          needed="$(readelf -d runtime/linux-x64/libprism_usb_sdk.so)"
+          printf '%s\n' "$needed"
+          grep -Fq 'Shared library: [libusb-1.0.so.0]' <<<"$needed"
+          if grep -Eq 'Shared library: \[lib(ssl|crypto)\.so' <<<"$needed"; then
+            echo 'Unified x86-64 SDK must not depend on dynamic OpenSSL' >&2
+            exit 1
+          fi
+
+      - name: Smoke-test SDK loading and enumeration
+        run: |
+          set +e
+          output="$(build-compat/examples/prism-device-info-time-sync 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -eq 1
+          test "$output" = 'error: no Prism device found'
+
   linux-arm64:
     name: Ubuntu 24.04 arm64
     needs: integrity
@@ -284,7 +336,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [linux-x64, linux-arm64, macos-arm64, windows-x64]
+    needs: [linux-x64, linux-x64-compatibility, linux-arm64, macos-arm64, windows-x64]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -299,7 +351,7 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          test "$version" = "1.0.2"
+          test "$version" = "1.0.0"
           git archive --format=tar --prefix="Prism-SDK-${version}/" HEAD \
             | gzip -9 > "Prism-SDK-${version}.tar.gz"
           sha256sum "Prism-SDK-${version}.tar.gz" \
@@ -312,14 +364,14 @@ jobs:
           if gh release view "$GITHUB_REF_NAME" \
               --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.2.tar.gz \
-              Prism-SDK-1.0.2.tar.gz.sha256 \
+              Prism-SDK-1.0.0.tar.gz \
+              Prism-SDK-1.0.0.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.2.tar.gz \
-              Prism-SDK-1.0.2.tar.gz.sha256 \
+              Prism-SDK-1.0.0.tar.gz \
+              Prism-SDK-1.0.0.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --generate-notes

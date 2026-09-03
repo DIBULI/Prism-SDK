@@ -1,4 +1,4 @@
-# Prism SDK Distribution 1.0.2
+# Prism Host SDK 1.0.0
 
 [![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
 
@@ -16,14 +16,11 @@ source code.
 Prism-SDK/
 ├── include/prism/                 Public C++17 headers
 ├── runtime/
-│   ├── linux-x64/                 Ubuntu 22.04+ x86-64 .so and .a
+│   ├── linux-x64/                 Ubuntu 20.04+ x86-64 .so and .a
 │   ├── linux-arm64/               Ubuntu 22.04+ arm64 .so and .a
 │   ├── ros/
-│   │   ├── ubuntu-20.04-x86_64/   ROS 1 Noetic SDK prefix
-│   │   ├── ubuntu-22.04-x86_64/   ROS 2 Humble SDK prefix
-│   │   ├── ubuntu-24.04-x86_64/   ROS 2 Jazzy/Kilted SDK prefix
-│   │   ├── ubuntu-26.04-x86_64/   ROS 2 Lyrical/Rolling SDK prefix
-│   │   └── linux-arm64/            All supported ROS/Ubuntu ARM64 releases
+│   │   ├── linux-x64/             All supported ROS/Ubuntu x86-64 releases
+│   │   └── linux-arm64/           All supported ROS/Ubuntu ARM64 releases
 │   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
 │   └── windows-x64/               Windows 10/11 x64 DLL
 ├── docs/                          Installation and usage guides
@@ -35,7 +32,7 @@ Prism-SDK/
 
 ## Compatibility
 
-- Distribution release: `1.0.2`
+- Distribution release: `1.0.0`
 - Host SDK runtime/ABI: `1.0.0`
 - Runtime API: `5`
 - USB protocol: `1`
@@ -43,23 +40,21 @@ Prism-SDK/
 - Language: C++17 or later
 - CMake: 3.20 or later
 
-Release 1.0.2 packages the existing Host SDK 1.0.0 interface for all supported
-platforms and adds the Linux ARM64 deliverables compiled from that same 1.0.0
-SDK source baseline. The runtime intentionally performs a strict 1.0.0
-SDK/Agent handshake. Do not mix headers and libraries from different
-distribution releases, or use an Agent other than 1.0.0.
+Release 1.0.0 packages the Host SDK 1.0.0 interface for all supported platforms,
+including Linux ARM64 deliverables compiled from the same 1.0.0 SDK source
+baseline. The runtime intentionally performs a strict 1.0.0 SDK/Agent
+handshake. Do not mix headers and libraries from different releases, or use an
+Agent other than 1.0.0.
 
 ### Compatibility by release tag
 
 | SDK release tag | Distribution | Host SDK runtime/ABI | Supported Agent | Qualified sensor-board | USB protocol |
 | --- | --- | --- | --- | --- | --- |
 | `v1.0.0` | `1.0.0` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
-| `v1.0.2` | `1.0.2` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
 
 The Host SDK rejects an incompatible Agent during the opening handshake. The
 sensor-board version is reported by the Agent but is not independently rejected
 by the Host SDK, so use the qualified sensor-board version shown for the tag.
-There is no Prism-SDK `v1.0.1` release tag.
 
 GitHub Actions compiles every example source across the three-platform matrix,
 runs all no-device support tests, runtime-smoke-tests the published dynamic
@@ -67,12 +62,12 @@ libraries, and verifies static linking on both Linux architectures. CMake
 rejects an unregistered `examples/*.cpp` source, preventing a future example
 from silently escaping CI.
 
-The normal Linux shared libraries use an Ubuntu 22.04 ABI baseline. The
-repository also provides complete binary SDK prefixes under `runtime/ros` for
-the ROS Adapter. x86-64 has one shared-library prefix per Ubuntu ABI. ARM64 has
-one static-library prefix that is linked inside each target ROS environment,
-matching the cross-Ubuntu strategy used by Prism Viewer. Desktop SDK consumers
-use `runtime/linux-x64/libprism_usb_sdk.so` by default. Set
+The Linux x86-64 shared library uses an Ubuntu 20.04/GCC 9 ABI baseline and
+statically embeds OpenSSL, so one `.so` supports Ubuntu 20.04, 22.04, 24.04,
+and 26.04. It keeps libusb dynamic through its stable `libusb-1.0.so.0` SONAME.
+The repository provides one x86-64 shared prefix and one ARM64 static prefix
+under `runtime/ros`; both cover every supported ROS/Ubuntu release. Desktop SDK
+consumers use `runtime/linux-x64/libprism_usb_sdk.so` by default. Set
 `PRISM_SDK_USE_STATIC=ON` to use the matching `libprism_usb_sdk.a` instead.
 
 ## Linux static SDK
@@ -132,8 +127,8 @@ the sensor-board GPS/NMEA and PPS synchronization source.
 
 ## Documentation
 
-- [Release 1.0.2 update notes](docs/update/v1.0.2.md)
-- [1.0.2 更新说明](docs/update/v1.0.2.zh-CN.md)
+- [Release 1.0.0 update notes](docs/update/v1.0.0.md)
+- [1.0.0 更新说明](docs/update/v1.0.0.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)
 - [Per-interface SDK examples](docs/interface-examples.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)

@@ -1,12 +1,11 @@
-# Prism SDK Distribution 1.0.2 release manifest
+# Prism Host SDK 1.0.0 release manifest
 
-This repository is the public binary distribution release 1.0.2 of Prism Host
-SDK. Its runtime/API compatibility baseline remains Host SDK 1.0.0.
+This repository is the public binary distribution of Prism Host SDK 1.0.0.
 No SDK implementation source code is included.
 
 ## Interface compatibility
 
-- Distribution release: 1.0.2
+- Distribution release: 1.0.0
 - Host SDK runtime/ABI: 1.0.0
 - Device Agent: 1.0.0
 - Qualified sensor-board: 0.4.25
@@ -17,9 +16,9 @@ No SDK implementation source code is included.
 
 The published headers, all four platform dynamic libraries, and both Linux
 static libraries have been verified as one compatible 1.0.0 ABI set. The Linux
-ARM64 artifacts were compiled from the same 1.0.0 SDK source baseline; 1.0.2 is
-the distribution version and does not change the strict Agent 1.0.0 handshake.
-Do not mix files from another SDK distribution.
+ARM64 artifacts were compiled from the same 1.0.0 SDK source baseline. The
+runtime retains the strict Agent 1.0.0 handshake. Do not mix files from another
+SDK release.
 
 The runtimes were rebuilt from `DIBULI/Prism-agent` commit
 `cc443541bfe71722ce6d49480761a52121c32146`. They retain the fixed 800 Hz
@@ -29,14 +28,20 @@ build and tests are recorded in Actions run `33150407054`.
 
 ## Linux x86-64
 
-- Environment: Ubuntu 22.04, GCC 11.4, Release
+- Shared runtime environment: Ubuntu 20.04, GCC 9.4, Release
 - Runtime: `runtime/linux-x64/libprism_usb_sdk.so`
 - SHA-256:
-  `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28`
-- ELF Build ID: `a7981f3b8d6a9bfda76b07516e9c88d982631728`
-- Maximum required symbol versions: GLIBC 2.34, GLIBCXX 3.4.29,
-  OPENSSL 3.0.0
+  `0d00e25b3788b16de9465225ddc10825ead98efc9ab3878c43d82f8c1663fd6b`
+- ELF Build ID: `25f1488185c855707bf8f46cec3ad6f50fc275f6`
+- Maximum required symbol versions: GLIBC 2.25, GLIBCXX 3.4.22,
+  CXXABI 1.3.9
+- OpenSSL 1.1.1 is statically embedded; the runtime has no `libssl` or
+  `libcrypto` dynamic dependency.
+- Dynamic external dependency: `libusb-1.0.so.0`
+- CMake option used for the shared runtime:
+  `-DOPENSSL_USE_STATIC_LIBS=TRUE`
 - Static archive: `runtime/linux-x64/libprism_usb_sdk.a`
+- Static archive environment: Ubuntu 22.04, GCC 11.4, Release
 - Static SHA-256:
   `cc53bbd78e4481aabad83282023770b7ed7cf8bf5e6d98033130154c3cb41dfe`
 
@@ -55,25 +60,21 @@ build and tests are recorded in Actions run `33150407054`.
 
 ## ROS Adapter Linux prefixes
 
-The SDK repository includes five complete binary installation prefixes under
+The SDK repository includes two complete binary installation prefixes under
 `runtime/ros`. They contain only the public headers, a shared or static
-library, CMake package metadata, and the udev rule. x86-64 uses the prefix
-matching its Ubuntu base image. ARM64 uses one static prefix for every target
-Ubuntu release, following the same approach as Prism Viewer.
+library, CMake package metadata, and the udev rule. One portable prefix covers
+all supported Ubuntu releases for each architecture.
 
 | Prefix | Link environment | Runtime SHA-256 |
 | --- | --- | --- |
-| `ubuntu-20.04-x86_64` | Ubuntu 20.04, GCC 9, OpenSSL 1.1 | `917665c9e8204e3c117ab6e60ecdfff263f36e46ecd12d89b406f4f8cffe548f` |
-| `ubuntu-22.04-x86_64` | Ubuntu 22.04, GCC 11, OpenSSL 3 | `73a0478da0c13dbeef26240b751d3debd027aa45701a4d723e629a293b175c28` |
-| `ubuntu-24.04-x86_64` | Ubuntu 24.04, GCC 13, OpenSSL 3 | `bc09e37a26f23ee4ec69a0dd3dbcc103f731c94966691ed0b051422e1ae05cba` |
-| `ubuntu-26.04-x86_64` | Ubuntu 26.04, GCC 15, OpenSSL 3.5 | `ec4a321203b630af3781cd01b0ac9f5eceb2668ce9573dc36d7671433087dc4d` |
+| `linux-x64` | Ubuntu 20.04, GCC 9; OpenSSL statically embedded | `0d00e25b3788b16de9465225ddc10825ead98efc9ab3878c43d82f8c1663fd6b` |
 | `linux-arm64` | Ubuntu 20.04, GCC 9; OpenSSL and libusb resolved at consumer link time | `a3d7b7920c1e65973c75fd9780c0b3fccbf854eb75825ba44af29abfef814ae6` |
 
-Each prefix uses the same SDK 1.0.0 interface. The ARM64 prefix reuses the
-same source revision as the published runtimes, rebuilt with Ubuntu 20.04/GCC
-9 as the oldest supported ABI. It does not impose the shared library's GLIBC
-2.34 or OpenSSL 3 runtime requirements. Its exported CMake target resolves the
-target system's Threads, libusb, and OpenSSL libraries.
+Each prefix uses the same SDK 1.0.0 interface and source revision. The x86-64
+shared library is built on Ubuntu 20.04/GCC 9, embeds OpenSSL, and dynamically
+uses the stable libusb SONAME. The ARM64 static prefix is also built on Ubuntu
+20.04/GCC 9; its exported CMake target resolves the target system's Threads,
+libusb, and OpenSSL libraries.
 
 ## macOS arm64
 
