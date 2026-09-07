@@ -20,7 +20,7 @@ set(_prism_rklocal_include "${_prism_rklocal_root}/include")
 set(_prism_rklocal_archive
   "${_prism_rklocal_root}/runtime/linux-arm64/libprism_rklocal_sdk.a")
 
-if(NOT EXISTS "${_prism_rklocal_include}/prism/rklocal_sdk.h")
+if(NOT EXISTS "${_prism_rklocal_include}/prism/rklocal_sdk.hpp")
   message(FATAL_ERROR "Missing Prism RK-local public header")
 endif()
 if(NOT EXISTS "${_prism_rklocal_archive}")
@@ -32,7 +32,8 @@ add_library(Prism::RkLocal STATIC IMPORTED GLOBAL)
 set_target_properties(Prism::RkLocal PROPERTIES
   IMPORTED_LOCATION "${_prism_rklocal_archive}"
   INTERFACE_INCLUDE_DIRECTORIES "${_prism_rklocal_include}"
-  INTERFACE_LINK_LIBRARIES Threads::Threads)
+  INTERFACE_COMPILE_FEATURES cxx_std_17
+  INTERFACE_LINK_LIBRARIES "Threads::Threads;${CMAKE_DL_LIBS}")
 
 unset(_prism_rklocal_processor)
 unset(_prism_rklocal_root)

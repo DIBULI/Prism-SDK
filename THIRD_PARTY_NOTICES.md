@@ -21,3 +21,8 @@ package revision `1.1.1f-1ubuntu2.24`.
 This product includes software developed by the OpenSSL Project for use in the
 OpenSSL Toolkit. This product includes cryptographic software written by Eric
 Young (eay@cryptsoft.com).
+
+The RK-local ARM64 static archive also embeds Ubuntu OpenSSL 1.1.1f
+(package revision 1.1.1f-1ubuntu2.24) and miniz for joint ZIP validation.
+See runtime/linux-arm64/openssl-LICENSE.txt and runtime/linux-arm64/miniz-LICENSE.txt.
+No dynamic libcrypto/libssl is required by the RK-local archive.

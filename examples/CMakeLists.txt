@@ -163,7 +163,7 @@ set(_prism_direct_api_example_sources
   parser_api_examples.cpp
   stream_api_examples.cpp
   gnss_rtk_status.cpp)
-set(_prism_rklocal_example_sources rklocal_capture.c rklocal_gnss_status.c)
+set(_prism_rklocal_example_sources rklocal_capture.cpp rklocal_gnss_status.cpp)
 set(_prism_windows_runtime_example_sources
   windows_runtime_api_examples.cpp)
 set(_prism_registered_example_sources
@@ -239,11 +239,14 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
    CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
   include("${PRISM_SDK_ROOT}/cmake/PrismRkLocalSdk.cmake")
+  if(BUILD_TESTING)
+    add_subdirectory("${PRISM_SDK_ROOT}/rk-local-sdk/tests" rklocal-tests)
+  endif()
   foreach(_example capture gnss_status)
     string(REPLACE "_" "-" _name "${_example}")
-    add_executable(prism-rklocal-${_name} rklocal_${_example}.c)
+    add_executable(prism-rklocal-${_name} rklocal_${_example}.cpp)
     target_link_libraries(prism-rklocal-${_name} PRIVATE Prism::RkLocal)
-    target_compile_features(prism-rklocal-${_name} PRIVATE c_std_11)
+    target_compile_features(prism-rklocal-${_name} PRIVATE cxx_std_17)
     target_compile_options(prism-rklocal-${_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
     list(APPEND _prism_supported_example_targets prism-rklocal-${_name})
     if(BUILD_TESTING)
@@ -257,6 +260,10 @@ endif()
 # direct Client linkage is intentionally unavailable.
 add_custom_target(prism-all-examples
   DEPENDS ${_prism_supported_example_targets})
+if(TARGET prism-rklocal-api-test)
+  add_dependencies(prism-all-examples prism-rklocal-api-test prism-rklocal-api-parity-test
+    prism-rklocal-hardware-test)
+endif()
 
 unset(_prism_sdk_include)
 unset(_prism_sdk_runtime)
