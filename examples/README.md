@@ -9,6 +9,13 @@ opt-in.
 
 ## Build
 
+New in 1.1.0: `prism-gnss-rtk-status` is a read-only Host snapshot example.
+On-device `prism-rklocal-capture` extracts four JPEG images and IMU samples;
+`prism-rklocal-gnss-status` queries GNSS/PPS without starting capture. Build just
+these C examples with `cmake -S examples/rklocal -B build/rklocal`.
+See [RK-local commands, units and ownership](../docs/rk-local-sdk.md) and
+[GNSS/RTK interfaces](../docs/gnss-rtk.md).
+
 Build all examples from the repository root:
 
 ```bash
@@ -53,7 +60,7 @@ Set and verify device time:
 `--sync-time` is an administrative operation. The host clock must be correct,
 and all Camera, IMU, and LiDAR streams must be stopped. On Windows, this
 example also demonstrates loading `prism_usb_sdk.dll` and validating Runtime
-API v5 before calling it.
+API v12 before calling it.
 
 ## `prism-camera-imu-capture`
 
@@ -137,7 +144,7 @@ is checked by a real compiler instead of appearing only in Markdown snippets:
 | `prism-configuration-api-examples` | `configuration_api_examples.cpp` | Linux, macOS | Configuration, exposure, acquisition, LiDAR network, low-level command, and upgrade |
 | `prism-stream-api-examples` | `stream_api_examples.cpp` | Linux, macOS | `ImuStream` and both `LidarStream` constructors and lifecycles |
 | `prism-parser-api-examples` | `parser_api_examples.cpp` | Linux, macOS | Every public helper and frame parser |
-| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | All 45 Runtime API v5 function pointers |
+| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | All 57 Runtime API v12 function pointers |
 
 ### `prism-client-api-examples`
 
@@ -167,12 +174,12 @@ chunk parsers. Its `main()` is a safe no-op catalogue.
 
 ### `prism-windows-runtime-api-examples`
 
-This Windows-only source loads the adjacent SDK DLL, validates Runtime API v5,
-checks all 45 function pointers, and contains a compile-checked minimal call for
+This Windows-only source loads the adjacent SDK DLL, validates Runtime API v12,
+checks all 57 function pointers, and contains a compile-checked minimal call for
 every pointer. Running it requires no device and makes no device changes.
 
 The four Linux/macOS catalogue programs are safe no-op executables. The
-Windows catalogue loads the published DLL and verifies that all 45 Runtime API
+Windows catalogue loads the published DLL and verifies that all 57 Runtime API
 entries are present, but it does not open or modify a device. CTest runs these
 catalogues after compilation.
 
@@ -223,7 +230,7 @@ Device mode remains non-destructive: it does not synchronize clocks, save
 configuration, change exposure/network state, or install firmware. Close Prism
 Viewer and other USB consumers before running it.
 
-The script supports only the published runtime architectures: Ubuntu 22.04+
+The script supports only the published runtime architectures: Ubuntu 20.04+
 x86-64, macOS arm64, and Windows x64. It intentionally does not delete or clean
 the selected build directory.
 

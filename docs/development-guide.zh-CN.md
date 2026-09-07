@@ -1,8 +1,8 @@
-# Prism Host SDK 1.0.0 开发手册
+# Prism Host SDK 1.1.0 开发手册
 
 本文面向只获得公共头文件和预编译动态库的应用开发者，说明 Prism Host SDK
-`1.0.0` 的全部公开功能、生命周期、数据单位、时间戳语义和使用约束。设备端
-Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行严格版本校验，
+`1.1.0` 的全部公开功能、生命周期、数据单位、时间戳语义和使用约束。设备端
+Agent 必须为 `1.1.0`，线协议必须为 `1`；SDK 在打开设备时执行严格版本校验，
 不提供旧协议兼容模式。
 
 统一头文件：
@@ -31,7 +31,7 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 - [Stream 包装类](#api-stream-wrappers)
 - [Free helper 和 parser](#api-helpers-parsers)
 - [API 与头文件索引](#sdk-header-index)
-- [Windows Runtime API v5](#sdk-windows-runtime)
+- [Windows Runtime API v12](#sdk-windows-runtime)
 
 <a id="api-client-control"></a>
 ### Client 生命周期和基础控制
@@ -141,8 +141,8 @@ Agent 必须为 `1.0.0`，线协议必须为 `1`；SDK 在打开设备时执行�
 | `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-system-upgrade) |
 | `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [全部 parser](#sdk-parsers) | [示例](interface-examples.zh-CN.md#example-system-upgrade) |
 
-Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, ...)`；全部 45 个字段
-已在 [Windows Runtime API v5](#sdk-windows-runtime) 中按直接 API 分组映射。
+Windows Runtime API v12 对应函数指针的最小形式是 `api->field(client, ...)`；全部 57 个字段
+已在 [Windows Runtime API v12](#sdk-windows-runtime) 中按直接 API 分组映射。
 
 <a id="sdk-header-index"></a>
 ## API 索引
@@ -159,7 +159,7 @@ Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, 
 | `time_sync.hpp` | 时间测量与设置结果 |
 | `update.hpp` | 完整系统升级包、进度、状态与 parser |
 | `wifi.hpp` | Wi‑Fi AP 状态与 parser |
-| `runtime_api.hpp` | Windows Runtime API v5 |
+| `runtime_api.hpp` | Windows Runtime API v12 |
 
 可编译的完整示例：
 
@@ -170,9 +170,9 @@ Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, 
 - [配置、曝光、采集、网络与升级 API 目录](../examples/configuration_api_examples.cpp)；
 - [高级 Stream API 目录](../examples/stream_api_examples.cpp)；
 - [helper 与 parser API 目录](../examples/parser_api_examples.cpp)；
-- [Windows Runtime API v5 目录](../examples/windows_runtime_api_examples.cpp)。
+- [Windows Runtime API v12 目录](../examples/windows_runtime_api_examples.cpp)。
 
-每个公开 Client 操作、Stream 接口、parser 和 Runtime API v5 函数指针，都可以从上方
+每个公开 Client 操作、Stream 接口、parser 和 Runtime API v12 函数指针，都可以从上方
 快速目录跳转到对应示例和下方详细章节。8 个源文件按功能类别集中，避免为每个便利重载
 复制一个几乎相同的 executable；GitHub Actions 平台矩阵会编译全部源文件。
 
@@ -181,15 +181,15 @@ Windows Runtime API v5 对应函数指针的最小形式是 `api->field(client, 
 
 | 平台 | 架构 | 使用方式 |
 | --- | --- | --- |
-| Ubuntu 22.04+ | x86-64 或 arm64 | 链接 `libprism_usb_sdk.so` 或 `libprism_usb_sdk.a`，使用完整 `Client` API |
+| Ubuntu 20.04+ | x86-64 或 arm64 | 链接 `libprism_usb_sdk.so` 或 `libprism_usb_sdk.a`，使用完整 `Client` API |
 | macOS 13+ | Apple Silicon arm64 | 链接 SDK dylib，并随程序部署 libusb dylib，使用完整 `Client` API |
-| Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v5 调用 |
+| Windows 10/11 | x64、MSVC 14.x | `LoadLibraryExW` 加载 DLL，通过 Runtime API v12 调用 |
 
 Windows 发布包不包含 import library，不能直接链接 `Client` 成员函数。完整、安全的
 DLL 加载流程见
 [`examples/device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)。
 
-Windows Runtime API v5 暴露大部分常用控制、采集和解析功能，但不暴露以下接口：
+Windows Runtime API v12 暴露大部分常用控制、采集和解析功能，但不暴露以下接口：
 
 - `boardTime()`、`ping()`；
 - `synchronizeTimeNtpLike()`；
@@ -209,7 +209,7 @@ Windows 可使用函数表中的通用读写、`read_frame` 和 parser 实现等
 ### 2.1 查询 SDK 版本
 
 ```cpp
-std::cout << prism::hostSdkVersion() << '\n';  // 1.0.0
+std::cout << prism::hostSdkVersion() << '\n';  // 1.1.0
 ```
 
 <a id="sdk-device-open"></a>
@@ -508,9 +508,10 @@ std::cout << "before=" << result.before.offset_us << '\n'
           << "verified=" << result.verified << '\n';
 ```
 
-该操作修改 RK `CLOCK_REALTIME`、Ethernet PTP 硬件时钟和 RK RTC，不修改主机时钟，
-也不替代 sensor-board 的 GPS/NMEA+PPS 同步。主机时间不准确时禁止调用。验证失败会
-抛异常；正常返回时 `verified` 应为 true。
+Sensor Board 始终是 UTC 主时钟；仅当外部 GNSS 尚未同步时，Agent 才将主机 UTC
+提交给 Sensor Board，否则返回错误。RK 跟随 Sensor Board，再提供以太网 PTP。
+无需 RTC，不修改主机时钟。主机时间不准确时禁止调用。验证失败会抛异常；
+正常返回时 `verified` 应为 true。
 
 `sample_count` 和 `verification_sample_count` 的允许范围均为 3..64，
 `timeout_ms` 为 100..10000。
@@ -1005,7 +1006,7 @@ try {
 Client 断连后不要继续使用旧 Stream wrapper；销毁它们，重新枚举并建立新的 Client。
 
 <a id="sdk-windows-runtime"></a>
-## 16. Windows Runtime API v5
+## 16. Windows Runtime API v12
 
 运行时入口：
 
@@ -1018,7 +1019,7 @@ if (entry == nullptr) {
 }
 const prism::RuntimeApi* api = entry(prism::kRuntimeApiVersion);
 if (api == nullptr) {
-  throw std::runtime_error("Prism Runtime API v5 不受支持");
+  throw std::runtime_error("Prism Runtime API v12 不受支持");
 }
 ```
 
@@ -1026,7 +1027,7 @@ if (api == nullptr) {
 
 - `abi_version == 4`；
 - `struct_size >= sizeof(prism::RuntimeApi)`；
-- `sdk_version == "1.0.0"`；
+- `sdk_version == "1.1.0"`；
 - `api->msvc_version / 100 == _MSC_VER / 100`，即 DLL 和应用属于兼容的
   MSVC 14.x runtime family；
 - 将要使用的函数指针非空。

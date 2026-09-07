@@ -6,7 +6,7 @@
 ## Linux 与 macOS 基本流程
 
 本节的 `prism::Client` 直连接口适用于 Linux 和 macOS。Windows 包不包含 import
-library，Windows 应用必须按 `examples/device_info_time_sync.cpp` 使用 Runtime API v5。
+library，Windows 应用必须按 `examples/device_info_time_sync.cpp` 使用 Runtime API v12。
 
 统一包含：
 
@@ -52,7 +52,7 @@ Linux 和 macOS 可用 `synchronizeTimeNtpLike()` 测量设备相对主机的时
 const auto measurement = client.synchronizeTimeNtpLike();
 ```
 
-该测量接口同样要求 Camera、板载 IMU 和 LiDAR 数据流全部停止。Runtime API v5 没有
+该测量接口同样要求 Camera、板载 IMU 和 LiDAR 数据流全部停止。Runtime API v12 没有
 向 Windows 用户暴露这个只测量接口。
 
 `synchronizeSystemTime()` 以主机墙钟为准校准设备，并回读验证：
@@ -72,9 +72,9 @@ const auto result = client.synchronizeSystemTime();
 4. 检查 `verified`、残余偏差和各时钟状态；
 5. 操作结束后再重新开始采集。
 
-该操作修改 RK `CLOCK_REALTIME`、Ethernet PTP 硬件时钟和 RK RTC，不会修改主机时钟。
-它不会改变 sensor-board 的 GPS/NMEA 和 PPS 时间源，也不会自动让
-`sensor_board_time_synced` 变为 true。录制过程中禁止跳变设备时间。
+Sensor Board 始终是主时钟。主机 UTC 经 Agent 送到 Sensor Board，再由其 PPS/NMEA
+同步 RK，RK 向以太网提供 PTP 时间。外部 GNSS 已同步时 Agent 拒绝主机校时。
+不依赖 RTC，也不修改主机时钟。录制过程中禁止跳变设备时间。
 
 ## 线程与独占访问
 

@@ -1,9 +1,9 @@
-# Prism Host SDK 1.0.0 Developer Guide
+# Prism Host SDK 1.1.0 Developer Guide
 
 This guide is for application developers who receive only the public headers
 and prebuilt shared libraries plus Linux static archives. It describes every public feature in Prism Host
-SDK `1.0.0`, including lifecycle rules, data units, timestamp semantics, and
-usage constraints. The device Agent must be `1.0.0` and the wire protocol must
+SDK `1.1.0`, including lifecycle rules, data units, timestamp semantics, and
+usage constraints. The device Agent must be `1.1.0` and the wire protocol must
 be `1`. The SDK performs strict version validation when it opens a device and
 does not provide a legacy-protocol compatibility mode.
 
@@ -35,7 +35,7 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 - [Stream wrappers](#api-stream-wrappers)
 - [Free helpers and parsers](#api-helpers-parsers)
 - [API and header index](#sdk-header-index)
-- [Windows Runtime API v5](#sdk-windows-runtime)
+- [Windows Runtime API v12](#sdk-windows-runtime)
 
 <a id="api-client-control"></a>
 ### Client lifecycle and base control
@@ -145,9 +145,9 @@ follow the idle-state, explicit-confirmation, and rollback rules described later
 | `parseUpgradeStatus` | `auto value = prism::parseUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
 | `parseSensorBoardUpgradeStatus` | `auto value = prism::parseSensorBoardUpgradeStatus(frame);` | [All parsers](#sdk-parsers) | [Example](interface-examples.md#example-system-upgrade) |
 
-For Windows Runtime API v5, each minimal call has the form `api->field(client, ...)`.
-All 45 function-pointer fields are grouped by their direct-API equivalent in
-[Windows Runtime API v5](#sdk-windows-runtime).
+For Windows Runtime API v12, each minimal call has the form `api->field(client, ...)`.
+All 57 function-pointer fields are grouped by their direct-API equivalent in
+[Windows Runtime API v12](#sdk-windows-runtime).
 
 <a id="sdk-header-index"></a>
 ## API index
@@ -164,7 +164,7 @@ All 45 function-pointer fields are grouped by their direct-API equivalent in
 | `time_sync.hpp` | Time-measurement and time-setting results |
 | `update.hpp` | Complete system package, progress, status, and parsers |
 | `wifi.hpp` | Wi-Fi AP status and parser |
-| `runtime_api.hpp` | Windows Runtime API v5 |
+| `runtime_api.hpp` | Windows Runtime API v12 |
 
 Complete buildable examples:
 
@@ -175,9 +175,9 @@ Complete buildable examples:
 - [configuration, exposure, acquisition, network, and update API catalogue](../examples/configuration_api_examples.cpp);
 - [high-level Stream API catalogue](../examples/stream_api_examples.cpp);
 - [helper and parser API catalogue](../examples/parser_api_examples.cpp);
-- [Windows Runtime API v5 catalogue](../examples/windows_runtime_api_examples.cpp).
+- [Windows Runtime API v12 catalogue](../examples/windows_runtime_api_examples.cpp).
 
-Every public Client operation, Stream interface, parser, and Runtime API v5
+Every public Client operation, Stream interface, parser, and Runtime API v12
 function pointer is linked from the quick directory above to a corresponding
 example and to its detailed chapter below. The eight source files are grouped
 by feature rather than duplicating a nearly identical executable for every
@@ -189,16 +189,16 @@ platform matrix.
 
 | Platform | Architecture | API model |
 | --- | --- | --- |
-| Ubuntu 22.04+ | x86-64 or arm64 | Link `libprism_usb_sdk.so` or `libprism_usb_sdk.a` and use the complete `Client` API |
+| Ubuntu 20.04+ | x86-64 or arm64 | Link `libprism_usb_sdk.so` or `libprism_usb_sdk.a` and use the complete `Client` API |
 | macOS 13+ | Apple Silicon arm64 | Link the SDK dylib, deploy the libusb dylib beside it, and use the complete `Client` API |
-| Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v5 |
+| Windows 10/11 | x64, MSVC 14.x | Load the DLL with `LoadLibraryExW` and call Runtime API v12 |
 
 The Windows package does not include an import library, so applications cannot
 link directly to `Client` member functions. See
 [`examples/device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)
 for a complete and safe DLL-loading flow.
 
-Windows Runtime API v5 exposes most common control, acquisition, and parsing
+Windows Runtime API v12 exposes most common control, acquisition, and parsing
 features, but it does not expose:
 
 - `boardTime()` or `ping()`;
@@ -224,7 +224,7 @@ Section 16 maps the Windows function table to the direct API.
 ### 2.1 Query the SDK version
 
 ```cpp
-std::cout << prism::hostSdkVersion() << '\n';  // 1.0.0
+std::cout << prism::hostSdkVersion() << '\n';  // 1.1.0
 ```
 
 <a id="sdk-device-open"></a>
@@ -543,11 +543,11 @@ std::cout << "before=" << result.before.offset_us << '\n'
           << "verified=" << result.verified << '\n';
 ```
 
-This operation changes RK `CLOCK_REALTIME`, the Ethernet PTP hardware clock,
-and the RK RTC. It does not change the host clock and does not replace
-sensor-board GPS/NMEA+PPS synchronization. Do not call it when the host time is
-not trustworthy. A verification failure throws; after a normal return,
-`verified` should be true.
+Sensor Board remains the UTC master. The Agent submits host UTC to Sensor
+Board only while external GNSS is not synchronized; otherwise it rejects the
+request. RK follows Sensor Board and supplies Ethernet PTP. No RTC is required.
+Do not call it when host time is untrustworthy. A verification failure throws;
+after a normal return, `verified` should be true.
 
 Both sample counts accept 3..64. `timeout_ms` accepts 100..10000.
 
@@ -1094,7 +1094,7 @@ Do not continue using old stream wrappers after a `Client` disconnect. Destroy
 them, enumerate again, and create a new `Client`.
 
 <a id="sdk-windows-runtime"></a>
-## 16. Windows Runtime API v5
+## 16. Windows Runtime API v12
 
 Resolve the runtime entry point:
 
@@ -1107,7 +1107,7 @@ if (entry == nullptr) {
 }
 const prism::RuntimeApi* api = entry(prism::kRuntimeApiVersion);
 if (api == nullptr) {
-  throw std::runtime_error("Prism Runtime API v5 is unavailable");
+  throw std::runtime_error("Prism Runtime API v12 is unavailable");
 }
 ```
 
@@ -1115,7 +1115,7 @@ Before making a call, verify:
 
 - `abi_version == 4`;
 - `struct_size >= sizeof(prism::RuntimeApi)`;
-- `sdk_version == "1.0.0"`;
+- `sdk_version == "1.1.0"`;
 - `api->msvc_version / 100 == _MSC_VER / 100`, proving that the DLL and
   application use a compatible MSVC 14.x runtime family;
 - every function pointer that the application will use is non-null.

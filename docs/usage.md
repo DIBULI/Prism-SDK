@@ -8,7 +8,7 @@ streaming, parsing, update, and Windows Runtime API entry, see the
 
 The direct `prism::Client` API shown in this section is linkable with the Linux
 and macOS runtimes. The Windows package intentionally has no import library;
-Windows applications must use Runtime API v5 as shown in
+Windows applications must use Runtime API v12 as shown in
 `examples/device_info_time_sync.cpp`.
 
 Include the umbrella header:
@@ -58,7 +58,7 @@ const auto measurement = client.synchronizeTimeNtpLike();
 ```
 
 This measurement is also idle-only: Camera, onboard IMU, and LiDAR transfers
-must all be stopped. Runtime API v5 does not expose this measurement-only call
+must all be stopped. Runtime API v12 does not expose this measurement-only call
 to Windows consumers.
 
 `synchronizeSystemTime()` makes the host wall clock authoritative for the
@@ -80,11 +80,10 @@ Before setting time:
 4. check `verified`, the residual offset, and clock-status fields;
 5. restart acquisition after the operation completes.
 
-The operation changes RK `CLOCK_REALTIME`, the Ethernet PTP hardware clock, and
-the RK RTC; it does not change the host clock. It does not change the
-sensor-board GPS/NMEA and PPS time source, and it does not make
-`sensor_board_time_synced` true by itself. Never step device time during a
-recording.
+Sensor Board remains the master; host UTC is submitted through the Agent to
+Sensor Board, then RK follows Sensor Board PPS/NMEA and feeds Ethernet PTP.
+The Agent rejects host time-setting while external GNSS is synchronized.
+No RTC is required. Never step device time during a recording.
 
 ## Threading and exclusive access
 

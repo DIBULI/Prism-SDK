@@ -1,6 +1,10 @@
-# Prism Host SDK 1.0.0
+# Prism Host SDK 1.1.0
 
-[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+同时包含 **RK-local SDK 1.1.0**：设备本机 C 接口、ARM64 静态库、相机/IMU
+采集示例和 GNSS 状态查询示例。见 [RK-local 使用说明](docs/rk-local-sdk.zh-CN.md)
+及 [1.1.0 GNSS/RTK 接口说明](docs/gnss-rtk.zh-CN.md)。
+
+[![Build SDK Examples](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml)
 
 [English](README.md)
 
@@ -15,7 +19,7 @@ Prism-SDK/
 ├── include/prism/                 C++17 公共头文件
 ├── runtime/
 │   ├── linux-x64/                 Ubuntu 20.04+ x86-64 .so 与 .a
-│   ├── linux-arm64/               Ubuntu 22.04+ arm64 .so 与 .a
+│   ├── linux-arm64/               Ubuntu 20.04+ arm64 .so 与 .a
 │   ├── ros/
 │   │   ├── linux-x64/             所有受支持 ROS/Ubuntu x86-64 版本
 │   │   └── linux-arm64/           所有受支持 ROS/Ubuntu ARM64 版本
@@ -30,24 +34,24 @@ Prism-SDK/
 
 ## 兼容要求
 
-- 分发版本：`1.0.0`
-- Host SDK 运行时/ABI：`1.0.0`
-- Runtime API：`5`
+- 分发版本：`1.1.0`
+- Host SDK 运行时/ABI：`1.1.0`
+- Runtime API：`12`
 - USB protocol：`1`
-- 设备 Agent：必须为 `1.0.0`
+- 设备 Agent：必须为 `1.1.0`
 - C++：C++17 或更新版本
 - CMake：3.20 或更新版本
 
-1.0.0 分发包面向全部受支持平台打包 Host SDK 1.0.0 接口，并包含从同一
-1.0.0 SDK 源码基线编译的 Linux ARM64 产物。运行时严格执行 SDK 1.0.0 与
-Agent 1.0.0 的版本握手。不要混用不同版本的头文件和库，也不要连接非 1.0.0
+1.1.0 分发包面向全部受支持平台打包 Host SDK 1.1.0 接口，并包含从同一
+1.1.0 SDK 源码基线编译的 Linux ARM64 产物。运行时严格执行 SDK 1.1.0 与
+Agent 1.1.0 的版本握手。不要混用不同版本的头文件和库，也不要连接非 1.1.0
 的 Agent。
 
 ### 各 Release Tag 兼容关系
 
 | SDK Release Tag | 分发版本 | Host SDK 运行时/ABI | 支持的 Agent | 已验证的 sensor-board | USB 协议 |
 | --- | --- | --- | --- | --- | --- |
-| `v1.0.0` | `1.0.0` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+| `v1.1.0` | `1.1.0` | `1.1.0` | `1.1.0` | `0.4.26` | `1` |
 
 Host SDK 会在打开设备时拒绝不兼容的 Agent。Agent 会上报 sensor-board 版本，
 但 Host SDK 不会单独拒绝该版本，因此请使用表中对应 Release Tag 已验证的
@@ -110,14 +114,15 @@ python3 scripts/test_all_examples.py --build-dir build-all-examples
 
 Visual Studio 等多配置生成器会把程序放在所选配置目录中，例如 `Release`。
 
-时间同步会修改 RK `CLOCK_REALTIME`、Ethernet PTP 硬件时钟和 RK RTC。使用
-`--sync-time` 前必须停止 Camera、IMU 和 LiDAR 数据流，并确认主机时间准确。该操作
-不会替代 sensor-board 的 GPS/NMEA 与 PPS 同步源。
+Sensor Board 是设备时间主时钟；RK 跟随其 PPS/NMEA，并向以太网提供 PTP 时间。
+只有外部 GNSS 尚未锁定时才允许通过 `--sync-time` 向这条链路提交主机 UTC；
+GPS 授时成功时 Agent 会拒绝请求。先停止全部采集并确认主机时间准确。
+打开 SDK 连接不会自动校时，也不要求板上贴装 RTC。
 
 ## 文档
 
-- [1.0.0 更新说明](docs/update/v1.0.0.zh-CN.md)
-- [Release 1.0.0 update notes](docs/update/v1.0.0.md)
+- [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
+- [Release 1.1.0 update notes](docs/update/v1.1.0.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
 - [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)

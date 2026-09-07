@@ -1,6 +1,6 @@
-# Prism Host SDK 1.0.0
+# Prism Host SDK 1.1.0
 
-[![Build SDK Examples](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/xiangfuli/Prism-SDK/actions/workflows/build.yml)
+[![Build SDK Examples](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml)
 
 [中文说明](README.zh-CN.md)
 
@@ -10,6 +10,11 @@ platforms, Linux x86-64/arm64 static libraries, end-user documentation, and
 CMake examples. It does not contain the SDK implementation or device firmware
 source code.
 
+It also includes the **RK-local SDK 1.1.0** C API and ARM64 static library for
+on-device Camera/IMU acquisition and GNSS/RTK queries. See the
+[RK-local guide](docs/rk-local-sdk.md) for the capture and GNSS examples.
+The [1.1.0 service guide](docs/gnss-rtk.md) covers new Host and local interfaces.
+
 ## Package contents
 
 ```text
@@ -17,7 +22,7 @@ Prism-SDK/
 ├── include/prism/                 Public C++17 headers
 ├── runtime/
 │   ├── linux-x64/                 Ubuntu 20.04+ x86-64 .so and .a
-│   ├── linux-arm64/               Ubuntu 22.04+ arm64 .so and .a
+│   ├── linux-arm64/               Ubuntu 20.04+ arm64 .so and .a
 │   ├── ros/
 │   │   ├── linux-x64/             All supported ROS/Ubuntu x86-64 releases
 │   │   └── linux-arm64/           All supported ROS/Ubuntu ARM64 releases
@@ -32,25 +37,25 @@ Prism-SDK/
 
 ## Compatibility
 
-- Distribution release: `1.0.0`
-- Host SDK runtime/ABI: `1.0.0`
-- Runtime API: `5`
+- Distribution release: `1.1.0`
+- Host SDK runtime/ABI: `1.1.0`
+- Runtime API: `12`
 - USB protocol: `1`
-- Device Agent: exactly `1.0.0`
+- Device Agent: exactly `1.1.0`
 - Language: C++17 or later
 - CMake: 3.20 or later
 
-Release 1.0.0 packages the Host SDK 1.0.0 interface for all supported platforms,
-including Linux ARM64 deliverables compiled from the same 1.0.0 SDK source
-baseline. The runtime intentionally performs a strict 1.0.0 SDK/Agent
+Release 1.1.0 packages the Host SDK 1.1.0 interface for all supported platforms,
+including Linux ARM64 deliverables compiled from the same 1.1.0 SDK source
+baseline. The runtime intentionally performs a strict 1.1.0 SDK/Agent
 handshake. Do not mix headers and libraries from different releases, or use an
-Agent other than 1.0.0.
+Agent other than 1.1.0.
 
 ### Compatibility by release tag
 
 | SDK release tag | Distribution | Host SDK runtime/ABI | Supported Agent | Qualified sensor-board | USB protocol |
 | --- | --- | --- | --- | --- | --- |
-| `v1.0.0` | `1.0.0` | `1.0.0` | `1.0.0` | `0.4.25` | `1` |
+| `v1.1.0` | `1.1.0` | `1.1.0` | `1.1.0` | `0.4.26` | `1` |
 
 The Host SDK rejects an incompatible Agent during the opening handshake. The
 sensor-board version is reported by the Agent but is not independently rejected
@@ -120,15 +125,16 @@ Run the same example and synchronize device time to the host:
 On multi-configuration generators, such as Visual Studio, the executable is
 under the selected configuration directory (for example `Release`).
 
-Time synchronization changes RK `CLOCK_REALTIME`, the Ethernet PTP hardware
-clock, and the RK RTC. All Camera, IMU, and LiDAR streams must be stopped, and
-the host clock must be correct before using `--sync-time`. It does not replace
-the sensor-board GPS/NMEA and PPS synchronization source.
+Sensor Board is the device time master; RK follows its disciplined PPS/NMEA
+and supplies PTP time to Ethernet. `--sync-time` submits host UTC to this chain
+only when external GNSS time is not locked; the Agent rejects it while GPS is
+synchronized. Stop all capture streams and verify host time first. Opening a
+client never requests time synchronization. No populated RTC is required.
 
 ## Documentation
 
-- [Release 1.0.0 update notes](docs/update/v1.0.0.md)
-- [1.0.0 更新说明](docs/update/v1.0.0.zh-CN.md)
+- [Release 1.1.0 update notes](docs/update/v1.1.0.md)
+- [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
 - [Complete SDK development guide](docs/development-guide.md)
 - [Per-interface SDK examples](docs/interface-examples.md)
 - [完整 SDK 开发手册](docs/development-guide.zh-CN.md)

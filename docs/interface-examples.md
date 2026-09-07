@@ -34,7 +34,7 @@ catalogue:
 - [Configuration, acquisition, network, and update](../examples/configuration_api_examples.cpp)
 - [High-level stream wrappers](../examples/stream_api_examples.cpp)
 - [Helpers and all public parsers](../examples/parser_api_examples.cpp)
-- [All 45 Windows Runtime API v5 entries](../examples/windows_runtime_api_examples.cpp)
+- [All 57 Windows Runtime API v12 entries](../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions builds every applicable catalogue on each supported platform.
 
@@ -149,8 +149,9 @@ if (user_confirmed_clock_write) {
 }
 ```
 
-The measurement call never modifies a clock. System synchronization changes
-RK system/PTP/RTC time and therefore requires a correct host clock.
+The measurement call never modifies a clock. Host time-setting requires a
+correct host clock and is rejected while GNSS is synchronized. Sensor Board
+remains master; RK follows its PPS/NMEA and provides Ethernet PTP. No RTC is required.
 
 <a id="example-wifi"></a>
 ### Read and explicitly change Wi-Fi hotspot state
@@ -524,15 +525,15 @@ Strict parsers throw if the frame type, protocol version, or payload size is
 wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 `VideoChunk` owns its byte vector.
 
-## Windows Runtime API v5
+## Windows Runtime API v12
 
 <a id="example-windows-runtime"></a>
-### Load the table and call all 45 function-pointer interfaces
+### Load the table and call all 57 function-pointer interfaces
 
 The complete buildable Windows loader is
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp). After it
 loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
-ABI v5/SDK 1.0.0/MSVC compatibility, and stores the result in `api`, the
+ABI v12/SDK 1.1.0/MSVC compatibility, and stores the result in `api`, the
 function-pointer calls have these direct forms:
 
 | Runtime API field | Corresponding example |
@@ -584,6 +585,6 @@ function-pointer calls have these direct forms:
 | `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 Check every function pointer for null before use. Keep the DLL loaded until all
-SDK-returned objects and the Client have been destroyed. Runtime API v5 is a
+SDK-returned objects and the Client have been destroyed. Runtime API v12 is a
 subset of the direct Linux/macOS API; interfaces absent from this table are not
 available through the packaged Windows DLL.

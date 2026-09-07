@@ -8,7 +8,7 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
 endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  project(PrismSdkExamples VERSION 1.0.0 LANGUAGES CXX)
+  project(PrismSdkExamples VERSION 1.1.0 LANGUAGES C CXX)
   include(CTest)
 endif()
 
@@ -161,19 +161,22 @@ set(_prism_direct_api_example_sources
   configuration_api_examples.cpp
   lidar_capture.cpp
   parser_api_examples.cpp
-  stream_api_examples.cpp)
+  stream_api_examples.cpp
+  gnss_rtk_status.cpp)
+set(_prism_rklocal_example_sources rklocal_capture.c rklocal_gnss_status.c)
 set(_prism_windows_runtime_example_sources
   windows_runtime_api_examples.cpp)
 set(_prism_registered_example_sources
   ${_prism_cross_platform_example_sources}
   ${_prism_direct_api_example_sources}
-  ${_prism_windows_runtime_example_sources})
+  ${_prism_windows_runtime_example_sources}
+  ${_prism_rklocal_example_sources})
 
 # Keep the source inventory strict: adding examples/*.cpp without registering a
 # build target must fail configuration instead of silently escaping CI.
 file(GLOB _prism_discovered_example_sources
   RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
-  CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+  CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/*.c")
 list(SORT _prism_discovered_example_sources)
 list(SORT _prism_registered_example_sources)
 if(NOT "${_prism_discovered_example_sources}" STREQUAL
@@ -208,13 +211,15 @@ else()
   prism_add_example(prism-lidar-capture lidar_capture.cpp)
   prism_add_example(prism-parser-api-examples parser_api_examples.cpp)
   prism_add_example(prism-stream-api-examples stream_api_examples.cpp)
+  prism_add_example(prism-gnss-rtk-status gnss_rtk_status.cpp)
   list(APPEND _prism_supported_example_targets
     prism-camera-imu-capture
     prism-client-api-examples
     prism-configuration-api-examples
     prism-lidar-capture
     prism-parser-api-examples
-    prism-stream-api-examples)
+    prism-stream-api-examples
+    prism-gnss-rtk-status)
 
   if(BUILD_TESTING)
     add_test(NAME prism-camera-frame-tracker-self-test
@@ -227,7 +232,24 @@ else()
       COMMAND prism-parser-api-examples)
     add_test(NAME prism-stream-api-examples-smoke
       COMMAND prism-stream-api-examples)
+    add_test(NAME prism-gnss-rtk-status-help COMMAND prism-gnss-rtk-status --help)
   endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
+   CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+  include("${PRISM_SDK_ROOT}/cmake/PrismRkLocalSdk.cmake")
+  foreach(_example capture gnss_status)
+    string(REPLACE "_" "-" _name "${_example}")
+    add_executable(prism-rklocal-${_name} rklocal_${_example}.c)
+    target_link_libraries(prism-rklocal-${_name} PRIVATE Prism::RkLocal)
+    target_compile_features(prism-rklocal-${_name} PRIVATE c_std_11)
+    target_compile_options(prism-rklocal-${_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    list(APPEND _prism_supported_example_targets prism-rklocal-${_name})
+    if(BUILD_TESTING)
+      add_test(NAME prism-rklocal-${_name}-help COMMAND prism-rklocal-${_name} --help)
+    endif()
+  endforeach()
 endif()
 
 # CI builds this target explicitly. It represents every example supported by

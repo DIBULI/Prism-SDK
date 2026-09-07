@@ -5,13 +5,13 @@
 | 主机平台 | 架构 | 最低环境 | 库文件 |
 | --- | --- | --- | --- |
 | Linux | x86-64 | Ubuntu 20.04 或更新版本 | `runtime/linux-x64/libprism_usb_sdk.so` / `.a` |
-| Linux | arm64 | Ubuntu 22.04 或更新版本 | `runtime/linux-arm64/libprism_usb_sdk.so` / `.a` |
+| Linux | arm64 | Ubuntu 20.04 或更新版本 | `runtime/linux-arm64/libprism_usb_sdk.so` / `.a` |
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-x86-64 动态库采用 GLIBC 2.25/GLIBCXX 3.4.22 基线，静态包含 OpenSSL，并且只要求
-稳定的 `libusb-1.0.so.0` 外部 ABI。ARM64 动态库要求 GLIBC 2.34、OpenSSL 3 和
-libusb 1.0。
+两个 Linux 动态库均采用 Ubuntu 20.04/GCC 9 构建，静态包含 OpenSSL，动态依赖
+libusb 及系统 C/C++ 运行库。来源见 ORIGIN.md。RK-local 静态库仅依赖 pthread，
+不需要 USB 或 OpenSSL。
 
 ## Linux x86-64 与 arm64
 
@@ -22,8 +22,11 @@ sudo apt-get update
 sudo apt-get install -y build-essential cmake libusb-1.0-0
 ```
 
-使用 ARM64 动态库时，Ubuntu 22.04 还需安装 `libssl3`，Ubuntu 24.04 则安装
-`libssl3t64`。统一的 x86-64 动态库没有 OpenSSL 动态依赖。
+Ubuntu 20.04 自带 CMake 3.16，而示例需要 3.20 以上。可安装 pip 后执行
+`python3 -m pip install --user -i https://pypi.tuna.tsinghua.edu.cn/simple cmake==3.31.6`，
+并将 `$HOME/.local/bin` 加入 PATH；CI 在 20.04 使用 CMake 3.31.6 验证。
+
+两个架构的 Host 动态库均不需要额外安装 OpenSSL 动态库。
 
 安装 udev 规则，使普通用户能够打开 VID:PID `2207:1201`：
 
@@ -80,12 +83,12 @@ libusb-1.0.0.dylib
 ## Windows x64
 
 使用 Visual Studio 2022 C++ x64 工具链和 CMake。公共 C++ ABI 要求 MSVC 14.x 和
-完全匹配的 SDK 1.0.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
+完全匹配的 SDK 1.1.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
 2015-2022 x64 Redistributable，并确保 Prism USB 接口使用 Windows WinUSB 驱动。将
 `prism_usb_sdk.dll` 放在应用程序旁。
 
 本仓库只发布 DLL，不发布 import library。Windows 应用应通过 `LoadLibraryW` 加载
-DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 5。仓库
+DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 12。仓库
 示例已经实现该流程，并固定使用与 DLL 兼容的 `/MD` runtime 和 release iterator ABI，
 即使用户选择 Debug 配置也是如此。
 

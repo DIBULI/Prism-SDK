@@ -16,7 +16,7 @@
 
 namespace {
 
-constexpr char kExpectedSdkVersion[] = "1.0.0";
+constexpr char kExpectedSdkVersion[] = "1.1.0";
 
 std::wstring runtimePath() {
   std::array<wchar_t, 32768> path{};
@@ -88,6 +88,18 @@ void validateAllFunctions(const prism::RuntimeApi& api) {
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, usb_link_speed_name);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, sensor_board_error_code_name);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, parse_lidar_imu_sample);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, begin_rtk_corrections);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, send_rtk_corrections);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, end_rtk_corrections);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, rtk_correction_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, timesync_port_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, set_timesync_port_mode);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, gnss_timing_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, rtk_navigation_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, parse_rtk_navigation_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, start_rover_rtcm);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, stop_rover_rtcm);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, parse_rover_rtcm_chunk_view);
 }
 
 #undef PRISM_REQUIRE_RUNTIME_FUNCTION
@@ -146,7 +158,7 @@ class RuntimeModule {
 };
 
 // This function is compile-checked but deliberately not executed by main().
-// It provides one minimal call for every RuntimeApi v5 function pointer.
+// It provides one minimal call for every RuntimeApi v12 function pointer.
 [[maybe_unused]] void everyRuntimeApiCall(
     const prism::RuntimeApi& api, prism::Client* client,
     const prism::DeviceInfo& selected_device, const prism::Frame& frame,
@@ -206,6 +218,19 @@ class RuntimeModule {
   const char* board_error_name =
       api.sensor_board_error_code_name(info.sensor_board_error_code);
   const auto lidar_imu = api.parse_lidar_imu_sample(frame);
+  (void)api.timesync_port_status(client);
+  (void)api.set_timesync_port_mode(client, prism::TimeSyncPortMode::SensorBoardMaster);
+  (void)api.gnss_timing_status(client);
+  (void)api.rtk_navigation_status(client);
+  (void)api.parse_rtk_navigation_status(frame);
+  (void)api.begin_rtk_corrections(client);
+  const uint8_t rtcm[] = {0xd3, 0, 0}; // illustration only, not a valid correction frame
+  (void)api.send_rtk_corrections(client, rtcm, sizeof(rtcm), 3000);
+  (void)api.end_rtk_corrections(client);
+  (void)api.rtk_correction_status(client);
+  (void)api.start_rover_rtcm(client);
+  (void)api.parse_rover_rtcm_chunk_view(frame);
+  (void)api.stop_rover_rtcm(client);
   api.close_device(client);
 
   (void)devices;
@@ -254,7 +279,7 @@ int main() {
   try {
     RuntimeModule module;
     validateAllFunctions(module.api());
-    std::cout << "Validated all 45 RuntimeApi v5 function pointers.\n";
+    std::cout << "Validated all 57 RuntimeApi v12 function pointers.\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "error: " << error.what() << '\n';

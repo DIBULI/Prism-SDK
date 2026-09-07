@@ -31,7 +31,7 @@ using namespace std::chrono_literals;
 - [配置、采集、网络与升级](../examples/configuration_api_examples.cpp)
 - [高级 Stream 封装](../examples/stream_api_examples.cpp)
 - [helper 与全部公共解析器](../examples/parser_api_examples.cpp)
-- [Windows Runtime API v5 全部 45 个入口](../examples/windows_runtime_api_examples.cpp)
+- [Windows Runtime API v12 全部 57 个入口](../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions 会在每个受支持平台上编译该平台适用的全部目录程序。
 
@@ -143,8 +143,8 @@ if (user_confirmed_clock_write) {
 }
 ```
 
-测量接口不会修改任何时钟。系统同步会修改 RK system/PTP/RTC 时间，因此必须先确认主机
-时钟正确。
+测量接口不会修改任何时钟。主机校时必须保证主机 UTC 正确，GNSS 同步时会被拒绝。
+Sensor Board 始终为主时钟，RK 跟随其 PPS/NMEA 再提供以太网 PTP，不要求 RTC。
 
 <a id="example-wifi"></a>
 ### 读取并显式修改 Wi-Fi 热点状态
@@ -509,15 +509,15 @@ void parse_frame(const prism::Frame& frame) {
 严格 parser 会在 frame type、协议版本或 payload 大小错误时抛异常。`VideoChunkView`
 只在源 `Frame` 存活时有效；`VideoChunk` 拥有自己的字节 vector。
 
-## Windows Runtime API v5
+## Windows Runtime API v12
 
 <a id="example-windows-runtime"></a>
-### 加载表并调用全部 45 个函数指针接口
+### 加载表并调用全部 57 个函数指针接口
 
 完整可编译的 Windows loader 位于
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp)。程序加载
-`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v5、SDK
-1.0.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
+`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v12、SDK
+1.1.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
 
 | Runtime API 字段 | 对应例子 |
 | --- | --- |
@@ -568,5 +568,5 @@ void parse_frame(const prism::Frame& frame) {
 | `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 使用前必须检查每个函数指针非空。直到所有 SDK 返回对象和 Client 都销毁后才能卸载 DLL。
-Runtime API v5 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
+Runtime API v12 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
 调用。
