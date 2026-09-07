@@ -85,7 +85,7 @@ def expected_targets(kind: str) -> list[str]:
             "prism-device-info-time-sync",
             "prism-windows-runtime-api-examples",
         ]
-    return [
+    targets = [
         "prism-device-info-time-sync",
         "prism-camera-imu-capture",
         "prism-client-api-examples",
@@ -93,7 +93,11 @@ def expected_targets(kind: str) -> list[str]:
         "prism-lidar-capture",
         "prism-parser-api-examples",
         "prism-stream-api-examples",
+        "prism-gnss-rtk-status",
     ]
+    if kind == "linux" and platform.machine().lower() in {"arm64", "aarch64"}:
+        targets.extend(["prism-rklocal-capture", "prism-rklocal-gnss-status"])
+    return targets
 
 
 def configure(build_dir: Path, kind: str, generator: str | None) -> None:
@@ -227,7 +231,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--build-dir",
         type=Path,
-        default=ROOT / "build-all-examples",
+        default=ROOT / "build" / "all-examples",
         help="CMake build directory (default: %(default)s)",
     )
     parser.add_argument(

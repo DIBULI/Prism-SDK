@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - codex/sdk-1.1.0
     tags:
       - "v*"
   pull_request:
@@ -48,6 +49,7 @@ jobs:
 
       - name: Install build and runtime dependencies
         run: |
+          sudo bash scripts/configure_tsinghua_apt.sh
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             libusb-1.0-0-dev libssl-dev
@@ -98,9 +100,9 @@ jobs:
           fi
 
   linux-x64-compatibility:
-    name: Ubuntu ${{ matrix.ubuntu }} x64 unified shared runtime
+    name: Ubuntu ${{ matrix.ubuntu }} ${{ matrix.arch }} unified shared runtime
     needs: integrity
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     container: ubuntu:${{ matrix.ubuntu }}
     defaults:
       run:
@@ -110,18 +112,28 @@ jobs:
       fail-fast: false
       matrix:
         ubuntu: ["20.04", "22.04", "24.04", "26.04"]
+        arch: [x64, arm64]
+        include:
+          - arch: x64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Install build and runtime dependencies
         env:
           UBUNTU_VERSION: ${{ matrix.ubuntu }}
         run: |
           export DEBIAN_FRONTEND=noninteractive
+          for sources_file in /etc/apt/sources.list /etc/apt/sources.list.d/*.sources; do
+            [ -f "$sources_file" ] || continue
+            sed -i -E 's#https?://([a-z0-9.-]+\.)?(archive|security).ubuntu.com/ubuntu#http://mirrors.tuna.tsinghua.edu.cn/ubuntu#g; s#https?://ports.ubuntu.com/ubuntu-ports#http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports#g' "$sources_file"
+          done
           apt-get update
           apt-get install -y --no-install-recommends \
             build-essential ca-certificates cmake git \
             libusb-1.0-0-dev python3 python3-pip
           if [ "$UBUNTU_VERSION" = "20.04" ]; then
-            python3 -m pip install --no-cache-dir cmake==3.31.6
+            python3 -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple cmake==3.31.6
           fi
 
       - name: Check out SDK package
@@ -134,7 +146,7 @@ jobs:
 
       - name: Verify dynamic dependency boundary
         run: |
-          needed="$(readelf -d runtime/linux-x64/libprism_usb_sdk.so)"
+          needed="$(readelf -d runtime/linux-${{ matrix.arch }}/libprism_usb_sdk.so)"
           printf '%s\n' "$needed"
           grep -Fq 'Shared library: [libusb-1.0.so.0]' <<<"$needed"
           if grep -Eq 'Shared library: \[lib(ssl|crypto)\.so' <<<"$needed"; then
@@ -168,6 +180,7 @@ jobs:
 
       - name: Install build and runtime dependencies
         run: |
+          sudo bash scripts/configure_tsinghua_apt.sh
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             libusb-1.0-0-dev libssl-dev
@@ -354,7 +367,7 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          test "$version" = "1.0.0"
+          test "$version" = "1.1.0"
           git archive --format=tar --prefix="Prism-SDK-${version}/" HEAD \
             | gzip -9 > "Prism-SDK-${version}.tar.gz"
           sha256sum "Prism-SDK-${version}.tar.gz" \
@@ -367,14 +380,14 @@ jobs:
           if gh release view "$GITHUB_REF_NAME" \
               --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.0.tar.gz \
-              Prism-SDK-1.0.0.tar.gz.sha256 \
+              Prism-SDK-1.1.0.tar.gz \
+              Prism-SDK-1.1.0.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
-              Prism-SDK-1.0.0.tar.gz \
-              Prism-SDK-1.0.0.tar.gz.sha256 \
+              Prism-SDK-1.1.0.tar.gz \
+              Prism-SDK-1.1.0.tar.gz.sha256 \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --generate-notes
