@@ -8,7 +8,7 @@
 
 namespace prism {
 
-constexpr uint32_t kRuntimeApiVersion = 5;
+constexpr uint32_t kRuntimeApiVersion = 12;
 inline constexpr char kRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_runtime_api";
 
@@ -75,9 +75,22 @@ struct RuntimeApi {
   const char* (*usb_link_speed_name)(UsbLinkSpeed);
   const char* (*sensor_board_error_code_name)(SensorBoardErrorCode);
   LidarImuSample (*parse_lidar_imu_sample)(const Frame&);
+  RtkCorrectionStatus (*begin_rtk_corrections)(Client*);
+  RtkCorrectionStatus (*send_rtk_corrections)(
+      Client*, const uint8_t*, size_t, uint32_t);
+  RtkCorrectionStatus (*end_rtk_corrections)(Client*);
+  RtkCorrectionStatus (*rtk_correction_status)(Client*);
   ExposureLimits (*camera_exposure_limits)(Client*);
   ExposureLimits (*set_camera_exposure_limits)(
       Client*, const ExposureLimits&, uint32_t);
+  TimeSyncPortStatus (*timesync_port_status)(Client*);
+  TimeSyncPortStatus (*set_timesync_port_mode)(Client*, TimeSyncPortMode);
+  GnssTimingStatus (*gnss_timing_status)(Client*);
+  RtkNavigationStatus (*rtk_navigation_status)(Client*);
+  RtkNavigationStatus (*parse_rtk_navigation_status)(const Frame&);
+  RoverRtcmStatus (*start_rover_rtcm)(Client*);
+  RoverRtcmStatus (*stop_rover_rtcm)(Client*);
+  RoverRtcmChunkView (*parse_rover_rtcm_chunk_view)(const Frame&);
 };
 
 using GetRuntimeApiFunction = const RuntimeApi* (*)(uint32_t);

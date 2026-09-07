@@ -14,6 +14,7 @@ using ImuSampleHandler = std::function<void(const ImuSample&)>;
 using LidarPointBatchHandler =
     std::function<void(const LidarPointBatch&)>;
 using LidarImuSampleHandler = std::function<void(const LidarImuSample&)>;
+using RoverRtcmHandler = std::function<void(const RoverRtcmChunkView&)>;
 
 // High-level IMU interface for applications that share the USB receive stream
 // with video. Feed every received frame to handleFrame(); IMU protocol parsing
@@ -56,6 +57,25 @@ class LidarStream {
   Client* client_ = nullptr;
   LidarPointBatchHandler point_handler_;
   LidarImuSampleHandler imu_handler_;
+  bool active_ = false;
+};
+
+class RoverRtcmStream {
+ public:
+  RoverRtcmStream(Client& client, RoverRtcmHandler handler);
+  ~RoverRtcmStream();
+
+  RoverRtcmStream(const RoverRtcmStream&) = delete;
+  RoverRtcmStream& operator=(const RoverRtcmStream&) = delete;
+
+  void start();
+  void stop();
+  bool active() const noexcept;
+  bool handleFrame(const Frame& frame);
+
+ private:
+  Client* client_ = nullptr;
+  RoverRtcmHandler handler_;
   bool active_ = false;
 };
 

@@ -200,6 +200,25 @@ struct LidarImuSample {
   std::array<float, 3> accel_m_s2{};
 };
 
+struct RoverRtcmStatus {
+  uint16_t version = 0;
+  bool enabled = false;
+  uint32_t buffered_bytes = 0;
+  uint32_t maximum_event_bytes = 0;
+  uint64_t dropped_bytes = 0;
+};
+
+// Non-owning view of CRC-validated RTCM3 bytes extracted from the device
+// receiver stream. The pointer remains valid only while the Frame is alive.
+struct RoverRtcmChunkView {
+  uint16_t version = 0;
+  uint32_t sequence = 0;
+  uint32_t flags = 0;
+  uint64_t dropped_bytes = 0;
+  const uint8_t* data = nullptr;
+  size_t data_size = 0;
+};
+
 HeartbeatStatus parseHeartbeat(const Frame& frame);
 VideoChunkView parseVideoChunkView(const Frame& frame);
 VideoChunk parseVideoChunk(const Frame& frame);
@@ -209,5 +228,7 @@ LidarStatus parseLidarStatus(const Frame& frame);
 LidarNetworkStatus parseLidarNetworkStatus(const Frame& frame);
 LidarPointBatch parseLidarPointBatch(const Frame& frame);
 LidarImuSample parseLidarImuSample(const Frame& frame);
+RoverRtcmStatus parseRoverRtcmStatus(const Frame& frame);
+RoverRtcmChunkView parseRoverRtcmChunkView(const Frame& frame);
 
 }  // namespace prism

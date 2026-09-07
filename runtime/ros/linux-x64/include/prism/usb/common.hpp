@@ -42,6 +42,11 @@ enum class FrameType : uint8_t {
   LidarNetworkGet = 0x14,
   LidarNetworkSet = 0x15,
   LidarNetworkProbe = 0x16,
+  RtkCorrectionBegin = 0x17,
+  RtkCorrectionData = 0x18,
+  RtkCorrectionEnd = 0x19,
+  RtkCorrectionStatus = 0x1a,
+  RtkNavigationStatus = 0x1b,
   UpgradeBegin = 0x20,
   UpgradeChunk = 0x21,
   UpgradeCommit = 0x22,
@@ -56,6 +61,11 @@ enum class FrameType : uint8_t {
   ExposureSet = 0x35,
   ExposureLimitsGet = 0x36,
   ExposureLimitsSet = 0x37,
+  TimeSyncPortGet = 0x38,
+  TimeSyncPortSet = 0x39,
+  GnssTimingStatus = 0x3a,
+  RoverRtcmStart = 0x3b,
+  RoverRtcmStop = 0x3c,
   HelloResponse = 0x81,
   TimeResponse = 0x82,
   Pong = 0x83,
@@ -74,11 +84,18 @@ enum class FrameType : uint8_t {
   LidarPoints = 0x92,
   LidarNetworkStatus = 0x93,
   LidarImuSample = 0x94,
+  RtkCorrectionStatusResponse = 0x95,
+  RtkNavigationStatusResponse = 0x96,
+  RtkNavigationEvent = 0x97,
+  RoverRtcm = 0x98,
   UpgradeStatus = 0xa0,
   SensorBoardUpgradeStatus = 0xa1,
   ConfigResponse = 0xb2,
   ExposureResponse = 0xb3,
   ExposureLimitsResponse = 0xb4,
+  TimeSyncPortStatus = 0xb5,
+  GnssTimingStatusResponse = 0xb6,
+  RoverRtcmStatus = 0xb7,
   Error = 0xff,
 };
 
@@ -95,6 +112,13 @@ enum class UsbLinkSpeed : uint8_t {
   UsbHighSpeed = 3,
   UsbSuperSpeed = 4,
   UsbSuperSpeedPlus = 5,
+};
+
+enum class SensorBoardTimeSyncSource : uint8_t {
+  Internal = 0,
+  Unsynced = Internal,
+  RkPtp = 1,
+  Gps = 2,
 };
 
 enum class ImuInitErrorReason : uint8_t {
@@ -161,6 +185,8 @@ struct DeviceInfo {
   bool usb3_connected = false;
   bool sensor_board_online = false;
   bool sensor_board_time_synced = false;
+  SensorBoardTimeSyncSource sensor_board_time_sync_source =
+      SensorBoardTimeSyncSource::Internal;
   uint8_t detected_imu_count = 0;
   uint8_t detected_camera_count = 0;
   uint8_t imu_present_mask = 0;

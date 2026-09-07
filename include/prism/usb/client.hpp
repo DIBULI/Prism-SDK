@@ -10,8 +10,12 @@
 #include "prism/usb/configuration.hpp"
 #include "prism/usb/device_info.hpp"
 #include "prism/usb/exposure.hpp"
+#include "prism/usb/gnss_timing.hpp"
+#include "prism/usb/rtk.hpp"
+#include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/telemetry.hpp"
 #include "prism/usb/time_sync.hpp"
+#include "prism/usb/timesync_port.hpp"
 #include "prism/usb/update.hpp"
 #include "prism/usb/wifi.hpp"
 
@@ -57,9 +61,9 @@ class Client {
   // rejected while a video, IMU, or LiDAR transfer is active.
   NtpTimeSyncResult synchronizeTimeNtpLike(
       uint32_t sample_count = 12, uint32_t timeout_ms = 1000);
-  // Makes the host wall clock authoritative for RK CLOCK_REALTIME, writes the
-  // corrected UTC value to the RK hardware clock, then remeasures the offset.
-  // The operation is rejected while video, IMU, or LiDAR transfer is active.
+  // Submits host UTC through the Agent to the Sensor Board master clock, then
+  // verifies RK alignment. Rejected while external GNSS is synchronized or
+  // video, IMU, or LiDAR transfer is active. A populated RTC is not required.
   SystemTimeSyncResult synchronizeSystemTime(
       uint32_t sample_count = 12,
       uint32_t verification_sample_count = 6,
@@ -78,6 +82,14 @@ class Client {
   DeviceConfiguration saveDeviceConfiguration(
       const DeviceConfiguration& configuration,
       uint32_t field_mask = kDeviceConfigFieldAll);
+
+  // Sensor Board is the fixed device time master. The Agent rejects the
+  // retired PpsNmeaOutput mode; use SensorBoardMaster/GnssInput only.
+  TimeSyncPortStatus timeSyncPortStatus();
+  TimeSyncPortStatus setTimeSyncPortMode(TimeSyncPortMode mode);
+  // Live GNSS status including the first valid RMC delay after its PPS.
+  // Use the delay only when offset_fresh is true; valid range is 0..800 ms.
+  GnssTimingStatus gnssTimingStatus();
 
   // Runtime-only exposure control. These values are not persisted and may be
   // read or changed while acquisition is active. Automatic exposure uses one
@@ -116,6 +128,22 @@ class Client {
   LidarNetworkStatus saveLidarNetworkConfiguration(
       const LidarNetworkConfiguration& configuration);
   LidarNetworkStatus probeLidarNetwork();
+
+  // Streams RTCM correction bytes received by the Host application from its
+  // CORS service directly to the RK-side RTK solver. These bytes are never
+  // forwarded to the SensorBoard or UM960.
+  RtkCorrectionStatus beginRtkCorrections();
+  RtkCorrectionStatus sendRtkCorrections(
+      const uint8_t* data, size_t size, uint32_t timeout_ms = 3000);
+  RtkCorrectionStatus sendRtkCorrections(
+      const std::vector<uint8_t>& data, uint32_t timeout_ms = 3000);
+  RtkCorrectionStatus endRtkCorrections();
+  RtkCorrectionStatus rtkCorrectionStatus();
+  RtkNavigationStatus rtkNavigationStatus();
+  // Streams complete, CRC-validated RTCM3 frames from the rover receiver;
+  // NMEA and other receiver output are excluded.
+  RoverRtcmStatus startRoverRtcm();
+  RoverRtcmStatus stopRoverRtcm();
 
   Frame readFrame(uint32_t timeout_ms = 3000);
   Frame command(FrameType type, const std::vector<uint8_t>& payload = {},

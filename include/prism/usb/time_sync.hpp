@@ -36,6 +36,7 @@ struct SystemTimeSyncResult {
   uint32_t correction_passes = 0;
   bool system_time_set = false;
   bool ptp_hardware_clock_set = false;
+  // Optional: false with an empty rtc_device on boards without a populated RTC.
   bool hardware_clock_set = false;
   bool verified = false;
   std::string rtc_device;

@@ -1,116 +1,64 @@
-# Prism Host SDK 1.0.0 release manifest
+# Prism SDK 1.1.0 release provenance
 
-This repository is the public binary distribution of Prism Host SDK 1.0.0.
-No SDK implementation source code is included.
+This binary-distribution repository contains public headers, prebuilt libraries,
+consumer examples and documentation. It does not publish SDK implementation or
+firmware source code.
 
-## Interface compatibility
+## Source and interface baseline
 
-- Distribution release: 1.0.0
-- Host SDK runtime/ABI: 1.0.0
-- Device Agent: 1.0.0
-- Qualified sensor-board: 0.4.25
-- USB protocol: 1
-- Runtime API: 5
-- Public headers: 12 C++17 headers under `include/prism/`
-- Onboard IMU: ICM45686 at a fixed 800 Hz
+- Distribution / Host SDK / RK-local SDK: **1.1.0**
+- Required device Agent: **exactly 1.1.0** (no old-Agent fallback)
+- Qualified Sensor Board: **0.4.26**
+- Host USB protocol / RK-local protocol: **1 / 1**
+- Windows Runtime API: **12**, 57 function pointers, MSVC C++ ABI
+- Runtime source: `DIBULI/Prism-agent` commit
+  `e47627fab53946c854bbdb0f83fee9a0a209d98e`
+- Host source directory: `prism-sdk/usb-sdk`
+- RK-local source directory: `prism-rklocal-sdk`
+- Runtime build: [Agent Actions run 34081177379](https://github.com/DIBULI/Prism-agent/actions/runs/34081177379)
+- Build workflow revision: `1d437fd`, `.github/workflows/build-sdk-distribution.yml`
 
-The published headers, all four platform dynamic libraries, and both Linux
-static libraries have been verified as one compatible 1.0.0 ABI set. The Linux
-ARM64 artifacts were compiled from the same 1.0.0 SDK source baseline. The
-runtime retains the strict Agent 1.0.0 handshake. Do not mix files from another
-SDK release.
+The build runs inside the private source repository; a public SDK repository
+token cannot check out the private implementation. Published artifacts contain
+only the installed SDK. Header comments clarify the current 800 Hz, GNSS and
+Sensor Board time semantics; declarations and binary layouts match the baseline.
+Examples in this package are consumer examples, compiled against these binaries.
 
-The runtimes were rebuilt from `DIBULI/Prism-agent` commit
-`cc443541bfe71722ce6d49480761a52121c32146`. They retain the fixed 800 Hz
-ICM45686 reporting and accept the Agent's `50..995000 us` exposure limits.
-Linux builds and tests are recorded in Actions run `33150407098`; the Windows
-build and tests are recorded in Actions run `33150407054`.
+## Linux x64 and ARM64
 
-## Linux x86-64
+Both architectures use Ubuntu 20.04/GCC 9. Shared runtimes embed Ubuntu
+OpenSSL `1.1.1f-1ubuntu2.24`, with archive symbols hidden using
+`-Wl,--exclude-libs,ALL`. They have no dynamic libcrypto/libssl dependency;
+libusb and system C/C++ runtime libraries remain dynamic. Maximum required
+GLIBC is 2.25 and GLIBCXX is 3.4.22 on both architectures.
 
-- Shared runtime environment: Ubuntu 20.04, GCC 9.4, Release
-- Runtime: `runtime/linux-x64/libprism_usb_sdk.so`
-- SHA-256:
-  `0d00e25b3788b16de9465225ddc10825ead98efc9ab3878c43d82f8c1663fd6b`
-- ELF Build ID: `25f1488185c855707bf8f46cec3ad6f50fc275f6`
-- Maximum required symbol versions: GLIBC 2.25, GLIBCXX 3.4.22,
-  CXXABI 1.3.9
-- OpenSSL 1.1.1 is statically embedded; the runtime has no `libssl` or
-  `libcrypto` dynamic dependency.
-- Dynamic external dependency: `libusb-1.0.so.0`
-- CMake option used for the shared runtime:
-  `-DOPENSSL_USE_STATIC_LIBS=TRUE`
-- Static archive: `runtime/linux-x64/libprism_usb_sdk.a`
-- Static archive environment: Ubuntu 22.04, GCC 11.4, Release
-- Static SHA-256:
-  `cc53bbd78e4481aabad83282023770b7ed7cf8bf5e6d98033130154c3cb41dfe`
+`runtime/linux-{x64,arm64}` includes both Host `.so` and `.a`. Static Host
+archives do not embed their dependencies: consumers resolve libusb, OpenSSL
+and threads using target-system development packages. ARM64 also includes
+`libprism_rklocal_sdk.a`; this C SDK only needs pthreads/system C libraries.
 
-## Linux arm64
+`runtime/ros/linux-x64` is the complete shared installed prefix;
+`runtime/ros/linux-arm64` is the complete static installed prefix. Both carry
+1.1.0 headers, exact-version CMake package metadata and udev rules. These are
+SDK installation prefixes; no ROS adapter implementation is included or changed.
 
-- Environment: Ubuntu 22.04 cross toolchain, GCC 11.4, Release
-- Runtime: `runtime/linux-arm64/libprism_usb_sdk.so`
-- SHA-256:
-  `86c702bdb40a307df590da6d4c5ed720923d75feb9d5a771b70514577e4d8e5a`
-- ELF Build ID: `4b259fb06cf960c68c673000ba1f671c0747ba63`
-- Runtime dependencies: OpenSSL 3 and libusb 1.0
-- ABI baseline: GLIBC 2.34 and GLIBCXX 3.4.29
-- Static archive: `runtime/linux-arm64/libprism_usb_sdk.a`
-- Static SHA-256:
-  `45dde324e5bff5285de24944741ae67b425a4b8d6f50a788200a78c0655086a8`
+## macOS and Windows
 
-## ROS Adapter Linux prefixes
+- macOS: Apple Silicon ARM64, deployment target 13.0; SDK dylib and bundled
+  libusb 1.0.30 rebuilt on macOS 15, relocatable and ad-hoc signed.
+- Windows: x64 MSVC on Windows Server 2022; DLL intended for Windows 10/11,
+  loaded through Runtime API 12 with compatible MSVC 14.x and `/MD`.
+  The distribution intentionally does not add a Windows import library.
 
-The SDK repository includes two complete binary installation prefixes under
-`runtime/ros`. They contain only the public headers, a shared or static
-library, CMake package metadata, and the udev rule. One portable prefix covers
-all supported Ubuntu releases for each architecture.
+Windows 10/11 and macOS 13 are compatibility targets, not physical-device test
+environments. CI executes on Windows Server 2022/macOS 15. Linux compatibility
+CI tests Ubuntu 20.04/22.04/24.04/26.04 for both architectures.
 
-| Prefix | Link environment | Runtime SHA-256 |
-| --- | --- | --- |
-| `linux-x64` | Ubuntu 20.04, GCC 9; OpenSSL statically embedded | `0d00e25b3788b16de9465225ddc10825ead98efc9ab3878c43d82f8c1663fd6b` |
-| `linux-arm64` | Ubuntu 20.04, GCC 9; OpenSSL and libusb resolved at consumer link time | `a3d7b7920c1e65973c75fd9780c0b3fccbf854eb75825ba44af29abfef814ae6` |
+## Integrity and verification
 
-Each prefix uses the same SDK 1.0.0 interface and source revision. The x86-64
-shared library is built on Ubuntu 20.04/GCC 9, embeds OpenSSL, and dynamically
-uses the stable libusb SONAME. The ARM64 static prefix is also built on Ubuntu
-20.04/GCC 9; its exported CMake target resolves the target system's Threads,
-libusb, and OpenSSL libraries.
-
-## macOS arm64
-
-- Environment: Apple Clang, Release
-- Minimum deployment target: macOS 13.0
-- Runtime: `runtime/macos-arm64/libprism_usb_sdk.dylib`
-- Runtime SHA-256:
-  `070f33890c47d54189a0ac13726ed9ff4dceff798ea93090995950853ecd7de5`
-- Bundled dependency: `runtime/macos-arm64/libusb-1.0.0.dylib`
-- libusb SHA-256:
-  `6f65716831f5072bbae4286903c1efce7588ecdbf9d9d4df01122a30cded3b01`
-
-Both dylibs are arm64 Mach-O files with relocatable install names and no
-package-build-machine load paths. The bundled libusb is version 1.0.30; its
-license text is included beside the dylib.
-
-## Windows x64
-
-- Environment: Windows Server 2022, MSVC x64, Release
-- Runtime: `runtime/windows-x64/prism_usb_sdk.dll`
-- SHA-256:
-  `5992b255f93c1cbef52bf227fc354ee6fe1f7621225fbc6d5d88a4981e3b8cb1`
-- Linker toolchain: MSVC 14.44
-
-The Windows package intentionally contains only the dynamic library. Consumers
-load Runtime API v5 with `LoadLibraryW` and `GetProcAddress`, as demonstrated by
-the included example.
-
-## Release verification
-
-- Linux and macOS runtimes report SDK 1.0.0 and Runtime API v5.
-- Runtime API v5 is accepted; earlier API versions are rejected.
-- Public headers compile and link against the frozen Linux and macOS runtimes.
-- Linux x86-64 and arm64 static archives build all examples without a
-  `libprism_usb_sdk.so` dependency and pass the six-test Host SDK suite.
-- The Windows runtime completed its Host SDK test suite before publication.
-- Every published runtime is rejected by package verification unless it
-  contains the `50..995000 us` exposure validator and excludes the obsolete
-  `200..995000 us` validator.
+All four runtime-build jobs passed. Linux shared/static builds each passed
+11 Host tests; ARM64 RK-local passed the mock-Agent test. macOS/Windows also
+passed the source SDK suites. Package CI separately compiles consumer examples,
+checks shared/static loading, and verifies every published file in `SHA256SUMS`.
+Regenerate the manifest with `bash scripts/update_checksums.sh` after staging
+package edits. Never mix headers or libraries from another SDK release.

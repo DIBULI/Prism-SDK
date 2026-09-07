@@ -61,7 +61,7 @@ add_library(Prism::UsbSdk STATIC IMPORTED)
 set_target_properties(Prism::UsbSdk PROPERTIES
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "Threads::Threads;PkgConfig::LIBUSB;OpenSSL::Crypto"
+  INTERFACE_LINK_LIBRARIES "PkgConfig::LIBUSB;OpenSSL::Crypto"
 )
 
 # Load information for each installed configuration.
