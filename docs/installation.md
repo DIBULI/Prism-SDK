@@ -11,7 +11,8 @@
 
 Both Linux shared runtimes are built on Ubuntu 20.04/GCC 9, embed OpenSSL,
 and dynamically link libusb and the system C/C++ runtime. See ORIGIN.md for
-build provenance. ARM64 RK-local consumers need pthreads, not USB or OpenSSL.
+build provenance. ARM64 RK-local embeds miniz/libcrypto and needs pthreads/dl and the C++ runtime;
+no libusb or dynamic OpenSSL is required.
 
 ## Linux x86-64 and arm64
 

@@ -1,6 +1,6 @@
 # Prism Host SDK 1.1.0
 
-同时包含 **RK-local SDK 1.1.0**：设备本机 C 接口、ARM64 静态库、相机/IMU
+同时包含 **RK-local SDK 1.1.0**：设备本机 C++17 Client 接口、ARM64 静态库、相机/IMU
 采集示例和 GNSS 状态查询示例。见 [RK-local 使用说明](docs/rk-local-sdk.zh-CN.md)
 及 [1.1.0 GNSS/RTK 接口说明](docs/gnss-rtk.zh-CN.md)。
 
@@ -25,7 +25,8 @@ Prism-SDK/
 │   │   └── linux-arm64/           所有受支持 ROS/Ubuntu ARM64 版本
 │   ├── macos-arm64/               macOS 13+ Apple Silicon 动态库
 │   └── windows-x64/               Windows 10/11 x64 DLL
-├── docs/                          安装和使用文档
+├── rk-local-sdk/                 本机示例构建入口与接口测试
+├── docs/                          Host/RK-local 接口与使用文档
 ├── examples/                      经编译验证的 SDK 示例
 ├── CMakeLists.txt
 ├── ORIGIN.md                      发布来源记录
@@ -100,26 +101,11 @@ cmake --build build --config Release
 python3 scripts/test_all_examples.py --build-dir build-all-examples
 ```
 
-只打开设备并读取设备信息：
-
-```bash
-./build/examples/prism-device-info-time-sync
-```
-
-读取设备信息并以主机时间校准设备：
-
-```bash
-./build/examples/prism-device-info-time-sync --sync-time
-```
-
-Visual Studio 等多配置生成器会把程序放在所选配置目录中，例如 `Release`。
-
-Sensor Board 是设备时间主时钟；RK 跟随其 PPS/NMEA，并向以太网提供 PTP 时间。
-只有外部 GNSS 尚未锁定时才允许通过 `--sync-time` 向这条链路提交主机 UTC；
-GPS 授时成功时 Agent 会拒绝请求。先停止全部采集并确认主机时间准确。
-打开 SDK 连接不会自动校时，也不要求板上贴装 RTC。
+运行示例及手动校时的用法见[示例使用说明](docs/examples.zh-CN.md#prism-device-info-time-sync)。
 
 ## 文档
+
+接口使用文档统一维护在 `docs/`，从[文档目录](docs/README.zh-CN.md)进入。
 
 - [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
 - [Release 1.1.0 update notes](docs/update/v1.1.0.md)
@@ -131,4 +117,7 @@ GPS 授时成功时 Agent 会拒绝请求。先停止全部采集并确认主机
 - [SDK 使用指南](docs/usage.zh-CN.md)
 - [Installation guide](docs/installation.md)
 - [SDK usage guide](docs/usage.md)
-- [示例说明](examples/README.zh-CN.md)
+- [示例说明](docs/examples.zh-CN.md)
+
+RK-local 同名控制接口现已覆盖配置、曝光、LiDAR、热点、校时、升级和原始RTCM；
+[一致范围与明确差异](docs/rk-local-sdk.zh-CN.md#与-host-sdk-的一致范围及明确差异)说明不能直接替换的部分。

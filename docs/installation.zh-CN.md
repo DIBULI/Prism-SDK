@@ -10,8 +10,8 @@
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
 两个 Linux 动态库均采用 Ubuntu 20.04/GCC 9 构建，静态包含 OpenSSL，动态依赖
-libusb 及系统 C/C++ 运行库。来源见 ORIGIN.md。RK-local 静态库仅依赖 pthread，
-不需要 USB 或 OpenSSL。
+libusb 及系统 C/C++ 运行库。来源见 ORIGIN.md。RK-local 静态库内含miniz/libcrypto，依赖pthread/dl和系统C++运行库，
+不需要libusb或动态OpenSSL。
 
 ## Linux x86-64 与 arm64
 

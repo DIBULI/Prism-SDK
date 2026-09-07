@@ -1,17 +1,17 @@
 # SDK 1.1.0: GNSS, CORS and navigation
 
 Use matching 1.1.0 headers/libraries and Agent 1.1.0. Windows uses Runtime API
-12, an MSVC C++ ABI table, not a compiler-neutral C ABI. RK-local is a C11
+12, an MSVC C++ ABI table, not a compiler-neutral C ABI. RK-local is a C++17
 interface to `/run/prism/stream.sock` on the device, not USB or direct UART access.
 
-| Operation | Host `Client` | Windows `RuntimeApi` | RK-local C API |
+| Operation | Host `Client` | Windows `RuntimeApi` | RK-local C++ Client |
 | --- | --- | --- | --- |
-| GNSS/PPS snapshot | `gnssTimingStatus()` | `gnss_timing_status` | `prism_rklocal_get_gnss_status` |
-| Correction transport status | `rtkCorrectionStatus()` | `rtk_correction_status` | `prism_rklocal_get_rtk_correction_status` |
-| Submit corrections | `beginRtkCorrections`, `sendRtkCorrections`, `endRtkCorrections` | `begin_rtk_corrections`, `send_rtk_corrections`, `end_rtk_corrections` | `prism_rklocal_begin_rtk_corrections`, `prism_rklocal_send_rtk_corrections`, `prism_rklocal_end_rtk_corrections` |
-| Raw/smoothed navigation | `rtkNavigationStatus()` | `rtk_navigation_status` | `prism_rklocal_get_rtk_navigation` |
-| Navigation events | `parseRtkNavigationStatus(frame)` | `parse_rtk_navigation_status` | `prism_rklocal_read_rtk_navigation` |
-| Rover raw RTCM3 | `startRoverRtcm`, `stopRoverRtcm`, `parseRoverRtcmChunkView` | `start_rover_rtcm`, `stop_rover_rtcm`, `parse_rover_rtcm_chunk_view` | Not exposed in this C interface |
+| GNSS/PPS snapshot | `gnssTimingStatus()` | `gnss_timing_status` | `gnssTimingStatus` |
+| Correction transport status | `rtkCorrectionStatus()` | `rtk_correction_status` | `rtkCorrectionStatus` |
+| Submit corrections | `beginRtkCorrections`, `sendRtkCorrections`, `endRtkCorrections` | `begin_rtk_corrections`, `send_rtk_corrections`, `end_rtk_corrections` | `beginRtkCorrections`, `sendRtkCorrections`, `endRtkCorrections` |
+| Raw/smoothed navigation | `rtkNavigationStatus()` | `rtk_navigation_status` | `rtkNavigationStatus` |
+| Navigation events | `parseRtkNavigationStatus(frame)` | `parse_rtk_navigation_status` | `readRtkNavigation` |
+| Rover raw RTCM3 | `startRoverRtcm`, `stopRoverRtcm`, `parseRoverRtcmChunkView` | `start_rover_rtcm`, `stop_rover_rtcm`, `parse_rover_rtcm_chunk_view` | Not exposed in this local interface |
 
 ## GNSS
 

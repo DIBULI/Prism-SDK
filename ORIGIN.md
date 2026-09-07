@@ -4,6 +4,23 @@ This binary-distribution repository contains public headers, prebuilt libraries,
 consumer examples and documentation. It does not publish SDK implementation or
 firmware source code.
 
+## RK-local C++ update (2026-09-07)
+
+Only the RK-local archive and its public API/examples are rebuilt for this update.
+The Host binaries and protocol versions remain unchanged. RK-local now exposes
+`prism::rklocal::Client` with shared Host controls for configuration, exposure,
+LiDAR, Wi-Fi, GNSS/RTK, time, upgrades and raw RTCM; the C header is private.
+[Explicit differences](docs/rk-local-sdk.md#host-api-alignment-and-explicit-differences)
+and [new validation results](docs/rk-local-sdk-testing.md) define the supported scope.
+Source: the RK-local C++ changes on top of the Agent baseline below, not yet
+published as a new source commit/tag. Final server build: Ubuntu 20.04 ARM64/GCC 9.4.0 container;
+control/upgrade test requires at most GLIBC 2.17 and GLIBCXX 3.4.21.
+Consumers must replace the header and archive together and rebuild.
+Physical RK3576 testing passed 19 query/capture/stop/reconnect checks using a
+temporary Agent write-lock isolation fix. USB/local coexistence requires this
+Agent fix; see the hardware report for its exact binary hash and deployment.
+The existing firmware image and Sensor Board BOOT.BIN are not updated by this SDK package.
+
 ## Source and interface baseline
 
 - Distribution / Host SDK / RK-local SDK: **1.1.0**
@@ -35,7 +52,8 @@ GLIBC is 2.25 and GLIBCXX is 3.4.22 on both architectures.
 `runtime/linux-{x64,arm64}` includes both Host `.so` and `.a`. Static Host
 archives do not embed their dependencies: consumers resolve libusb, OpenSSL
 and threads using target-system development packages. ARM64 also includes
-`libprism_rklocal_sdk.a`; this C SDK only needs pthreads/system C libraries.
+`libprism_rklocal_sdk.a`; this C++17 SDK embeds miniz/OpenSSL libcrypto, and needs pthreads/dl and
+system C/C++ libraries, not dynamic libcrypto/libssl.
 
 `runtime/ros/linux-x64` is the complete shared installed prefix;
 `runtime/ros/linux-arm64` is the complete static installed prefix. Both carry

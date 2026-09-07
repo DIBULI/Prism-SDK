@@ -10,7 +10,7 @@ platforms, Linux x86-64/arm64 static libraries, end-user documentation, and
 CMake examples. It does not contain the SDK implementation or device firmware
 source code.
 
-It also includes the **RK-local SDK 1.1.0** C API and ARM64 static library for
+It also includes the **RK-local SDK 1.1.0** C++17 Client API and ARM64 static library for
 on-device Camera/IMU acquisition and GNSS/RTK queries. See the
 [RK-local guide](docs/rk-local-sdk.md) for the capture and GNSS examples.
 The [1.1.0 service guide](docs/gnss-rtk.md) covers new Host and local interfaces.
@@ -28,7 +28,8 @@ Prism-SDK/
 │   │   └── linux-arm64/           All supported ROS/Ubuntu ARM64 releases
 │   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
 │   └── windows-x64/               Windows 10/11 x64 DLL
-├── docs/                          Installation and usage guides
+├── rk-local-sdk/                 On-device example build entry and API tests
+├── docs/                          Host/RK-local interface and usage documentation
 ├── examples/                      Compile-tested SDK examples
 ├── CMakeLists.txt
 ├── ORIGIN.md                      Release provenance
@@ -110,28 +111,13 @@ GitHub Actions:
 python3 scripts/test_all_examples.py --build-dir build-all-examples
 ```
 
-Run the example without changing device time:
-
-```bash
-./build/examples/prism-device-info-time-sync
-```
-
-Run the same example and synchronize device time to the host:
-
-```bash
-./build/examples/prism-device-info-time-sync --sync-time
-```
-
-On multi-configuration generators, such as Visual Studio, the executable is
-under the selected configuration directory (for example `Release`).
-
-Sensor Board is the device time master; RK follows its disciplined PPS/NMEA
-and supplies PTP time to Ethernet. `--sync-time` submits host UTC to this chain
-only when external GNSS time is not locked; the Agent rejects it while GPS is
-synchronized. Stop all capture streams and verify host time first. Opening a
-client never requests time synchronization. No populated RTC is required.
+For running examples and opt-in time synchronization, see the
+[example usage guide](docs/examples.md#prism-device-info-time-sync).
 
 ## Documentation
+
+All interface usage documentation is maintained under `docs/`.
+Start with the [documentation index](docs/README.md).
 
 - [Release 1.1.0 update notes](docs/update/v1.1.0.md)
 - [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
@@ -143,4 +129,7 @@ client never requests time synchronization. No populated RTC is required.
 - [SDK usage guide](docs/usage.md)
 - [安装指南](docs/installation.zh-CN.md)
 - [SDK 使用指南](docs/usage.zh-CN.md)
-- [Example guide](examples/README.md)
+- [Example guide](docs/examples.md)
+
+RK-local now covers configuration, exposure, LiDAR, hotspot, time, upgrades and raw RTCM.
+See [Host API alignment and explicit differences](docs/rk-local-sdk.md#host-api-alignment-and-explicit-differences) before substituting backends.
