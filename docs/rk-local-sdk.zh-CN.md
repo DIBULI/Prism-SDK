@@ -6,15 +6,6 @@
 Agent。公开接口为 **C++17 `prism::rklocal::Client`**。与 Host SDK 的
 `prism::Client` 共用 GNSS/RTK 返回类型和查询、改正流方法名，不经 USB，也不直接占用 UART。
 
-## 从 C 迁移
-
-这是公开接口的源码不兼容修改：不再发布 `prism/rklocal_sdk.h` 或 C 示例。
-改用 `#include <prism/rklocal_sdk.hpp>`，更新头文件和 ARM64 静态库并重新编译；
-不能将新头文件与旧静态库混用。底层 C 传输实现仅为私有实现细节，不再提供应用 C API。
-SDK/Agent 握手仍为 1.1.0、协议 1；没有修改 Sensor Board 固件或通信协议，也不兼容旧 Agent。
-USB 与 RK-local 并存需要 Agent 发送锁隔离修复，见[实机验证记录](rk-local-sdk-testing.md#physical-rk3576-validation)。
-本工作树改动不等于已经更新 GitHub 的 v1.1.0 标签或 Release。
-
 ## 文件与编译
 
 - [公共头文件](../include/prism/rklocal_sdk.hpp)

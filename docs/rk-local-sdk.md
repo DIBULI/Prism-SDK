@@ -7,18 +7,6 @@ ARM64 applications on RK3576. It connects through `/run/prism/stream.sock`;
 Agent alone owns UARTs, CSI/V4L2, time synchronization and aggregate capture.
 GNSS/RTK methods share the actual Host SDK types, not parallel copies.
 
-## C API migration
-
-This is a source-breaking public API change. The package no longer includes
-`prism/rklocal_sdk.h` or C consumer examples. Include
-`<prism/rklocal_sdk.hpp>`, replace the ARM64 archive together with the headers,
-and rebuild consumers. Internal C transport code is private, not an application
-API. The Agent/SDK handshake remains exactly 1.1.0 with local protocol 1;
-Sensor Board firmware and wire protocol are unchanged. RK-local/USB coexistence
-requires the Agent write-lock isolation fix described in the [hardware report](rk-local-sdk-testing.md#physical-rk3576-validation).
-A working-tree update does not by
-itself update the GitHub v1.1.0 tag or Release.
-
 ## Package and build
 
 - [Public C++ header](../include/prism/rklocal_sdk.hpp)
