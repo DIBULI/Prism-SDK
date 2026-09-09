@@ -12,6 +12,7 @@
 | Host 完整接口参考 | [开发手册](development-guide.zh-CN.md) | [Development guide](development-guide.md) |
 | Host 逐接口代码示例 | [逐接口示例](interface-examples.zh-CN.md) | [Interface examples](interface-examples.md) |
 | RK-local C++ 接口、Host 对应关系及限制 | [RK-local 接口说明](rk-local-sdk.zh-CN.md) | [RK-local API](rk-local-sdk.md) |
+| RK 本机 ROS 2 Docker（Ubuntu 22.04 / 24.04） | [RK 本机 ROS Docker](rk-local-ros2-docker.zh-CN.md) | [RK-local ROS Docker](rk-local-ros2-docker.md) |
 | GNSS、PPS、CORS 与 RTK | [GNSS/RTK](gnss-rtk.zh-CN.md) | [GNSS/RTK](gnss-rtk.md) |
 | 编译及运行示例程序 | [示例使用说明](examples.zh-CN.md) | [Examples](examples.md) |
 | Release 1.1.0 说明 | [更新说明](update/v1.1.0.zh-CN.md) | [Update notes](update/v1.1.0.md) |
