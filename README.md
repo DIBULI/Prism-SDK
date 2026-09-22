@@ -135,3 +135,5 @@ Start with the [documentation index](docs/README.md).
 
 RK-local now covers configuration, exposure, LiDAR, hotspot, time, upgrades and raw RTCM.
 See [Host API alignment and explicit differences](docs/rk-local-sdk.md#host-api-alignment-and-explicit-differences) before substituting backends.
+
+GNSS reception diagnostics: [接收状态接口说明](docs/gnss-reception-status.md).

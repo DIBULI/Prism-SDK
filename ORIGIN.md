@@ -1,10 +1,11 @@
 # Prism SDK mainline 1.2.0 / ABI 13 provenance
 
 The current headers, Host libraries and RK-local archive are built from
-`DIBULI/Prism-agent` commit `811b96e852cb4eb23d147213ed03fb53acd30065`.
-Source changes are `f9b58e4` (optional GNSS observation interfaces) and
-`d56b0ee` (XT32 explicit point timestamps); `811b96e` defines the build matrix.
-Build: [Actions run 35771184679](https://github.com/DIBULI/Prism-agent/actions/runs/35771184679).
+`DIBULI/Prism-agent` commit `abacf0c1df4d62eb8510a4b60095667714770b31`.
+Includes `f9b58e4` (GNSS observation interfaces), `d56b0ee` (XT32 point times),
+`9c70b42` (RK-local setDeviceTime verification) and `abacf0c` (current Agent GNSS/RTK integration).
+`811b96e` defines the matched build matrix.
+Build: [Actions run 35774352024](https://github.com/DIBULI/Prism-agent/actions/runs/35774352024).
 
 - Host / RK-local / required Agent: 1.2.0, protocol 1; Runtime API ABI 13.
 - Linux x64 and ARM64: Ubuntu 20.04 baseline, OpenSSL statically embedded in
@@ -17,7 +18,7 @@ Build: [Actions run 35771184679](https://github.com/DIBULI/Prism-agent/actions/r
   tested. This is not XT32 physical-device validation, a firmware update,
   a new tag, or a GitHub Release.
 - Optional GNSS observation queries require an Agent implementing that
-  extension; their presence in the SDK does not imply device support.
+  extension; Agent `abacf0c` implements it. Older Agents may report unsupported.
 
 ## Historical v1.1.0 release provenance (not the current master binaries)
 

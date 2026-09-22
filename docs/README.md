@@ -23,3 +23,5 @@ and unverified hardware operations. Shared method names do not imply identical
 transport, clock source, queue behavior or ABI; consult the RK-local differences
 before substituting clients. Working-tree documentation does not mean a new
 Release or tag has been published.
+
+GNSS reception diagnostics: [GNSS reception status](gnss-reception-status.md).
