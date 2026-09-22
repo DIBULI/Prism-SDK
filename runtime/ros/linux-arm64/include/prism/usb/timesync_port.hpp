@@ -10,10 +10,11 @@ constexpr uint16_t kTimeSyncPortProtocolVersion = 1;
 constexpr uint16_t kTimeSyncPortPayloadSize = 20;
 
 enum class TimeSyncPortMode : uint32_t {
-  // Fixed product mode: Sensor Board receives GNSS and owns device time.
+  // Sensor Board owns device time in BOTH modes. Default: external input.
   SensorBoardMaster = 0,
   GnssInput = SensorBoardMaster,
-  // Retained as a wire value only; current Agent rejects this retired mode.
+  // E19: 1 Hz / 100 ms PPS; E18: GPRMC with PPS UTC and synthetic zero position.
+  // Stop capture and disconnect external transmitters before selecting output.
   PpsNmeaOutput = 1,
 };
 

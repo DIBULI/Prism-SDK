@@ -8,6 +8,7 @@
 #include "prism/usb/device_info.hpp"
 #include "prism/usb/exposure.hpp"
 #include "prism/usb/gnss_timing.hpp"
+#include "prism/usb/lidar_points.hpp"
 #include "prism/usb/runtime_api.hpp"
 #include "prism/usb/rtk.hpp"
 #include "prism/usb/rtk_navigation.hpp"

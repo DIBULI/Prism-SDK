@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(PrismRkLocalExamples VERSION 1.1.0 LANGUAGES CXX)
+project(PrismRkLocalExamples VERSION 1.2.0 LANGUAGES CXX)
 include(CTest)
 include("${CMAKE_CURRENT_LIST_DIR}/../cmake/PrismRkLocalSdk.cmake")
 foreach(_example capture gnss_status)

@@ -8,7 +8,7 @@
 
 namespace prism {
 
-constexpr uint32_t kRuntimeApiVersion = 12;
+constexpr uint32_t kRuntimeApiVersion = 13;  // LidarPoint now carries XT32 metadata.
 inline constexpr char kRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_runtime_api";
 

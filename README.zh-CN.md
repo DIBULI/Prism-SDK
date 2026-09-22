@@ -1,6 +1,6 @@
-# Prism Host SDK 1.1.0
+# Prism Host SDK 1.2.0（主干）
 
-同时包含 **RK-local SDK 1.1.0**：设备本机 C++17 Client 接口、ARM64 静态库、相机/IMU
+同时包含 **RK-local SDK 1.2.0**：设备本机 C++17 Client 接口、ARM64 静态库、相机/IMU
 采集示例和 GNSS 状态查询示例。见 [RK-local 使用说明](docs/rk-local-sdk.zh-CN.md)
 及 [1.1.0 GNSS/RTK 接口说明](docs/gnss-rtk.zh-CN.md)。
 
@@ -35,17 +35,18 @@ Prism-SDK/
 
 ## 兼容要求
 
-- 分发版本：`1.1.0`
-- Host SDK 运行时/ABI：`1.1.0`
-- Runtime API：`12`
+- 主干分发版本：`1.2.0`（不修改既有发布标签）
+- Host SDK 运行时：`1.2.0`
+- Runtime API ABI：`13`
 - USB protocol：`1`
-- 设备 Agent：必须为 `1.1.0`
+- 设备 Agent：必须为 `1.2.0`
 - C++：C++17 或更新版本
 - CMake：3.20 或更新版本
 
-1.1.0 分发包面向全部受支持平台打包 Host SDK 1.1.0 接口，并包含从同一
-1.1.0 SDK 源码基线编译的 Linux ARM64 产物。运行时严格执行 SDK 1.1.0 与
-Agent 1.1.0 的版本握手。不要混用不同版本的头文件和库，也不要连接非 1.1.0
+当前主干新增 [Hesai XT32](docs/xt32.md) 支持，Host 与 RK-local 共用逐点时间接口。
+全部库的源码版本见 [ORIGIN.md](ORIGIN.md)。`LidarPoint` 二进制布局已变化，必须
+成套替换头文件和库并重新编译，不得混用 ABI 12 的旧库。运行时严格执行 1.2.0
+版本握手。本次不创建标签或 Release；不要连接非 1.2.0
 的 Agent。
 
 ### 各 Release Tag 兼容关系

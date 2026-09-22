@@ -1,4 +1,4 @@
-# Prism Host SDK 1.1.0
+# Prism Host SDK 1.2.0 (master)
 
 [![Build SDK Examples](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml)
 
@@ -10,7 +10,7 @@ platforms, Linux x86-64/arm64 static libraries, end-user documentation, and
 CMake examples. It does not contain the SDK implementation or device firmware
 source code.
 
-It also includes the **RK-local SDK 1.1.0** C++17 Client API and ARM64 static library for
+It also includes the **RK-local SDK 1.2.0** C++17 Client API and ARM64 static library for
 on-device Camera/IMU acquisition and GNSS/RTK queries. See the
 [RK-local guide](docs/rk-local-sdk.md) for the capture and GNSS examples.
 The [1.1.0 service guide](docs/gnss-rtk.md) covers new Host and local interfaces.
@@ -38,19 +38,21 @@ Prism-SDK/
 
 ## Compatibility
 
-- Distribution release: `1.1.0`
-- Host SDK runtime/ABI: `1.1.0`
-- Runtime API: `12`
+- Mainline package: `1.2.0` (existing release tags are unchanged)
+- Host SDK runtime: `1.2.0`
+- Runtime API ABI: `13`
 - USB protocol: `1`
-- Device Agent: exactly `1.1.0`
+- Device Agent: exactly `1.2.0`
 - Language: C++17 or later
 - CMake: 3.20 or later
 
-Release 1.1.0 packages the Host SDK 1.1.0 interface for all supported platforms,
-including Linux ARM64 deliverables compiled from the same 1.1.0 SDK source
-baseline. The runtime intentionally performs a strict 1.1.0 SDK/Agent
-handshake. Do not mix headers and libraries from different releases, or use an
-Agent other than 1.1.0.
+This mainline package adds [Hesai XT32](docs/xt32.md) to Host and RK-local SDKs.
+All runtimes are built from the source revision in [ORIGIN.md](ORIGIN.md).
+`LidarPoint` has a new binary layout: replace headers and libraries together
+and rebuild consumers. ABI 12 libraries must not be mixed with these headers.
+The runtime performs a strict 1.2.0 SDK/Agent handshake. GNSS observation
+queries are optional; an Agent without that extension reports unsupported.
+This update does not create a tag or GitHub Release.
 
 ### Compatibility by release tag
 

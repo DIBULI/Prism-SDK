@@ -12,16 +12,23 @@
 #include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/client.hpp"
 #include "prism/usb/streams.hpp"
+#include "prism/usb/lidar_points.hpp"
 
 namespace prism::rklocal {
 
 // Shared with the Host SDK, not separately maintained look-alike structures.
 using ::prism::GnssTimingStatus;
+using ::prism::GnssReceptionStatus;
 using ::prism::RtkCorrectionStatus;
 using ::prism::RtkNavigationStatus;
 inline constexpr const char* kDefaultSocketPath = "/run/prism/stream.sock";
 inline constexpr std::size_t kCameraCount = 4;
 inline constexpr uint32_t kWaitForever = UINT32_MAX;
+
+// Concurrent read-only monitor: unlike Client::open, this does not occupy the
+// single RK-local capture connection. Uses the same cursor/session/result model.
+GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0,
+    const std::string& control_socket="/run/prism/control.sock", uint32_t timeout_ms=500);
 
 enum class ErrorCode {
   InvalidArgument = -1, System = -2, Protocol = -3, Timeout = -4,
@@ -127,6 +134,8 @@ class Client {
   std::optional<RtkNavigationStatus> readRtkNavigation(uint32_t timeout_ms = 3000);
 
   GnssTimingStatus gnssTimingStatus();
+  GnssReceptionStatus gnssReceptionStatus();
+  GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
   RtkCorrectionStatus rtkCorrectionStatus();
   RtkNavigationStatus rtkNavigationStatus();
   RtkCorrectionStatus beginRtkCorrections();

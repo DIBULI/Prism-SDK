@@ -1,4 +1,25 @@
-# Prism SDK 1.1.0 release provenance
+# Prism SDK mainline 1.2.0 / ABI 13 provenance
+
+The current headers, Host libraries and RK-local archive are built from
+`DIBULI/Prism-agent` commit `811b96e852cb4eb23d147213ed03fb53acd30065`.
+Source changes are `f9b58e4` (optional GNSS observation interfaces) and
+`d56b0ee` (XT32 explicit point timestamps); `811b96e` defines the build matrix.
+Build: [Actions run 35771184679](https://github.com/DIBULI/Prism-agent/actions/runs/35771184679).
+
+- Host / RK-local / required Agent: 1.2.0, protocol 1; Runtime API ABI 13.
+- Linux x64 and ARM64: Ubuntu 20.04 baseline, OpenSSL statically embedded in
+  shared Host runtimes; system libusb and C/C++ runtime dependencies remain.
+- macOS arm64: deployment target 13.0, including separately rebuilt libusb.
+- Windows x64: MSVC, Windows Server 2022 build/test runner.
+- Public declarations and all runtime binaries come from that same source;
+  consumers must replace both and rebuild because `LidarPoint` changed layout.
+- XT32 codec, metadata preservation and synthetic dataset round trips are
+  tested. This is not XT32 physical-device validation, a firmware update,
+  a new tag, or a GitHub Release.
+- Optional GNSS observation queries require an Agent implementing that
+  extension; their presence in the SDK does not imply device support.
+
+## Historical v1.1.0 release provenance (not the current master binaries)
 
 This binary-distribution repository contains public headers, prebuilt libraries,
 consumer examples and documentation. It does not publish SDK implementation or

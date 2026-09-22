@@ -161,6 +161,10 @@ struct LidarPoint {
   int32_t z_mm = 0;
   uint8_t reflectivity = 0;
   uint8_t tag = 0;
+  uint16_t ring = 0;       // XT32 laser channel 0..31; not supplied by Livox.
+  int32_t offset_ns = 0;   // XT32: signed offset from the packet tail timestamp.
+  uint8_t return_id = 0;   // XT32: 1 last, 2 strongest, 3 first.
+  uint8_t confidence = 0;  // Raw vendor byte (reserved), NOT a quality percentage.
 };
 
 struct LidarPointBatch {
@@ -173,7 +177,7 @@ struct LidarPointBatch {
   bool tai_offset_applied = false;
   uint32_t handle = 0;
   uint32_t batch_id = 0;
-  uint64_t timestamp_raw = 0;  // Unmodified Livox packet timestamp.
+  uint64_t timestamp_raw = 0;  // Raw packet ns: Livox first point / XT32 tail.
   // Batch-base time in the RK CLOCK_REALTIME microsecond domain. When
   // timestamp_synced is false this is callback arrival time (or zero if the
   // RK clock could not be read).
@@ -181,6 +185,9 @@ struct LidarPointBatch {
   // Total first-to-last point span in 100 ns units. It is not per-point
   // spacing; the SDK does not expand point timestamps or deskew the batch.
   uint16_t time_interval_100ns = 0;
+  // XT32 uses version 3 and time_interval_100ns == 0. Each point carries
+  // its own signed offset_ns; dual returns need not be in time order.
+  // For XT32 an unresolved mapped timestamp is zero, never host arrival time.
   std::vector<LidarPoint> points;
 };
 

@@ -256,7 +256,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--lidar-model",
-        choices=("mid360", "mid360s"),
+        choices=("mid360", "mid360s", "xt32"),
         help="also test LiDAR capture with the explicitly selected model",
     )
     parser.add_argument(

@@ -11,6 +11,8 @@
 #include "prism/usb/device_info.hpp"
 #include "prism/usb/exposure.hpp"
 #include "prism/usb/gnss_timing.hpp"
+#include "prism/usb/gnss_reception.hpp"
+#include "prism/usb/gnss_observation.hpp"
 #include "prism/usb/rtk.hpp"
 #include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/telemetry.hpp"
@@ -61,9 +63,9 @@ class Client {
   // rejected while a video, IMU, or LiDAR transfer is active.
   NtpTimeSyncResult synchronizeTimeNtpLike(
       uint32_t sample_count = 12, uint32_t timeout_ms = 1000);
-  // Submits host UTC through the Agent to the Sensor Board master clock, then
-  // verifies RK alignment. Rejected while external GNSS is synchronized or
-  // video, IMU, or LiDAR transfer is active. A populated RTC is not required.
+  // Makes the host wall clock authoritative for RK CLOCK_REALTIME, writes the
+  // corrected UTC value to the RK hardware clock, then remeasures the offset.
+  // The operation is rejected while video, IMU, or LiDAR transfer is active.
   SystemTimeSyncResult synchronizeSystemTime(
       uint32_t sample_count = 12,
       uint32_t verification_sample_count = 6,
@@ -83,13 +85,18 @@ class Client {
       const DeviceConfiguration& configuration,
       uint32_t field_mask = kDeviceConfigFieldAll);
 
-  // Sensor Board is the fixed device time master. The Agent rejects the
-  // retired PpsNmeaOutput mode; use SensorBoardMaster/GnssInput only.
+  // Persistent external TimeSync connector direction. Hardware always resets
+  // to GnssInput/high-Z; the agent reapplies a persisted output request.
   TimeSyncPortStatus timeSyncPortStatus();
   TimeSyncPortStatus setTimeSyncPortMode(TimeSyncPortMode mode);
-  // Live GNSS status including the first valid RMC delay after its PPS.
-  // Use the delay only when offset_fresh is true; valid range is 0..800 ms.
+  // Latest sensor-board association between the time-bearing GNSS report and
+  // external PPS. Fresh input-mode offsets are constrained to 0..800 ms;
+  // negative offsets explicitly mean PPS advanced before a new report.
   GnssTimingStatus gnssTimingStatus();
+  // Independent UART/NMEA diagnostics; does not change GnssTimingStatus.
+  GnssReceptionStatus gnssReceptionStatus();
+  // Independent cursor, no stream ownership, no CORS/GNSS configuration writes.
+  GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
 
   // Runtime-only exposure control. These values are not persisted and may be
   // read or changed while acquisition is active. Automatic exposure uses one

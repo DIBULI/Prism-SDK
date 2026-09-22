@@ -47,14 +47,16 @@ Options parseOptions(int argc, char** argv) {
         options.model = prism::LidarModel::Mid360;
       } else if (model == "mid360s") {
         options.model = prism::LidarModel::Mid360S;
+      } else if (model == "xt32") {
+        options.model = prism::LidarModel::Xt32;
       } else {
-        throw std::invalid_argument("--model must be mid360 or mid360s");
+        throw std::invalid_argument("--model must be mid360, mid360s or xt32");
       }
     } else if (argument == "--seconds") {
       options.seconds = parseSeconds(nextValue(argc, argv, index, argument));
     } else if (argument == "--help" || argument == "-h") {
       std::cout << "usage: " << argv[0]
-                << " --model mid360|mid360s [--seconds 1..3600]\n";
+                << " --model mid360|mid360s|xt32 [--seconds 1..3600]\n";
       std::exit(0);
     } else {
       throw std::invalid_argument("unknown argument: " +
@@ -74,6 +76,8 @@ const char* modelName(prism::LidarModel model) {
       return "Mid360";
     case prism::LidarModel::Mid360S:
       return "Mid360S";
+    case prism::LidarModel::Xt32:
+      return "PandarXT-32";
     case prism::LidarModel::None:
       return "None";
   }

@@ -66,6 +66,7 @@ enum class FrameType : uint8_t {
   GnssTimingStatus = 0x3a,
   RoverRtcmStart = 0x3b,
   RoverRtcmStop = 0x3c,
+  GnssReceptionStatus = 0x3d,
   HelloResponse = 0x81,
   TimeResponse = 0x82,
   Pong = 0x83,
@@ -96,6 +97,7 @@ enum class FrameType : uint8_t {
   TimeSyncPortStatus = 0xb5,
   GnssTimingStatusResponse = 0xb6,
   RoverRtcmStatus = 0xb7,
+  GnssReceptionStatusResponse = 0xb8,
   Error = 0xff,
 };
 
@@ -103,6 +105,7 @@ enum class LidarModel : uint8_t {
   None = 0,
   Mid360 = 1,
   Mid360S = 2,
+  Xt32 = 3,  // Hesai PandarXT-32 (not XT32M2X).
 };
 
 enum class UsbLinkSpeed : uint8_t {

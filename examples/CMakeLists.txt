@@ -8,7 +8,7 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
 endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  project(PrismSdkExamples VERSION 1.1.0 LANGUAGES C CXX)
+  project(PrismSdkExamples VERSION 1.2.0 LANGUAGES C CXX)
   include(CTest)
 endif()
 
