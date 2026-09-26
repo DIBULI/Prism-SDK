@@ -21,6 +21,7 @@
 RK-local 差异表。
 
 - [CORS 配置及 RTK 启停](rtk-module-control.md)
+- [原始数据集下载：USB / RK-local](recorded-datasets.md)（SDK 不转换 ROS bag）
 - [当前 TimeSync 模式](timesync-port.md)
 - [RTK-module 版本](rtk-module-versions.md)
 - [XT32](xt32.md)及[雷达 line 字段](livox-line.md)

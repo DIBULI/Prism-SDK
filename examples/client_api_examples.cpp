@@ -8,6 +8,21 @@
 
 namespace prism_sdk_examples {
 
+// Compile-checked only: all files remain in the recorder's original format.
+// These calls require an idle, connected device and an existing destination.
+std::string downloadOriginalDataset(prism::Client& client, const std::string& name,
+                                    const std::string& parent) {
+  const auto recordings = client.recordedDatasets();
+  const auto manifest = client.recordedDatasetFiles(name);
+  if (!manifest.files.empty()) {
+    const auto chunk = client.readRecordedDatasetFile(name, manifest.files.front(), 0, 1024);
+    (void)chunk;
+  }
+  (void)recordings;
+  return client.downloadRecordedDataset(name,parent,
+      [](const prism::DatasetDownloadProgress&) {}, [] { return false; });
+}
+
 void clientConstructionAndMove() {
   prism::Client first;
   prism::Client second = std::move(first);

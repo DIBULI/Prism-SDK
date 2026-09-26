@@ -7,10 +7,10 @@ examples and documentation. No SDK implementation or device firmware is included
 
 - Host / RK-local / required Agent version: `1.2.0`.
 - Qualified Sensor Board: `0.4.27`; USB / RK-local protocol: `1`.
-- Runtime API: `18`; RTK-module control extension: `1`.
+- Runtime API: `18`; RTK-module control extension: `1`; raw dataset extension: `1`.
 - Source repository: `DIBULI/Prism-agent`.
-- Immutable source commit: `d10fdcfc7919c082ad974bb79487d9c3c02cbee9`.
-- Build: [matched SDK distribution run 36237563907](https://github.com/DIBULI/Prism-agent/actions/runs/36237563907).
+- Immutable source commit: `d7161c93baa4e652c2cdbbefb1e9922c6327c244`.
+- Build: [matched SDK distribution run 36255581761](https://github.com/DIBULI/Prism-agent/actions/runs/36255581761).
 - All four platform jobs passed their source tests before packaging.
 
 All installed Host headers are identical across platforms after normalizing
@@ -30,7 +30,7 @@ artifacts of the source commit above.
 
 - Linux x64 / ARM64: Ubuntu 20.04 / GCC 9 ABI baseline. Host shared libraries
   embed OpenSSL with its symbols hidden; libusb remains a dynamic dependency.
-  Both shared libraries require at most GLIBC 2.25 and GLIBCXX 3.4.22.
+  Runtime symbol requirements are checked against the Ubuntu 20.04 / GLIBC 2.31 baseline.
   Host static archives require target libusb/OpenSSL development dependencies.
 - RK-local ARM64: static C++17 archive with embedded miniz/OpenSSL; pthreads/dl
   and system C/C++ runtimes are required. Do not link both Host and RK-local

@@ -9,6 +9,7 @@
 #include "prism/usb/common.hpp"
 #include "prism/usb/configuration.hpp"
 #include "prism/usb/device_info.hpp"
+#include "prism/usb/datasets.hpp"
 #include "prism/usb/exposure.hpp"
 #include "prism/usb/gnss_timing.hpp"
 #include "prism/usb/gnss_reception.hpp"
@@ -71,6 +72,18 @@ class Client {
       uint32_t timeout_ms = 1000);
   bool streamTransferActive() const noexcept;
   uint64_t ping();
+  // Original recorded files only, no ROS conversion. Idle-only, read-only;
+  // all requests use the existing USB connection, never HTTP or shell commands.
+  std::vector<RecordedDataset> recordedDatasets();
+  RecordedDatasetManifest recordedDatasetFiles(const std::string& dataset);
+  RecordedDatasetChunk readRecordedDatasetFile(const std::string& dataset,
+      const RecordedDatasetFile& file, uint64_t offset,
+      uint32_t max_bytes = kRecordedDatasetChunkBytes);
+  // Fresh child directory under parent. Returns its path after all bytes and
+  // final manifest match; failure/cancel keeps a .partial directory. Does not
+  // overwrite local data or delete/modify RK files. Serialize Client I/O.
+  std::string downloadRecordedDataset(const std::string& dataset, const std::string& parent,
+      const DatasetProgress& progress = {}, const DatasetCancel& cancel = {});
   NetworkInfo networkInfo();
   // WiFi hotspot control shares the USB receive endpoint with live streams.
   // Both calls are therefore rejected while any streaming transfer is active.

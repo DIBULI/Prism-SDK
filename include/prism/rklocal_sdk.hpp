@@ -151,6 +151,14 @@ class Client {
   DeviceVersions deviceVersions();
   TimeInfo boardTime();
   uint64_t ping();
+  // Same read-only/raw-file contract as Host SDK, over the RK-local socket.
+  std::vector<RecordedDataset> recordedDatasets();
+  RecordedDatasetManifest recordedDatasetFiles(const std::string& dataset);
+  RecordedDatasetChunk readRecordedDatasetFile(const std::string& dataset,
+      const RecordedDatasetFile& file, uint64_t offset,
+      uint32_t max_bytes = kRecordedDatasetChunkBytes);
+  std::string downloadRecordedDataset(const std::string& dataset, const std::string& parent,
+      const DatasetProgress& progress = {}, const DatasetCancel& cancel = {});
   NetworkInfo networkInfo();
   DeviceConfiguration deviceConfiguration();
   DeviceConfiguration saveDeviceConfiguration(const DeviceConfiguration& configuration,

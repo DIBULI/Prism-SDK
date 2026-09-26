@@ -23,6 +23,7 @@ transport, clock source, queue behavior or ABI; consult the RK-local differences
 before substituting clients.
 
 - [CORS configuration and RTK controls](rtk-module-control.md)
+- [Raw recorded dataset download: USB / RK-local](recorded-datasets.md) (no ROS bag conversion)
 - [Current TimeSync modes](timesync-port.md)
 - [RTK-module versions](rtk-module-versions.md)
 - [XT32](xt32.md) and [LiDAR line fields](livox-line.md)

@@ -133,6 +133,12 @@ class RuntimeModule {
         throw std::runtime_error("incompatible MSVC runtime family");
       }
       validateAllFunctions(*api_);
+      const auto dataset_entry = reinterpret_cast<prism::GetDatasetRuntimeApiFunction>(
+          GetProcAddress(loaded_module, prism::kDatasetRuntimeApiEntryPoint));
+      const auto* dataset = dataset_entry ? dataset_entry(prism::kDatasetRuntimeApiVersion) : nullptr;
+      if (!dataset || dataset->abi_version != 1 || dataset->struct_size < sizeof(*dataset) ||
+          !dataset->list || !dataset->files || !dataset->read || !dataset->download)
+        throw std::runtime_error("incompatible raw dataset extension");
       const auto control_entry = reinterpret_cast<prism::GetRtkModuleControlRuntimeApiFunction>(
           GetProcAddress(loaded_module, prism::kRtkModuleControlRuntimeApiEntryPoint));
       control_ = control_entry ? control_entry(prism::kRtkModuleControlRuntimeApiVersion) : nullptr;
