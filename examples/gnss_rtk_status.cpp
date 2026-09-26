@@ -8,8 +8,30 @@
 // Queries only; never starts capture, opens CORS or sets device time.
 int main(int argc, char** argv) {
   try {
+    if (argc == 2 && std::string(argv[1]) == "--self-test") {
+      using namespace prism::gnss_plot;
+      auto check = [](bool ok) {
+        if (!ok) throw std::runtime_error("GNSS numeric parser self-test failed");
+      };
+      for (const char* value : {"", " ", " 1", "1 ", "1x", "nan", "inf", "1e999"})
+        check(!number(value));
+      check(number("0").value_or(-1) == 0);
+      check(number("-1.25").value_or(0) == -1.25);
+      check(number("1e2").value_or(0) == 100);
+      check(!number("2", 0, 1));
+      check(!number("-1", 0, 1));
+      check(number("1", 0, 1).value_or(-1) == 1);
+      check(integer("12", 0, 20) == 12 && integer("1.5", 0, 20) == -1);
+      check(coordinate("3130.000", "N", true).value_or(0) == 31.5);
+      check(coordinate("12130.000", "W", false).value_or(0) == -121.5);
+      check(!coordinate("3160.0", "N", true));
+      check(!coordinate("3130.0", "E", true));
+      check(utcValid("123456.10") && !utcValid("246000.0"));
+      std::cout << "GNSS numeric parser self-test passed\n";
+      return 0;
+    }
     if (argc == 2 && std::string(argv[1]) == "--help") {
-      std::cout << "usage: prism-gnss-rtk-status (read-only GNSS/RTK snapshot)\n";
+      std::cout << "usage: prism-gnss-rtk-status [--self-test] (read-only GNSS/RTK snapshot)\n";
       return 0;
     }
     if (argc != 1) throw std::invalid_argument("use --help");

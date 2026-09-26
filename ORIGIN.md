@@ -17,6 +17,13 @@ All installed Host headers are identical across platforms after normalizing
 Windows CRLF to LF. RK-local uses the same Host types and adds its own C++ Client.
 Consumers must replace headers and libraries together and rebuild.
 
+Packaging applies one header-only GCC 9 compatibility adjustment to
+`gnss_plot.hpp`: initialize the optional numeric-parser payload before parsing.
+It does not change the public interface, parsing rules or binary ABI. The same
+adjustment is present in both installed ROS header prefixes and is covered by
+the numeric-parser consumer self-test. Compiled libraries remain unmodified
+artifacts of the source commit above.
+
 ## Platforms
 
 - Linux x64 / ARM64: Ubuntu 20.04 / GCC 9 ABI baseline. Host shared libraries

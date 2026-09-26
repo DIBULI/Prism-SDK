@@ -236,6 +236,7 @@ else()
     add_test(NAME prism-stream-api-examples-smoke
       COMMAND prism-stream-api-examples)
     add_test(NAME prism-gnss-rtk-status-help COMMAND prism-gnss-rtk-status --help)
+    add_test(NAME prism-gnss-numeric-parser-self-test COMMAND prism-gnss-rtk-status --self-test)
     add_test(NAME prism-rtk-module-control-help COMMAND prism-rtk-module-control --help)
   endif()
 endif()
@@ -267,7 +268,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
 endif()
 
 # CI builds this target explicitly. It represents every example supported by
-# the current packaged runtime: seven on Linux/macOS and two on Windows, where
+# the current packaged runtime: nine on Linux/macOS and two on Windows, where
 # direct Client linkage is intentionally unavailable.
 add_custom_target(prism-all-examples
   DEPENDS ${_prism_supported_example_targets})

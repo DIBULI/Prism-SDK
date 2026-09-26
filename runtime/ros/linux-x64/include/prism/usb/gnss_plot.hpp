@@ -18,8 +18,13 @@ inline std::vector<std::string> split(const std::string& s,char sep=',') {
   for(;;){auto e=s.find(sep,at);r.push_back(s.substr(at,e-at));if(e==s.npos)return r;at=e+1;}
 }
 inline std::optional<double> number(const std::string& s,double low=-1e12,double high=1e12) {
-  std::istringstream in(s);in.imbue(std::locale::classic());double x=0;
-  in>>std::noskipws>>x;if(!in||!in.eof()||!std::isfinite(x)||x<low||x>high)return {};return x;
+  std::istringstream in(s);in.imbue(std::locale::classic());
+  // Initialize the optional payload even on invalid input. GCC 9 otherwise
+  // warns about the disengaged return value after inlining at -O3.
+  std::optional<double> result{0.0};
+  in>>std::noskipws>>*result;
+  if(!in||!in.eof()||!std::isfinite(*result)||*result<low||*result>high)result.reset();
+  return result;
 }
 inline int integer(const std::string& s,int low,int high) {
   auto n=number(s,low,high);return n&&std::floor(*n)==*n?int(*n):-1;
