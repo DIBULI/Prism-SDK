@@ -14,6 +14,12 @@ foreach(_example capture gnss_status)
   endif()
 endforeach()
 
+add_executable(prism-rklocal-rtk-module-control "../examples/rtk_module_control.cpp")
+target_compile_definitions(prism-rklocal-rtk-module-control PRIVATE PRISM_EXAMPLE_RKLOCAL)
+target_link_libraries(prism-rklocal-rtk-module-control PRIVATE Prism::RkLocal)
+target_compile_options(prism-rklocal-rtk-module-control PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
 if(BUILD_TESTING)
+  add_test(NAME prism-rklocal-rtk-module-control-help COMMAND prism-rklocal-rtk-module-control --help)
   add_subdirectory(tests)
 endif()

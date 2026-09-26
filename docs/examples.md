@@ -11,7 +11,7 @@ All commands below run from the repository root.
 
 ## Build
 
-New in 1.1.0: `prism-gnss-rtk-status` is a read-only Host snapshot example.
+New in 1.2.0: `prism-gnss-rtk-status` is a read-only Host snapshot example.
 On-device `prism-rklocal-capture` extracts four JPEG images and IMU samples;
 `prism-rklocal-gnss-status` queries GNSS/PPS without starting capture. Build just
 these C++ examples with `cmake -S rk-local-sdk -B build/rklocal`.
@@ -70,7 +70,7 @@ the selected configuration directory, for example `Release`.
 `--sync-time` is an administrative operation. The host clock must be correct,
 and all Camera, IMU, and LiDAR streams must be stopped. On Windows, this
 example also demonstrates loading `prism_usb_sdk.dll` and validating Runtime
-API v12 before calling it.
+API v18 before calling it.
 
 ## `prism-camera-imu-capture`
 
@@ -154,7 +154,7 @@ is checked by a real compiler instead of appearing only in Markdown snippets:
 | `prism-configuration-api-examples` | `configuration_api_examples.cpp` | Linux, macOS | Configuration, exposure, acquisition, LiDAR network, low-level command, and upgrade |
 | `prism-stream-api-examples` | `stream_api_examples.cpp` | Linux, macOS | `ImuStream` and both `LidarStream` constructors and lifecycles |
 | `prism-parser-api-examples` | `parser_api_examples.cpp` | Linux, macOS | Every public helper and frame parser |
-| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | All 57 Runtime API v12 function pointers |
+| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | All 57 Runtime API v18 function pointers |
 
 ### `prism-client-api-examples`
 
@@ -184,7 +184,7 @@ chunk parsers. Its `main()` is a safe no-op catalogue.
 
 ### `prism-windows-runtime-api-examples`
 
-This Windows-only source loads the adjacent SDK DLL, validates Runtime API v12,
+This Windows-only source loads the adjacent SDK DLL, validates Runtime API v18,
 checks all 57 function pointers, and contains a compile-checked minimal call for
 every pointer. Running it requires no device and makes no device changes.
 

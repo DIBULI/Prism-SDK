@@ -4,7 +4,7 @@
 
 - [RK-local C++ 接口及与 Host 的差异](../docs/rk-local-sdk.zh-CN.md)
 - [English API guide](../docs/rk-local-sdk.md)
-- [验证记录](../docs/rk-local-sdk-testing.md)
+- [CORS 配置与 RTK 启停](../docs/rtk-module-control.md)
 - [SDK 文档目录](../docs/README.zh-CN.md)
 
 本目录仅保留独立示例构建入口和接口测试。

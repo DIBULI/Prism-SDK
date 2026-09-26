@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "prism/usb/gnss_timing.hpp"
-#include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/client.hpp"
 #include "prism/usb/streams.hpp"
 #include "prism/usb/lidar_points.hpp"
@@ -20,7 +19,6 @@ namespace prism::rklocal {
 using ::prism::GnssTimingStatus;
 using ::prism::GnssReceptionStatus;
 using ::prism::RtkCorrectionStatus;
-using ::prism::RtkNavigationStatus;
 inline constexpr const char* kDefaultSocketPath = "/run/prism/stream.sock";
 inline constexpr std::size_t kCameraCount = 4;
 inline constexpr uint32_t kWaitForever = UINT32_MAX;
@@ -131,13 +129,11 @@ class Client {
   // 0 is nonblocking; kWaitForever waits until data or disconnection.
   std::optional<ImuSample> readImu(uint32_t timeout_ms = 3000);
   std::optional<FrameSet> readFrameSet(uint32_t timeout_ms = 3000);
-  std::optional<RtkNavigationStatus> readRtkNavigation(uint32_t timeout_ms = 3000);
 
   GnssTimingStatus gnssTimingStatus();
   GnssReceptionStatus gnssReceptionStatus();
   GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
   RtkCorrectionStatus rtkCorrectionStatus();
-  RtkNavigationStatus rtkNavigationStatus();
   RtkCorrectionStatus beginRtkCorrections();
   // Raw RTCM2.x/RTCM3 bytes, automatically split into <=16 KiB commands.
   // Each wire chunk uses timeout_ms, matching Host SDK; NTRIP is application-owned.
@@ -169,6 +165,13 @@ class Client {
   ExposureLimits setCameraExposureLimits(const ExposureLimits& limits,
       uint32_t field_mask = kExposureLimitsFieldAll);
   TimeSyncPortStatus timeSyncPortStatus();
+  TimeSyncRtkStatus timeSyncRtkStatus();
+  TimeSyncRtkVersions timeSyncRtkVersions();
+  TimeSyncCorsStatus timeSyncCorsConfiguration();
+  // Same persistence/consent/confirmation semantics as Host Client.
+  TimeSyncCorsStatus saveTimeSyncCorsConfiguration(const TimeSyncCorsConfiguration& configuration);
+  TimeSyncRtkStatus startRtk(const RtkStartOptions& options = {});
+  TimeSyncRtkStatus stopRtk(uint32_t timeout_ms = 20000);
   TimeSyncPortStatus setTimeSyncPortMode(TimeSyncPortMode mode);
   WifiHotspotStatus wifiHotspotStatus();
   WifiHotspotStatus setWifiHotspotEnabled(bool enabled);

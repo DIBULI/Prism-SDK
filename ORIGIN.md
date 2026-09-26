@@ -1,104 +1,42 @@
-# Prism SDK mainline 1.2.0 / ABI 13 provenance
+# Prism SDK 1.2.0 provenance
 
-The current headers, Host libraries and RK-local archive are built from
-`DIBULI/Prism-agent` commit `abacf0c1df4d62eb8510a4b60095667714770b31`.
-Includes `f9b58e4` (GNSS observation interfaces), `d56b0ee` (XT32 point times),
-`9c70b42` (RK-local setDeviceTime verification) and `abacf0c` (current Agent GNSS/RTK integration).
-`811b96e` defines the matched build matrix.
-Build: [Actions run 35774352024](https://github.com/DIBULI/Prism-agent/actions/runs/35774352024).
+This repository contains only public headers, compiled SDK libraries, consumer
+examples and documentation. No SDK implementation or device firmware is included.
 
-- Host / RK-local / required Agent: 1.2.0, protocol 1; Runtime API ABI 13.
-- Linux x64 and ARM64: Ubuntu 20.04 baseline, OpenSSL statically embedded in
-  shared Host runtimes; system libusb and C/C++ runtime dependencies remain.
-- macOS arm64: deployment target 13.0, including separately rebuilt libusb.
-- Windows x64: MSVC, Windows Server 2022 build/test runner.
-- Public declarations and all runtime binaries come from that same source;
-  consumers must replace both and rebuild because `LidarPoint` changed layout.
-- XT32 codec, metadata preservation and synthetic dataset round trips are
-  tested. This is not XT32 physical-device validation, a firmware update,
-  a new tag, or a GitHub Release.
-- Optional GNSS observation queries require an Agent implementing that
-  extension; Agent `abacf0c` implements it. Older Agents may report unsupported.
+## Matched source
 
-## Historical v1.1.0 release provenance (not the current master binaries)
+- Host / RK-local / required Agent version: `1.2.0`.
+- Qualified Sensor Board: `0.4.27`; USB / RK-local protocol: `1`.
+- Runtime API: `18`; RTK-module control extension: `1`.
+- Source repository: `DIBULI/Prism-agent`.
+- Immutable source commit: `d10fdcfc7919c082ad974bb79487d9c3c02cbee9`.
+- Build: [matched SDK distribution run 36237563907](https://github.com/DIBULI/Prism-agent/actions/runs/36237563907).
+- All four platform jobs passed their source tests before packaging.
 
-This binary-distribution repository contains public headers, prebuilt libraries,
-consumer examples and documentation. It does not publish SDK implementation or
-firmware source code.
+All installed Host headers are identical across platforms after normalizing
+Windows CRLF to LF. RK-local uses the same Host types and adds its own C++ Client.
+Consumers must replace headers and libraries together and rebuild.
 
-## RK-local C++ update (2026-09-07)
+## Platforms
 
-Only the RK-local archive and its public API/examples are rebuilt for this update.
-The Host binaries and protocol versions remain unchanged. RK-local now exposes
-`prism::rklocal::Client` with shared Host controls for configuration, exposure,
-LiDAR, Wi-Fi, GNSS/RTK, time, upgrades and raw RTCM; the C header is private.
-[Explicit differences](docs/rk-local-sdk.md#host-api-alignment-and-explicit-differences)
-and [new validation results](docs/rk-local-sdk-testing.md) define the supported scope.
-Source: the RK-local C++ changes on top of the Agent baseline below, not yet
-published as a new source commit/tag. Final server build: Ubuntu 20.04 ARM64/GCC 9.4.0 container;
-control/upgrade test requires at most GLIBC 2.17 and GLIBCXX 3.4.21.
-Consumers must replace the header and archive together and rebuild.
-Physical RK3576 testing passed 19 query/capture/stop/reconnect checks using a
-temporary Agent write-lock isolation fix. USB/local coexistence requires this
-Agent fix; see the hardware report for its exact binary hash and deployment.
-The existing firmware image and Sensor Board BOOT.BIN are not updated by this SDK package.
+- Linux x64 / ARM64: Ubuntu 20.04 / GCC 9 ABI baseline. Host shared libraries
+  embed OpenSSL with its symbols hidden; libusb remains a dynamic dependency.
+  Both shared libraries require at most GLIBC 2.25 and GLIBCXX 3.4.22.
+  Host static archives require target libusb/OpenSSL development dependencies.
+- RK-local ARM64: static C++17 archive with embedded miniz/OpenSSL; pthreads/dl
+  and system C/C++ runtimes are required. Do not link both Host and RK-local
+  static archives into the same executable because they share codec symbols.
+- macOS ARM64: deployment target 13.0, bundled libusb 1.0.30, relocatable
+  dylibs built on macOS 15. No Intel package.
+- Windows x64: MSVC on Windows Server 2022, `/MD`, Runtime API DLL loading.
+  Windows 10/11 and macOS 13 are compatibility targets, not hardware test hosts.
 
-## Source and interface baseline
+`runtime/ros/linux-x64` is an installed shared Host prefix;
+`runtime/ros/linux-arm64` is an installed static Host prefix. No ROS adapter
+binary or Docker image is released here.
 
-- Distribution / Host SDK / RK-local SDK: **1.1.0**
-- Required device Agent: **exactly 1.1.0** (no old-Agent fallback)
-- Qualified Sensor Board: **0.4.26**
-- Host USB protocol / RK-local protocol: **1 / 1**
-- Windows Runtime API: **12**, 57 function pointers, MSVC C++ ABI
-- Runtime source: `DIBULI/Prism-agent` commit
-  `e47627fab53946c854bbdb0f83fee9a0a209d98e`
-- Host source directory: `prism-sdk/usb-sdk`
-- RK-local source directory: `prism-rklocal-sdk`
-- Runtime build: [Agent Actions run 34081177379](https://github.com/DIBULI/Prism-agent/actions/runs/34081177379)
-- Build workflow revision: `1d437fd`, `.github/workflows/build-sdk-distribution.yml`
-
-The build runs inside the private source repository; a public SDK repository
-token cannot check out the private implementation. Published artifacts contain
-only the installed SDK. Header comments clarify the current 800 Hz, GNSS and
-Sensor Board time semantics; declarations and binary layouts match the baseline.
-Examples in this package are consumer examples, compiled against these binaries.
-
-## Linux x64 and ARM64
-
-Both architectures use Ubuntu 20.04/GCC 9. Shared runtimes embed Ubuntu
-OpenSSL `1.1.1f-1ubuntu2.24`, with archive symbols hidden using
-`-Wl,--exclude-libs,ALL`. They have no dynamic libcrypto/libssl dependency;
-libusb and system C/C++ runtime libraries remain dynamic. Maximum required
-GLIBC is 2.25 and GLIBCXX is 3.4.22 on both architectures.
-
-`runtime/linux-{x64,arm64}` includes both Host `.so` and `.a`. Static Host
-archives do not embed their dependencies: consumers resolve libusb, OpenSSL
-and threads using target-system development packages. ARM64 also includes
-`libprism_rklocal_sdk.a`; this C++17 SDK embeds miniz/OpenSSL libcrypto, and needs pthreads/dl and
-system C/C++ libraries, not dynamic libcrypto/libssl.
-
-`runtime/ros/linux-x64` is the complete shared installed prefix;
-`runtime/ros/linux-arm64` is the complete static installed prefix. Both carry
-1.1.0 headers, exact-version CMake package metadata and udev rules. These are
-SDK installation prefixes; no ROS adapter implementation is included or changed.
-
-## macOS and Windows
-
-- macOS: Apple Silicon ARM64, deployment target 13.0; SDK dylib and bundled
-  libusb 1.0.30 rebuilt on macOS 15, relocatable and ad-hoc signed.
-- Windows: x64 MSVC on Windows Server 2022; DLL intended for Windows 10/11,
-  loaded through Runtime API 12 with compatible MSVC 14.x and `/MD`.
-  The distribution intentionally does not add a Windows import library.
-
-Windows 10/11 and macOS 13 are compatibility targets, not physical-device test
-environments. CI executes on Windows Server 2022/macOS 15. Linux compatibility
-CI tests Ubuntu 20.04/22.04/24.04/26.04 for both architectures.
-
-## Integrity and verification
-
-All four runtime-build jobs passed. Linux shared/static builds each passed
-11 Host tests; ARM64 RK-local passed the mock-Agent test. macOS/Windows also
-passed the source SDK suites. Package CI separately compiles consumer examples,
-checks shared/static loading, and verifies every published file in `SHA256SUMS`.
-Regenerate the manifest with `bash scripts/update_checksums.sh` after staging
-package edits. Never mix headers or libraries from another SDK release.
+Per-platform provenance is in `runtime/*/PROVENANCE.txt`. `SHA256SUMS` covers
+published files; external Release archives have separate SHA-256 checksums.
+Consumer-package CI tests loading, example builds, and Linux compatibility
+independently of the source build. No new device firmware is flashed by installing
+this SDK, and no device recordings or hardware test reports are included.

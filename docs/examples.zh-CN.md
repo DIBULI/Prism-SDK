@@ -9,7 +9,7 @@
 
 ## 编译
 
-1.1.0 新增：Host 的 `prism-gnss-rtk-status` 只读查询；RK 端的
+1.2.0 新增：Host 的 `prism-gnss-rtk-status` 只读查询；RK 端的
 `prism-rklocal-capture` 提取四路 JPEG 与 IMU，`prism-rklocal-gnss-status`
 不启动采集即可查询 GNSS/PPS。只编译 RK 的两个 C++ 示例可用
 `cmake -S rk-local-sdk -B build/rklocal`。命令、单位及占用规则见
@@ -64,7 +64,7 @@ Visual Studio 等多配置生成器会把程序放在所选配置目录，例如
 
 `--sync-time` 是管理操作。主机时钟必须正确，而且 Camera、IMU 和 LiDAR 流必须全部
 停止。在 Windows 上，本示例还演示如何加载 `prism_usb_sdk.dll`，验证 Runtime API
-v12 后再调用接口。
+v18 后再调用接口。
 
 ## `prism-camera-imu-capture`
 
@@ -140,7 +140,7 @@ v12 后再调用接口。
 | `prism-configuration-api-examples` | `configuration_api_examples.cpp` | Linux、macOS | 配置、曝光、采集、LiDAR 网络、底层命令和升级 |
 | `prism-stream-api-examples` | `stream_api_examples.cpp` | Linux、macOS | `ImuStream` 与两个 `LidarStream` 构造方式及生命周期 |
 | `prism-parser-api-examples` | `parser_api_examples.cpp` | Linux、macOS | 全部公共 helper 与帧解析器 |
-| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | Runtime API v12 的全部 57 个函数指针 |
+| `prism-windows-runtime-api-examples` | `windows_runtime_api_examples.cpp` | Windows | Runtime API v18 的全部 57 个函数指针 |
 
 ### `prism-client-api-examples`
 
@@ -167,7 +167,7 @@ v12 后再调用接口。
 
 ### `prism-windows-runtime-api-examples`
 
-该 Windows 专用源码加载相邻 SDK DLL、验证 Runtime API v12、检查全部 57 个函数指针，
+该 Windows 专用源码加载相邻 SDK DLL、验证 Runtime API v18、检查全部 57 个函数指针，
 并为每个指针提供一个经编译检查的最小调用。运行时不需要设备，也不会修改设备。
 
 四个 Linux/macOS 目录程序默认只输出说明，不会操作设备。Windows 目录程序会加载发布

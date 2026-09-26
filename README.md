@@ -1,139 +1,68 @@
-# Prism Host SDK 1.2.0 (master)
+# Prism SDK 1.2.0
 
-[![Build SDK Examples](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml)
+[简体中文](README.zh-CN.md) · [API documentation](docs/README.md)
 
-[中文说明](README.zh-CN.md)
-
-This repository is the binary distribution of the Prism Host SDK. It contains
-public C++ headers, prebuilt dynamic libraries for the three supported host
-platforms, Linux x86-64/arm64 static libraries, end-user documentation, and
-CMake examples. It does not contain the SDK implementation or device firmware
-source code.
-
-It also includes the **RK-local SDK 1.2.0** C++17 Client API and ARM64 static library for
-on-device Camera/IMU acquisition and GNSS/RTK queries. See the
-[RK-local guide](docs/rk-local-sdk.md) for the capture and GNSS examples.
-The [1.1.0 service guide](docs/gnss-rtk.md) covers new Host and local interfaces.
-
-## Package contents
-
-```text
-Prism-SDK/
-├── include/prism/                 Public C++17 headers
-├── runtime/
-│   ├── linux-x64/                 Ubuntu 20.04+ x86-64 .so and .a
-│   ├── linux-arm64/               Ubuntu 20.04+ arm64 .so and .a
-│   ├── ros/
-│   │   ├── linux-x64/             All supported ROS/Ubuntu x86-64 releases
-│   │   └── linux-arm64/           All supported ROS/Ubuntu ARM64 releases
-│   ├── macos-arm64/               macOS 13+ Apple Silicon dylibs
-│   └── windows-x64/               Windows 10/11 x64 DLL
-├── rk-local-sdk/                 On-device example build entry and API tests
-├── docs/                          Host/RK-local interface and usage documentation
-├── examples/                      Compile-tested SDK examples
-├── CMakeLists.txt
-├── ORIGIN.md                      Release provenance
-└── SHA256SUMS                     Package integrity hashes
-```
+Binary distribution of the Host SDK and RK-local C++17 SDK. Includes public
+headers, compiled libraries, consumer examples and documentation; no SDK
+implementation or device firmware source is published here.
 
 ## Compatibility
 
-- Mainline package: `1.2.0` (existing release tags are unchanged)
-- Host SDK runtime: `1.2.0`
-- Runtime API ABI: `13`
-- USB protocol: `1`
-- Device Agent: exactly `1.2.0`
-- Language: C++17 or later
-- CMake: 3.20 or later
+- SDK / required Agent: **1.2.0**; opening enforces an exact version match.
+- Qualified Sensor Board: **0.4.27**; USB and RK-local protocol **1**.
+- Windows Runtime API **18**, RTK-module control extension **1**.
+- Replace headers and libraries together and rebuild your application.
 
-This mainline package adds [Hesai XT32](docs/xt32.md) to Host and RK-local SDKs.
-All runtimes are built from the source revision in [ORIGIN.md](ORIGIN.md).
-`LidarPoint` has a new binary layout: replace headers and libraries together
-and rebuild consumers. ABI 12 libraries must not be mixed with these headers.
-The runtime performs a strict 1.2.0 SDK/Agent handshake. GNSS observation
-queries are optional; an Agent without that extension reports unsupported.
-This update does not create a tag or GitHub Release.
+| Platform | Published libraries | Baseline |
+| --- | --- | --- |
+| Linux x64 / ARM64 | Host `.so` and `.a` | Ubuntu 20.04 ABI; tested by CI on 20.04/22.04/24.04/26.04 |
+| RK3576 Linux ARM64 | `libprism_rklocal_sdk.a` | RK-local C++ Client |
+| macOS Apple Silicon | SDK + bundled libusb `.dylib` | macOS 13+; no Intel package |
+| Windows x64 | SDK DLL via Runtime API | MSVC 14.x, `/MD`, Windows 10/11 target |
 
-### Compatibility by release tag
+Linux shared libraries embed OpenSSL and depend on system libusb-1.0. Static
+Host linking additionally needs libusb and OpenSSL development libraries.
+RK-local embeds its archive dependencies and needs pthreads/dl, not libusb.
+`runtime/ros/linux-x64` and `runtime/ros/linux-arm64` are matching installed
+Host SDK prefixes, not ROS adapter binaries or Docker images.
 
-| SDK release tag | Distribution | Host SDK runtime/ABI | Supported Agent | Qualified sensor-board | USB protocol |
-| --- | --- | --- | --- | --- | --- |
-| `v1.1.0` | `1.1.0` | `1.1.0` | `1.1.0` | `0.4.26` | `1` |
+## What's included
 
-The Host SDK rejects an incompatible Agent during the opening handshake. The
-sensor-board version is reported by the Agent but is not independently rejected
-by the Host SDK, so use the qualified sensor-board version shown for the tag.
+- Unified Host/RK-local CORS configuration and RTK start/stop APIs.
+- Current TimeSync modes, RTK-module firmware versions, 4G/control diagnostics.
+- Receiver-native GNSS/RTK observations, sky/trajectory display helpers; no
+  Agent-side RTK solver or retired raw/smoothed navigation interface.
+- GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
+- [Release notes](docs/update/v1.2.0.md), [provenance](ORIGIN.md) and `SHA256SUMS`.
 
-GitHub Actions compiles every example source across the three-platform matrix,
-runs all no-device support tests, runtime-smoke-tests the published dynamic
-libraries, and verifies static linking on both Linux architectures. CMake
-rejects an unregistered `examples/*.cpp` source, preventing a future example
-from silently escaping CI.
+## Build consumer examples
 
-The Linux x86-64 shared library uses an Ubuntu 20.04/GCC 9 ABI baseline and
-statically embeds OpenSSL, so one `.so` supports Ubuntu 20.04, 22.04, 24.04,
-and 26.04. It keeps libusb dynamic through its stable `libusb-1.0.so.0` SONAME.
-The repository provides one x86-64 shared prefix and one ARM64 static prefix
-under `runtime/ros`; both cover every supported ROS/Ubuntu release. Desktop SDK
-consumers use `runtime/linux-x64/libprism_usb_sdk.so` by default. Set
-`PRISM_SDK_USE_STATIC=ON` to use the matching `libprism_usb_sdk.a` instead.
-
-## Linux static SDK
-
-Install the OpenSSL and libusb development packages, then enable the static SDK
-option when configuring a consumer:
-
-```bash
-sudo apt-get install -y libssl-dev libusb-1.0-0-dev
-cmake -S . -B build-static \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DPRISM_SDK_USE_STATIC=ON
-cmake --build build-static --config Release
-```
-
-This removes the final application's dependency on `libprism_usb_sdk.so`.
-OpenSSL and libusb remain transitive dependencies and are dynamically linked by
-default unless the consumer explicitly selects compatible static builds of
-those projects.
-
-## Build the examples
-
-```bash
+```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake --build build --config Release --parallel
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-The build copies the required runtime library next to the example executable.
-On macOS it also copies the bundled libusb dylib.
+On Ubuntu/Debian install `libusb-1.0-0-dev`; static Host consumers also need
+`libssl-dev` and `-DPRISM_SDK_USE_STATIC=ON`. Install the USB permission rule once:
 
-Run the full automated package, build-target, and CTest verification used by
-GitHub Actions:
-
-```bash
-python3 scripts/test_all_examples.py --build-dir build-all-examples
+```sh
+sudo install -m 0644 runtime/ros/linux-x64/lib/udev/rules.d/99-prism-usb.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
 
-For running examples and opt-in time synchronization, see the
-[example usage guide](docs/examples.md#prism-device-info-time-sync).
+The same rule applies to ARM64. Replug USB if needed. Windows examples load
+the adjacent DLL; do not directly link the Linux/macOS Client examples on Windows.
+macOS examples use the two bundled dylibs without a Homebrew runtime dependency.
 
-## Documentation
+For RK-local build `cmake -S rk-local-sdk -B build/rklocal` on the RK, or use
+the supplied ARM64 toolchain; see [RK-local API and differences](docs/rk-local-sdk.md).
 
-All interface usage documentation is maintained under `docs/`.
-Start with the [documentation index](docs/README.md).
+Opening a client does not set time, start acquisition or start CORS. CORS save
+and RTK start are separate actions; starting requires explicit consent to send
+live GGA. Use `prism-rtk-module-control --help` for the Host example and
+`prism-rklocal-rtk-module-control --help` from the top-level ARM64 build.
 
-- [Release 1.1.0 update notes](docs/update/v1.1.0.md)
-- [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
-- [Complete SDK development guide](docs/development-guide.md)
-- [Per-interface SDK examples](docs/interface-examples.md)
-- [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
-- [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
-- [Installation guide](docs/installation.md)
-- [SDK usage guide](docs/usage.md)
-- [安装指南](docs/installation.zh-CN.md)
-- [SDK 使用指南](docs/usage.zh-CN.md)
-- [Example guide](docs/examples.md)
-
-RK-local now covers configuration, exposure, LiDAR, hotspot, time, upgrades and raw RTCM.
-See [Host API alignment and explicit differences](docs/rk-local-sdk.md#host-api-alignment-and-explicit-differences) before substituting backends.
-
-GNSS reception diagnostics: [接收状态接口说明](docs/gnss-reception-status.md).
+All usage guides are in [docs/](docs/README.md). Full package checks:
+`python3 scripts/test_all_examples.py --build-dir build-all-examples`.

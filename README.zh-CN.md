@@ -1,124 +1,61 @@
-# Prism Host SDK 1.2.0（主干）
+# Prism SDK 1.2.0
 
-同时包含 **RK-local SDK 1.2.0**：设备本机 C++17 Client 接口、ARM64 静态库、相机/IMU
-采集示例和 GNSS 状态查询示例。见 [RK-local 使用说明](docs/rk-local-sdk.zh-CN.md)
-及 [1.1.0 GNSS/RTK 接口说明](docs/gnss-rtk.zh-CN.md)。
+[English](README.md) · [接口文档](docs/README.zh-CN.md)
 
-[![Build SDK Examples](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DIBULI/Prism-SDK/actions/workflows/build.yml)
+本仓库发布 Host SDK 和 RK-local C++17 SDK 的公共头文件、编译好的库、
+消费者示例及文档，不包含 SDK 实现源码或设备固件源码。
 
-[English](README.md)
+## 版本与兼容性
 
-本仓库是 Prism Host SDK 的二进制发布仓库，只包含公共 C++ 头文件、三个受支持
-平台的预编译动态库、Linux x86-64/arm64 静态库、用户安装/使用文档和 CMake 示例，
-不包含 SDK 实现源码或设备固件源码。
+- SDK 与设备 Agent 均为 **1.2.0**，连接时严格校验，不兼容其他 Agent 版本。
+- 配套 Sensor Board **0.4.27**，USB/RK-local 协议版本均为 **1**。
+- Windows Runtime API **18**，RTK-module 控制扩展版本 **1**。
+- 头文件与库须同时更新，应用需要重新编译，不能混用旧库。
 
-## 仓库内容
+| 平台 | 发布文件 | 基线 |
+| --- | --- | --- |
+| Linux x64 / ARM64 | Host `.so`、`.a` | Ubuntu 20.04 ABI；CI 覆盖 20.04/22.04/24.04/26.04 |
+| RK3576 Linux ARM64 | `libprism_rklocal_sdk.a` | RK-local C++ Client |
+| macOS Apple Silicon | SDK 与 libusb `.dylib` | macOS 13 以上，不提供 Intel 包 |
+| Windows x64 | SDK DLL，通过 Runtime API 加载 | MSVC 14.x、`/MD`，目标 Windows 10/11 |
 
-```text
-Prism-SDK/
-├── include/prism/                 C++17 公共头文件
-├── runtime/
-│   ├── linux-x64/                 Ubuntu 20.04+ x86-64 .so 与 .a
-│   ├── linux-arm64/               Ubuntu 20.04+ arm64 .so 与 .a
-│   ├── ros/
-│   │   ├── linux-x64/             所有受支持 ROS/Ubuntu x86-64 版本
-│   │   └── linux-arm64/           所有受支持 ROS/Ubuntu ARM64 版本
-│   ├── macos-arm64/               macOS 13+ Apple Silicon 动态库
-│   └── windows-x64/               Windows 10/11 x64 DLL
-├── rk-local-sdk/                 本机示例构建入口与接口测试
-├── docs/                          Host/RK-local 接口与使用文档
-├── examples/                      经编译验证的 SDK 示例
-├── CMakeLists.txt
-├── ORIGIN.md                      发布来源记录
-└── SHA256SUMS                     文件完整性校验
-```
+Linux 动态库内嵌 OpenSSL，使用系统 libusb；Host 静态链接需要安装 libusb、
+OpenSSL 开发包。RK-local 库内嵌其依赖，仅需 pthreads/dl 和系统 C/C++ 运行库。
+`runtime/ros/` 是匹配的 SDK 安装前缀，不包含 ROS adapter 或 Docker 镜像。
 
-## 兼容要求
+## 本次更新
 
-- 主干分发版本：`1.2.0`（不修改既有发布标签）
-- Host SDK 运行时：`1.2.0`
-- Runtime API ABI：`13`
-- USB protocol：`1`
-- 设备 Agent：必须为 `1.2.0`
-- C++：C++17 或更新版本
-- CMake：3.20 或更新版本
-
-当前主干新增 [Hesai XT32](docs/xt32.md) 支持，Host 与 RK-local 共用逐点时间接口。
-全部库的源码版本见 [ORIGIN.md](ORIGIN.md)。`LidarPoint` 二进制布局已变化，必须
-成套替换头文件和库并重新编译，不得混用 ABI 12 的旧库。运行时严格执行 1.2.0
-版本握手。本次不创建标签或 Release；不要连接非 1.2.0
-的 Agent。
-
-### 各 Release Tag 兼容关系
-
-| SDK Release Tag | 分发版本 | Host SDK 运行时/ABI | 支持的 Agent | 已验证的 sensor-board | USB 协议 |
-| --- | --- | --- | --- | --- | --- |
-| `v1.1.0` | `1.1.0` | `1.1.0` | `1.1.0` | `0.4.26` | `1` |
-
-Host SDK 会在打开设备时拒绝不兼容的 Agent。Agent 会上报 sensor-board 版本，
-但 Host SDK 不会单独拒绝该版本，因此请使用表中对应 Release Tag 已验证的
-sensor-board 版本。
-
-GitHub Actions 会通过三平台矩阵编译每一个 example 源文件，运行全部无需设备的支持
-测试，对发布的动态库执行加载冒烟测试，并验证两个 Linux 架构的静态链接。新增
-`examples/*.cpp` 如果没有注册 CMake target，配置会直接失败，避免后续示例被 CI
-静默漏编。
-
-Linux x86-64 动态库采用 Ubuntu 20.04/GCC 9 ABI 基线并静态包含 OpenSSL，
-因此同一份 `.so` 支持 Ubuntu 20.04、22.04、24.04 和 26.04；libusb 仍通过
-稳定的 `libusb-1.0.so.0` SONAME 动态链接。`runtime/ros` 下分别提供一份覆盖
-全部 ROS/Ubuntu 版本的 x86-64 动态前缀和 ARM64 静态前缀。普通桌面 SDK 用户
-默认使用
-`runtime/linux-x64/libprism_usb_sdk.so`。配置时设置
-`PRISM_SDK_USE_STATIC=ON` 可改用同目录的 `libprism_usb_sdk.a`。
-
-## Linux 静态 SDK
-
-安装 OpenSSL 与 libusb 开发包，然后在配置使用方时启用静态 SDK：
-
-```bash
-sudo apt-get install -y libssl-dev libusb-1.0-0-dev
-cmake -S . -B build-static \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DPRISM_SDK_USE_STATIC=ON
-cmake --build build-static --config Release
-```
-
-这样最终程序不再依赖 `libprism_usb_sdk.so`。OpenSSL 和 libusb 仍是传递链接依赖，
-默认使用它们的动态库；只有使用方显式选择兼容的静态版本时才会进一步静态链接。
+- Host/RK-local 统一 CORS 配置、RTK 启停接口。
+- 最新 TimeSync 模式、RTK-module 版本、4G 与控制状态诊断。
+- 接收机原生 GNSS/RTK 报文、天空图和轨迹模型；不提供 Agent 内部 RTK 解算及旧 raw/smoothed 接口。
+- GNSS 输入诊断、XT32、雷达 line 字段、相机元数据。
+- 详见[更新说明](docs/update/v1.2.0.zh-CN.md)及[产物来源](ORIGIN.md)。
 
 ## 编译示例
 
-```bash
+```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake --build build --config Release --parallel
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-构建过程会把所需动态库复制到示例程序旁；macOS 还会复制配套的 libusb 动态库。
+Ubuntu/Debian 安装 `libusb-1.0-0-dev`；Host 静态链接还需 `libssl-dev`，
+配置时添加 `-DPRISM_SDK_USE_STATIC=ON`。普通用户访问 USB 前安装权限规则：
 
-运行 GitHub Actions 同款的发布文件、全部编译目标和 CTest 自动化验证：
-
-```bash
-python3 scripts/test_all_examples.py --build-dir build-all-examples
+```sh
+sudo install -m 0644 runtime/ros/linux-x64/lib/udev/rules.d/99-prism-usb.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
 
-运行示例及手动校时的用法见[示例使用说明](docs/examples.zh-CN.md#prism-device-info-time-sync)。
+ARM64 使用同一规则，必要时重新插拔 USB。Windows 使用 DLL Runtime API，
+macOS 使用包内两个 dylib。RK-local 编译命令为
+`cmake -S rk-local-sdk -B build/rklocal`，详见[接口说明与差异](docs/rk-local-sdk.zh-CN.md)。
 
-## 文档
+连接客户端不会自动校时、采集或启动 CORS。保存账号与启动 RTK 是分开的操作；
+启动前必须明确允许向已保存的 CORS 服务发送实时 GGA 位置。
+Host 示例为 `prism-rtk-module-control --help`，顶层 ARM64 构建还提供
+`prism-rklocal-rtk-module-control --help`。
 
-接口使用文档统一维护在 `docs/`，从[文档目录](docs/README.zh-CN.md)进入。
-
-- [1.1.0 更新说明](docs/update/v1.1.0.zh-CN.md)
-- [Release 1.1.0 update notes](docs/update/v1.1.0.md)
-- [完整 SDK 开发手册](docs/development-guide.zh-CN.md)
-- [逐接口 SDK 示例](docs/interface-examples.zh-CN.md)
-- [Complete SDK development guide](docs/development-guide.md)
-- [Per-interface SDK examples](docs/interface-examples.md)
-- [安装指南](docs/installation.zh-CN.md)
-- [SDK 使用指南](docs/usage.zh-CN.md)
-- [Installation guide](docs/installation.md)
-- [SDK usage guide](docs/usage.md)
-- [示例说明](docs/examples.zh-CN.md)
-
-RK-local 同名控制接口现已覆盖配置、曝光、LiDAR、热点、校时、升级和原始RTCM；
-[一致范围与明确差异](docs/rk-local-sdk.zh-CN.md#与-host-sdk-的一致范围及明确差异)说明不能直接替换的部分。
+所有接口说明集中在 [docs/](docs/README.zh-CN.md)。完整包验证：
+`python3 scripts/test_all_examples.py --build-dir build-all-examples`。

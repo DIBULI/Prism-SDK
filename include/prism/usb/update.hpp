@@ -29,6 +29,9 @@ struct UpgradeOptions {
 };
 
 struct SensorBoardUpgradeStatus {
+  // SDK-only terminal state: no OTA transaction was sent. Existing wire
+  // states (0..4) and the structure layout remain unchanged.
+  static constexpr uint16_t SkippedSameVersion = 5;
   uint16_t code = 0;
   uint16_t state = 0;
   uint32_t received = 0;         // Bytes staged on RK.
@@ -57,8 +60,9 @@ struct SystemUpgradePackageInfo {
 
 struct SystemUpgradeProgress {
   SystemUpgradePhase phase = SystemUpgradePhase::ValidatingPackage;
-  // Transfer work includes the sensor-board image twice: host -> RK staging,
-  // then RK -> sensor-board. This keeps the overall progress monotonic.
+  // Transfer work includes the sensor-board image twice only when flashing:
+  // host -> RK staging, then RK -> sensor-board. A same-version skip counts
+  // zero sensor-board transfer bytes.
   uint64_t completed_bytes = 0;
   uint64_t total_bytes = 0;
   uint64_t component_received = 0;

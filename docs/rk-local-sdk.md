@@ -1,20 +1,27 @@
 # RK-local SDK: C++ interface
 
-[简体中文](rk-local-sdk.zh-CN.md) · [SDK README](../README.md) · [Validation](rk-local-sdk-testing.md)
+[简体中文](rk-local-sdk.zh-CN.md) · [SDK README](../README.md)
+
+The commands below use this binary distribution; no private source checkout is required.
 
 The public RK-local interface is **C++17 `prism::rklocal::Client`**, for Linux
 ARM64 applications on RK3576. It connects through `/run/prism/stream.sock`;
 Agent alone owns UARTs, CSI/V4L2, time synchronization and aggregate capture.
 GNSS/RTK methods share the actual Host SDK types, not parallel copies.
 
+## Current version
+
+Agent and both SDKs use **1.2.0**, protocol **1**. Main Runtime ABI is **18**.
+Use matching current headers/libraries and rebuild consumers. Include
+`<prism/rklocal_sdk.hpp>`; the public API is C++17.
+
 ## Package and build
 
 - [Public C++ header](../include/prism/rklocal_sdk.hpp)
 - [ARM64 archive](../runtime/linux-arm64/libprism_rklocal_sdk.a)
-- [Imported CMake target](../cmake/PrismRkLocalSdk.cmake): `Prism::RkLocal`
+- [Imported CMake target](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake): `Prism::RkLocal`
 - [Camera/IMU example](../examples/rklocal_capture.cpp)
 - [Read-only GNSS example](../examples/rklocal_gnss_status.cpp)
-- [Opt-in hardware test](../rk-local-sdk/tests/hardware_test.cpp) (not run by CTest)
 
 From the SDK root on RK:
 
@@ -51,16 +58,15 @@ Source builds need target OpenSSL headers and static libcrypto.a (Ubuntu: libssl
 ## Host API alignment and explicit differences
 
 These connected-client methods reuse Host control implementations, parameter/return
-types and defaults. Compile tests compare 51 same-named interfaces (including two
-RTCM overloads). This is source alignment, not ABI identity.
+types and defaults. Compile tests compare same-named public interfaces and parameter/return types. This is source alignment, not ABI identity.
 
 | Capability | Shared methods |
 | --- | --- |
 | Identity/versions/network | hello, deviceInfo, deviceVersions, boardTime, ping, networkInfo |
 | Persistent configuration | deviceConfiguration, saveDeviceConfiguration |
 | Runtime exposure | cameraExposure, setExposureConfiguration, setCameraExposure, setAutoExposureTargetBrightness, cameraExposureLimits, setCameraExposureLimits |
-| GNSS/PPS/RTK | gnssTimingStatus, rtkNavigationStatus, rtkCorrectionStatus, timeSyncPortStatus, setTimeSyncPortMode |
-| CORS input | beginRtkCorrections, sendRtkCorrections, endRtkCorrections |
+| GNSS/PPS/RTK | gnssTimingStatus, gnssReceptionStatus, gnssObservations, timeSyncRtkStatus, timeSyncRtkVersions, timeSyncPortStatus, setTimeSyncPortMode |
+| CORS configuration / RTK control | timeSyncCorsConfiguration, saveTimeSyncCorsConfiguration, startRtk, stopRtk |
 | Camera/IMU | startVideo1280x1024, startImu, stopVideo, stopImu, sendVideoAck |
 | LiDAR | startLidar, stopLidar, lidarStatus, lidarNetworkStatus, saveLidarNetworkConfiguration, probeLidarNetwork |
 | Raw rover stream | startRoverRtcm, stopRoverRtcm |
@@ -79,7 +85,7 @@ RTCM overloads). This is source alignment, not ABI identity.
   advances by monotonic elapsed time, sets Sensor Board through Agent, then verifies RK/PPS/PHC.
   GPS lock or active transfer rejects writes. Opening never sets time.
   This helper reports one correction/verification; before remains default, not a multi-sample result.
-- Local additionally offers startCapture/stopCapture/readFrameSet/readImu/readRtkNavigation.
+- Local additionally offers startCapture/stopCapture/readFrameSet/readImu.
   Camera/IMU assembly and ACK are automatic. Default readFrame queues other raw events;
   set `raw_camera_imu_frames=true` for raw camera/IMU too, without another ACK.
   Host VideoStream/ImuStream/LidarStream/RoverRtcmStream wrappers require Host Client;
@@ -89,8 +95,8 @@ RTCM overloads). This is source alignment, not ABI identity.
   This is not a lossless recorder; duplicated raw images cost memory/CPU.
 - Shared startImu() defaults to two IMUs; local-only startCapture() defaults to one.
   Either stop path stops both Camera and IMU.
-- Shared command/readFrame/sendRtkCorrections default to 3000ms.
-  Both RTCM overloads accept a trailing timeout per <=16KiB command, not per stream.
+- Shared command/readFrame default to 3000ms. CORS save uses 25000ms;
+  RTK start/stop default to a total 20000ms budget.
   High-level calls reuse Host-specific timeouts. ClientOptions.command_timeout_ms (10000)
   only controls handshake and local aggregate-capture helpers. Timeout does not roll back
   an already-sent write: inspect state before retrying.
@@ -104,15 +110,8 @@ RTCM overloads). This is source alignment, not ABI identity.
   Agent enforces socket permissions and capture ownership.
 - Joint ZIP upgrades require manifest.ini, prism-agent and BOOT.BIN. Local reconnects
   to the same socket; Host re-enumerates USB. A different Agent version needs matching SDK.
-  Implementation is present; this update only exercised mock protocol/failure paths,
-  not real flashing or restart/reconnect.
 
-Before the first IMU FSYNC anchor, timestamps may still be unsynchronized and
-can move when entering the Sensor Board time domain. Check the per-sample
-`TimestampSynced` flag; do not interpret an unsynchronized-to-synchronized
-transition as a continuous precision-time interval. The SDK preserves raw values.
-
-## Added control operations
+## Control operations
 
 These writes require explicit application action, not automatic connection side effects.
 
@@ -132,7 +131,7 @@ network.configuration.lidar_ip = "192.168.1.194";
 client.saveLidarNetworkConfiguration(network.configuration);
 client.probeLidarNetwork();
 client.startLidar(prism::LidarModel::Mid360S);
-auto frame = client.readFrame(3000); // heartbeat/navigation may arrive first
+auto frame = client.readFrame(3000); // heartbeat/GNSS may arrive first
 if (frame.type == prism::FrameType::LidarPoints) {
   auto points = prism::parseLidarPointBatch(frame);
 }
@@ -149,8 +148,9 @@ client.upgradeSystem("/path/prism-system-update.zip", {},
 ```
 
 Wi-Fi matches Host hotspot query/enable/disable, not arbitrary SSID/password writes.
-TimeSync is fixed SensorBoardMaster; retired output mode is rejected.
-CORS input is raw RTCM2.x/RTCM3 owned by the application; SDK does not log in.
+TimeSync supports `GnssInput`, `PpsNmeaOutput` and `Rtk`; see [mode guide](../docs/timesync-port.md).
+RTK-module handles NTRIP. Both SDKs configure the saved account and start/stop positioning;
+see [CORS / RTK control](../docs/rtk-module-control.md).
 Rover output is CRC-validated receiver RTCM3, not echoed CORS data.
 
 ## Connection, capture and ownership
@@ -205,7 +205,6 @@ on overflow; monitor sample/frame IDs for continuity.
 | --- | --- |
 | IMU `accel_mg`, `gyro_mdps`, `temp_milli_c` | mg, millidegrees/s, milli-Celsius |
 | IMU/Image/FrameSet `timestamp_us` | Sensor Board timeline, microseconds |
-| IMU `sample_id` | Sensor Board 16-bit sequence stored in uint32_t; wraps at 65536 |
 | Metadata `trigger_time_ns`, `exposure_us` | ns, us |
 | Metadata analog/digital gain | gain multiplied by 1024 |
 
@@ -222,37 +221,21 @@ The example treats data older than 2 seconds as stale. Coordinates are degrees
 times 1e7, GGA MSL altitude/geoid separation are mm, DOP is times 1000 and UTC is
 milliseconds of day. Ellipsoidal height = MSL altitude + geoid separation.
 
-`rtkNavigationStatus()` queries a snapshot; `readRtkNavigation()` waits for the
-newest unread event. Raw coordinates require `solution_valid`; independent
-smoothed coordinates require `smoothed_position_valid`. Both retain their own
-epoch, FIX/FLOAT status, coordinates, E/N/U standard deviations and smoothing
-gate/reset counters. Angles are degrees; height and uncertainty are metres.
-ENU position needs an explicit common origin; standard deviations are not
-positions. Check solution age against device UTC. A 10 Hz receiver does not
-guarantee 10 fresh RTK solutions per second.
+Use `gnssObservations(cursor, session)` for receiver-native GGA/ADRNAV/GST messages.
+Check receiver solution type, validity and freshness. `timeSyncRtkStatus()` reports
+module control state; running does not imply FIX. Use matching headers and ABI 18 libraries.
 
-## CORS input
+## CORS configuration and receiver control
 
-```cpp
-// bytes: raw binary corrections obtained by the application after NTRIP headers.
-client.beginRtkCorrections();
-try {
-  client.sendRtkCorrections(bytes); // vector<uint8_t>, or pointer plus size
-} catch (...) {
-  try { client.endRtkCorrections(); } catch (...) {}
-  throw;
-}
-const auto status = client.endRtkCorrections();
-```
+`timeSyncCorsConfiguration()` returns the public account fields, never the password.
+`saveTimeSyncCorsConfiguration(cfg)` saves a complete account on RK even if the
+receiver is disconnected; check `configuration_applied` separately.
+`startRtk(options)` binds explicit GGA consent to the reviewed saved generation.
+`stopRtk()` stops receiver RTK/CORS while preserving timing. Neither is merely a UI toggle.
 
-The application owns login, GGA and reconnects. SDK does not store credentials.
-Send repeatedly within one session; buffers over 16 KiB are automatically split.
-Empty input is invalid. Do not mix RTCM formats within a session. After a
-timeout, inspect status before blindly resending possibly accepted bytes.
-Agent detects RTCM2.x/RTCM3.x and reports Unknown/Rtcm2/Rtcm3/Unsupported plus
-byte/message/epoch/solution/error counters in `correction_format` and status.
-Corrections feed RK's solver, not UM960/Sensor Board. Detecting format is not
-evidence of FLOAT/FIX: inspect navigation validity and freshness.
+Both SDKs share types, validation, deadlines and confirmed-state semantics.
+See [the complete bilingual API guide and examples](../docs/rtk-module-control.md).
+Use `gnssObservations()` for receiver-native results; running does not guarantee FIX.
 
 ## Errors and timeouts
 
@@ -262,8 +245,3 @@ disconnection. Raw readFrame throws on timeout. Shared controls use standard exc
 local transport failures throw `prism::rklocal::Error`, with diagnostic
 `what()` and `code()`: InvalidArgument, System, Protocol, Timeout, Closed,
 Busy, Remote or VersionMismatch. Do not interpret errors as missing GPS/frames.
-
-C migration: open → Client::open; start/stop → startCapture/stopCapture;
-read_imu/read_frame_set → readImu/readFrameSet; get_gnss_status →
-gnssTimingStatus; get_rtk_navigation → rtkNavigationStatus; last_error →
-exceptions; frame_set_release → automatic destruction.

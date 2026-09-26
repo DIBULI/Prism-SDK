@@ -83,12 +83,12 @@ libusb-1.0.0.dylib
 ## Windows x64
 
 使用 Visual Studio 2022 C++ x64 工具链和 CMake。公共 C++ ABI 要求 MSVC 14.x 和
-完全匹配的 SDK 1.1.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
+完全匹配的 SDK 1.2.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
 2015-2022 x64 Redistributable，并确保 Prism USB 接口使用 Windows WinUSB 驱动。将
 `prism_usb_sdk.dll` 放在应用程序旁。
 
 本仓库只发布 DLL，不发布 import library。Windows 应用应通过 `LoadLibraryW` 加载
-DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 12。仓库
+DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 18。仓库
 示例已经实现该流程，并固定使用与 DLL 兼容的 `/MD` runtime 和 release iterator ABI，
 即使用户选择 Debug 配置也是如此。
 

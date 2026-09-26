@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - codex/sdk-1.1.0
+      - codex/sdk-1.2.0
     tags:
       - "v*"
   pull_request:
@@ -367,28 +367,35 @@ jobs:
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          test "$version" = "1.1.0"
+          test "$version" = "$(cat VERSION)"
+          python3 scripts/test_all_examples.py --verify-only
           git archive --format=tar --prefix="Prism-SDK-${version}/" HEAD \
             | gzip -9 > "Prism-SDK-${version}.tar.gz"
-          sha256sum "Prism-SDK-${version}.tar.gz" \
-            > "Prism-SDK-${version}.tar.gz.sha256"
+          git archive --format=zip --prefix="Prism-SDK-${version}/" HEAD \
+            > "Prism-SDK-${version}.zip"
+          sha256sum "Prism-SDK-${version}.tar.gz" "Prism-SDK-${version}.zip" > SHA256SUMS.txt
+          # Convert documentation-relative links for the Release page.
+          sed -E "s#\(../../([^)]*)\)#(https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/\1)#g; s#\(../([^)]*)\)#(https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/\1)#g" \
+            "docs/update/v${version}.zh-CN.md" > release-notes.md
 
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
           if gh release view "$GITHUB_REF_NAME" \
               --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" \
-              Prism-SDK-1.1.0.tar.gz \
-              Prism-SDK-1.1.0.tar.gz.sha256 \
+              "Prism-SDK-${version}.tar.gz" "Prism-SDK-${version}.zip" SHA256SUMS.txt \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+              --title "Prism SDK ${version}" --notes-file release-notes.md
           else
             gh release create "$GITHUB_REF_NAME" \
-              Prism-SDK-1.1.0.tar.gz \
-              Prism-SDK-1.1.0.tar.gz.sha256 \
+              "Prism-SDK-${version}.tar.gz" "Prism-SDK-${version}.zip" SHA256SUMS.txt \
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
-              --generate-notes
+              --title "Prism SDK ${version}" --notes-file release-notes.md --latest
           fi

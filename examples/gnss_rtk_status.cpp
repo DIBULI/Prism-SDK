@@ -1,4 +1,5 @@
 #include "prism/usb_sdk.hpp"
+#include "prism/usb/gnss_plot.hpp"
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
@@ -16,34 +17,46 @@ int main(int argc, char** argv) {
     if (devices.empty()) throw std::runtime_error("no Prism device found");
     auto client = prism::Client::open(devices.front());
     const auto gnss = client.gnssTimingStatus();
-    const auto corrections = client.rtkCorrectionStatus();
-    const auto navigation = client.rtkNavigationStatus();
+    const auto module = client.timeSyncRtkStatus();
+    const auto versions = client.timeSyncRtkVersions();
+    const auto cors = client.timeSyncCorsConfiguration();
+    prism::gnss_plot::Model positions;
+    const auto observations = client.gnssObservations();
+    positions.apply(observations);
     std::cout << "external_synced=" << gnss.time_synced
               << " pps_valid=" << gnss.pps_valid
               << " pps_high_us=" << gnss.pps_high_width_us
               << " nmea_age_ms=" << gnss.nmea_age_ms
               << " satellites=" << gnss.satellites << '\n';
     if (gnss.offset_fresh) std::cout << "first_RMC_delay_us=" << gnss.message_pps_offset_us << '\n';
-    if (gnss.nmea_position_valid && gnss.nmea_fix_valid) {
+    if (gnss.nmea_seen && gnss.nmea_age_ms <= 2000 && gnss.nmea_position_valid && gnss.nmea_fix_valid) {
       std::cout << std::fixed << std::setprecision(7)
                 << "GPS lat=" << gnss.latitude_e7 / 1e7
                 << " lon=" << gnss.longitude_e7 / 1e7
                 << " MSL_altitude_m=" << gnss.altitude_mm / 1e3 << '\n';
     }
-    std::cout << "correction_format=" << static_cast<unsigned>(corrections.correction_format)
-              << " base_bytes=" << corrections.base_bytes
-              << " solutions=" << navigation.solution_count << '\n';
-    if (navigation.solution_valid) {
-      std::cout << std::setprecision(9) << "raw lat=" << navigation.latitude_deg
-                << " lon=" << navigation.longitude_deg
-                << " ellipsoidal_height_m=" << navigation.ellipsoidal_height_m
-                << " epoch_us=" << navigation.solution_epoch_us << '\n';
+    std::cout << "module_linked=" << module.linked
+              << " status_fresh=" << module.device_status_fresh
+              << " control_state=" << unsigned(module.control_state)
+              << " control_error=" << unsigned(module.control_error)
+              << " rtcm_frames=" << module.rtcm_frames
+              << " cors_saved=" << cors.configuration_saved
+              << " cors_applied=" << cors.configuration_applied << '\n';
+    if (versions.application.valid) {
+      std::cout << "module_version=" << versions.application.major << '.'
+                << versions.application.minor << '.' << versions.application.patch << '\n';
     }
-    if (navigation.smoothed_position_valid) {
-      std::cout << "smoothed lat=" << navigation.smoothed_latitude_deg
-                << " lon=" << navigation.smoothed_longitude_deg
-                << " ellipsoidal_height_m=" << navigation.smoothed_ellipsoidal_height_m
-                << " epoch_us=" << navigation.smoothed_solution_epoch_us << '\n';
+    const auto& rtk = positions.rtk;
+    if (rtk.valid && prism::gnss_plot::fresh(positions.now, rtk.ms, 2000)) {
+      std::cout << std::setprecision(9) << "receiver_RTK=" << rtk.solution
+                << " lat=" << rtk.latitude << " lon=" << rtk.longitude
+                << " receiver_epoch=" << rtk.epoch << '\n';
+      if (rtk.height) std::cout << "ellipsoidal_height_m=" << *rtk.height << '\n';
+      if (rtk.north_sigma && rtk.east_sigma && rtk.up_sigma)
+        std::cout << "receiver_sigma_m NEU=" << *rtk.north_sigma << ','
+                  << *rtk.east_sigma << ',' << *rtk.up_sigma << '\n';
+    } else {
+      std::cout << "receiver_RTK=unavailable/stale\n";
     }
     return 0;
   } catch (const std::exception& error) {

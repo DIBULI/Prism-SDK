@@ -1,19 +1,25 @@
 # RK-local SDK：C++ 接口
 
-[English](rk-local-sdk.md) · [返回 SDK README](../README.zh-CN.md) · [验证记录](rk-local-sdk-testing.md)
+[English](rk-local-sdk.md) · [返回 SDK README](../README.zh-CN.md)
+
+下文使用本仓库的二进制发布包，无需获取私有实现源码。
 
 供程序直接在 RK3576（Linux ARM64）运行，通过 `/run/prism/stream.sock` 访问
 Agent。公开接口为 **C++17 `prism::rklocal::Client`**。与 Host SDK 的
-`prism::Client` 共用 GNSS/RTK 返回类型和查询、改正流方法名，不经 USB，也不直接占用 UART。
+`prism::Client` 共用 GNSS/RTK 返回类型和查询、CORS 配置及启停方法名，不经 USB，也不直接占用 UART。
+
+## 当前版本
+
+Agent、Host SDK 和 RK-local SDK 均为 **1.2.0**，线协议 **1**，主 Runtime ABI **18**。
+包含 `<prism/rklocal_sdk.hpp>`，使用同套最新头文件与库重新编译；公开 API 为 C++17。
 
 ## 文件与编译
 
 - [公共头文件](../include/prism/rklocal_sdk.hpp)
 - [ARM64 静态库](../runtime/linux-arm64/libprism_rklocal_sdk.a)
-- [CMake 导入目标](../cmake/PrismRkLocalSdk.cmake)：`Prism::RkLocal`
+- [CMake 导入目标](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake)：`Prism::RkLocal`
 - [相机/IMU 示例](../examples/rklocal_capture.cpp)
 - [只读 GNSS 示例](../examples/rklocal_gnss_status.cpp)
-- [手动实机自测](../rk-local-sdk/tests/hardware_test.cpp)（不会由 CTest 自动采集）
 
 在 RK 上从 SDK 仓库根目录运行：
 
@@ -51,15 +57,15 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
 ## 与 Host SDK 的一致范围及明确差异
 
 连接后的以下同名方法共用 Host 控制实现、参数/返回类型和默认参数。
-编译测试逐项比较 51 个同名接口（含 RTCM 两个重载）的参数及返回类型；这不是 ABI 相同的承诺。
+编译测试校验同名接口的参数和返回类型。
 
 | 功能 | 两端同名接口 |
 | --- | --- |
 | 身份/版本/网络 | hello、deviceInfo、deviceVersions、boardTime、ping、networkInfo |
 | 持久化配置 | deviceConfiguration、saveDeviceConfiguration |
 | 运行时曝光 | cameraExposure、setExposureConfiguration、setCameraExposure、setAutoExposureTargetBrightness、cameraExposureLimits、setCameraExposureLimits |
-| GNSS/PPS/RTK | gnssTimingStatus、rtkNavigationStatus、rtkCorrectionStatus、timeSyncPortStatus、setTimeSyncPortMode |
-| CORS输入 | beginRtkCorrections、sendRtkCorrections、endRtkCorrections |
+| GNSS/PPS/RTK | gnssTimingStatus、gnssReceptionStatus、gnssObservations、timeSyncRtkStatus、timeSyncRtkVersions、timeSyncPortStatus、setTimeSyncPortMode |
+| CORS 配置 / RTK 启停 | timeSyncCorsConfiguration、saveTimeSyncCorsConfiguration、startRtk、stopRtk |
 | 相机/IMU | startVideo1280x1024、startImu、stopVideo、stopImu、sendVideoAck |
 | LiDAR | startLidar、stopLidar、lidarStatus、lidarNetworkStatus、saveLidarNetworkConfiguration、probeLidarNetwork |
 | rover原始流 | startRoverRtcm、stopRoverRtcm |
@@ -79,7 +85,7 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
   按单调时钟补偿经过时间；Agent 设置 Sensor Board，再由 PPS 驯化 RK 并验证 PHC。
   GPS 锁定或传输活动时拒绝写入；连接不会自动校时。
   该入口返回一次校正/验证，`before` 保持默认，并非 Host 多样本报告。
-- 读取：本机额外提供 `startCapture/stopCapture/readFrameSet/readImu/readRtkNavigation`。
+- 读取：本机额外提供 `startCapture/stopCapture/readFrameSet/readImu`。
   内部线程组装相机/IMU并自动 ACK；默认 `readFrame()` 只排队其他原始事件。
   连接时设 `raw_camera_imu_frames=true` 才收到原始相机/IMU，无需再次 ACK。
   Host 的 VideoStream/ImuStream/LidarStream/RoverRtcmStream 接受 Host Client，
@@ -88,8 +94,7 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
   无法安全保存升级关键进度时报错。这不是无丢包记录器；复制原始图像增加内存/CPU开销。
 - IMU默认值：同名 `startImu()` 均默认2颗；本机专有 `startCapture()` 默认1颗，支持仅IMU0。
   任一停止路径都同时停止 Camera 和 IMU。
-- 超时：同名 `command/readFrame/sendRtkCorrections` 默认3000ms。
-  RTCM指针/vector重载都支持末尾timeout_ms，每个最多16KiB的命令分别计时，而非整流总超时。
+- 超时：同名 `command/readFrame` 默认 3000ms；CORS 保存预算 25000ms，RTK 启停默认总预算 20000ms。
   高层命令复用Host专用超时。本机 `ClientOptions.command_timeout_ms` 默认10000，
   仅用于握手与专有聚合采集控制，不覆盖同名方法。
   超时不会撤销已发出的写入；先查询状态，不要盲目重试。
@@ -102,14 +107,8 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
   本机发布产物仅Linux ARM64；socket权限和采集独占由Agent控制。
 - 升级：共同入口仅接受联合ZIP（manifest.ini、prism-agent、BOOT.BIN）。
   本机重连原socket，Host重新枚举USB；升级到不同Agent版本后需要匹配SDK。
-  实现已补齐；本轮仅模拟协议/失败路径验证，未验证真实刷写及重启回连。
 
-IMU 首次 FSYNC 对齐前的时间戳可能未同步，进入 Sensor Board 时间域时可发生跳变。
-请检查每个样本的 `TimestampSynced` 标志，不把未同步→已同步的跨域样本当作连续精确时间。
-SDK 保留原始值，不丢弃或平滑时间戳。`sample_id` 用 uint32_t 承载 Sensor Board 的16位序号，
-连续性需按65536回绕判断。
-
-## 新增控制能力示例
+## 控制能力示例
 
 以下写操作必须由应用明确触发，不是连接时自动执行：
 
@@ -147,8 +146,9 @@ client.upgradeSystem("/path/prism-system-update.zip", {},
 ```
 
 Wi-Fi只开放与Host相同的热点查询/启停，不支持任意SSID/密码写入。
-TimeSync固定SensorBoardMaster；已废弃的PpsNmeaOutput同样拒绝。
-SDK不登录CORS，输入应用剥离HTTP/ICY头后的原始RTCM2.x/RTCM3；
+TimeSync 支持 `GnssInput`、`PpsNmeaOutput`、`Rtk`，见[模式说明](../docs/timesync-port.md)。
+SDK 负责配置保存在 RK 的 CORS 账号和控制 RTK；RTK-module 自行 NTRIP 登录和收流，
+见[CORS 配置与 RTK 启停](../docs/rtk-module-control.md)。
 rover输出是接收机CRC校验通过的RTCM3，不是CORS回显。
 
 ## 连接与资源管理
@@ -223,32 +223,20 @@ JPEG 缓冲区转移所有权，不额外复制图像字节；对象析构自动
 海拔/大地水准面分离为 mm、DOP ×1000、UTC 为当天毫秒。GNSS 示例将超过 2 秒的数据
 视为过期，应用可按场景设置阈值。PPS valid 不等同于外部 UTC 授时成功。
 
-`rtkNavigationStatus()` 查询当前结果；`readRtkNavigation()` 等待最新事件。
-原始位置受 `solution_valid` 控制，独立平滑位置受 `smoothed_position_valid` 控制。
-保留各自 epoch、FIX/FLOAT 状态、经纬度/椭球高、E/N/U 标准差、质量门控与重置计数。
-经纬度单位度，高度/标准差单位米；米制 ENU 位置须用共同原点转换，不能把标准差当位置。
-用设备 UTC 检查解的 age；读取成功不等于有新解，GNSS 10 Hz 也不保证每次都出 RTK 解。
+使用 `gnssObservations(cursor, session)` 读取接收机原生 GGA/ADRNAV/GST 报文；
+按接收机解类型、有效性和数据龄期判断定位。`timeSyncRtkStatus()` 查询模块
+启停及执行状态，运行中不等于 FIX。头文件与 Runtime ABI 18 的库必须配套。
 
-## CORS / 原始 RTCM 输入
+## CORS 配置和接收机控制
 
-```cpp
-// bytes 是应用从 NTRIP 去掉 HTTP/ICY 头后获得的原始二进制改正流。
-client.beginRtkCorrections();
-try {
-  client.sendRtkCorrections(bytes); // std::vector<uint8_t>，也支持 data + size
-} catch (...) {
-  try { client.endRtkCorrections(); } catch (...) {}
-  throw;
-}
-const auto status = client.endRtkCorrections();
-```
+`timeSyncCorsConfiguration()` 返回公开账号字段，不返回密码。
+`saveTimeSyncCorsConfiguration(cfg)` 在 RK 保存完整配置，模块离线不妨碍保存；
+是否已下发需要另查 `configuration_applied`。
+`startRtk(options)` 将显式 GGA 授权绑定到用户确认的配置代次。
+`stopRtk()` 停止接收机 RTK 和 CORS 输入，保留授时；不是仅隐藏界面结果。
 
-应用负责 NTRIP 登录、GGA、重连；SDK 不保存账号密码、不把文本/Base64 当 RTCM。
-可连续多次 send，同一会话不要混合格式；超过 16 KiB 会自动分块，空输入报错。
-超时后先查询状态，不要盲目重发整块导致重复。Agent 自动识别 RTCM2.x 或 RTCM3.x；
-`status.correction_format` 为 Unknown/Rtcm2/Rtcm3/Unsupported，并上报字节、报文、
-观测历元、解算及解码错误计数。这些数据给 RK 解算器，不转发给 UM960/Sensor Board。
-仅识别格式并不代表已达到 FLOAT/FIX；还须检查导航结果和新鲜度。
+两种 SDK 共用类型、参数校验、超时和执行确认规则，见[完整接口和示例](../docs/rtk-module-control.md)。
+用 `gnssObservations()` 读取接收机原生结果，运行中并不保证 FIX。
 
 ## 超时与错误
 
@@ -258,7 +246,3 @@ timeout_ms=0 为非阻塞，`kWaitForever` 为一直等待至有数据或断开�
 本机传输/读取错误可抛 `prism::rklocal::Error`。
 `e.what()` 为诊断，`e.code()` 区分 InvalidArgument、System、Protocol、Timeout、
 Closed、Busy、Remote、VersionMismatch。不要把错误当作“没有 GPS”或“没有新帧”。
-
-旧 C 迁移速查：open→Client::open，start/stop→startCapture/stopCapture，
-read_imu/read_frame_set→readImu/readFrameSet，get_gnss_status→gnssTimingStatus，
-get_rtk_navigation→rtkNavigationStatus，last_error→异常，frame_set_release→自动析构。

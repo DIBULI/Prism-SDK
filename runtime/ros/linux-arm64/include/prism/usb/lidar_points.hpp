@@ -71,6 +71,10 @@ inline std::vector<uint8_t> serializeLidarPoints(const LidarPointBatch& batch) {
       put(16, static_cast<uint32_t>(point.offset_ns), 4);
       p[20] = point.return_id;
       p[21] = point.confidence;
+    } else if (point.line_valid) {
+      if (point.line >= 4u) throw std::invalid_argument("invalid Livox line");
+      p[14] = point.line;
+      p[15] = 1u;
     }
   }
   return out;

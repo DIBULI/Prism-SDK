@@ -8,7 +8,7 @@
 
 namespace prism {
 
-constexpr uint32_t kRuntimeApiVersion = 13;  // LidarPoint now carries XT32 metadata.
+constexpr uint32_t kRuntimeApiVersion = 18;  // Additive RTK-module version query.
 inline constexpr char kRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_runtime_api";
 
@@ -86,13 +86,27 @@ struct RuntimeApi {
   TimeSyncPortStatus (*timesync_port_status)(Client*);
   TimeSyncPortStatus (*set_timesync_port_mode)(Client*, TimeSyncPortMode);
   GnssTimingStatus (*gnss_timing_status)(Client*);
-  RtkNavigationStatus (*rtk_navigation_status)(Client*);
-  RtkNavigationStatus (*parse_rtk_navigation_status)(const Frame&);
   RoverRtcmStatus (*start_rover_rtcm)(Client*);
   RoverRtcmStatus (*stop_rover_rtcm)(Client*);
   RoverRtcmChunkView (*parse_rover_rtcm_chunk_view)(const Frame&);
+  TimeSyncRtkStatus (*timesync_rtk_status)(Client*);
+  TimeSyncRtkVersions (*timesync_rtk_versions)(Client*);
 };
 
 using GetRuntimeApiFunction = const RuntimeApi* (*)(uint32_t);
+
+// Independent extension: keeps the existing RuntimeApi v18 layout unchanged.
+constexpr uint32_t kRtkModuleControlRuntimeApiVersion = 1;
+inline constexpr char kRtkModuleControlRuntimeApiEntryPoint[] =
+    "prism_usb_sdk_get_rtk_module_control_api";
+struct RtkModuleControlRuntimeApi {
+  uint32_t abi_version;
+  uint32_t struct_size;
+  TimeSyncCorsStatus (*cors_configuration)(Client*);
+  TimeSyncCorsStatus (*save_cors_configuration)(Client*, const TimeSyncCorsConfiguration&);
+  TimeSyncRtkStatus (*start_rtk)(Client*, const RtkStartOptions&);
+  TimeSyncRtkStatus (*stop_rtk)(Client*, uint32_t);
+};
+using GetRtkModuleControlRuntimeApiFunction = const RtkModuleControlRuntimeApi* (*)(uint32_t);
 
 }  // namespace prism

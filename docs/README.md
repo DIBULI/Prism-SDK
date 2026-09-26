@@ -16,12 +16,15 @@ Headers and example sources remain in `include/` and `examples/`;
 | ROS 2 Docker on RK (Ubuntu 22.04 / 24.04) | [RK-local ROS Docker](rk-local-ros2-docker.md) | [RK 本机 ROS Docker](rk-local-ros2-docker.zh-CN.md) |
 | GNSS, PPS, CORS and RTK | [GNSS/RTK](gnss-rtk.md) | [GNSS/RTK](gnss-rtk.zh-CN.md) |
 | Build and run example programs | [Examples](examples.md) | [示例使用说明](examples.zh-CN.md) |
-| Release 1.1.0 notes | [Update notes](update/v1.1.0.md) | [更新说明](update/v1.1.0.zh-CN.md) |
+| Release 1.2.0 notes | [Update notes](update/v1.2.0.md) | [更新说明](update/v1.2.0.zh-CN.md) |
 
-See the [RK-local validation record](rk-local-sdk-testing.md) for completed checks
-and unverified hardware operations. Shared method names do not imply identical
+Shared method names do not imply identical
 transport, clock source, queue behavior or ABI; consult the RK-local differences
-before substituting clients. Working-tree documentation does not mean a new
-Release or tag has been published.
+before substituting clients.
+
+- [CORS configuration and RTK controls](rtk-module-control.md)
+- [Current TimeSync modes](timesync-port.md)
+- [RTK-module versions](rtk-module-versions.md)
+- [XT32](xt32.md) and [LiDAR line fields](livox-line.md)
 
 GNSS reception diagnostics: [GNSS reception status](gnss-reception-status.md).

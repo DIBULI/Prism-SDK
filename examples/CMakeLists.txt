@@ -162,7 +162,8 @@ set(_prism_direct_api_example_sources
   lidar_capture.cpp
   parser_api_examples.cpp
   stream_api_examples.cpp
-  gnss_rtk_status.cpp)
+  gnss_rtk_status.cpp
+  rtk_module_control.cpp)
 set(_prism_rklocal_example_sources rklocal_capture.cpp rklocal_gnss_status.cpp)
 set(_prism_windows_runtime_example_sources
   windows_runtime_api_examples.cpp)
@@ -212,6 +213,7 @@ else()
   prism_add_example(prism-parser-api-examples parser_api_examples.cpp)
   prism_add_example(prism-stream-api-examples stream_api_examples.cpp)
   prism_add_example(prism-gnss-rtk-status gnss_rtk_status.cpp)
+  prism_add_example(prism-rtk-module-control rtk_module_control.cpp)
   list(APPEND _prism_supported_example_targets
     prism-camera-imu-capture
     prism-client-api-examples
@@ -219,7 +221,8 @@ else()
     prism-lidar-capture
     prism-parser-api-examples
     prism-stream-api-examples
-    prism-gnss-rtk-status)
+    prism-gnss-rtk-status
+    prism-rtk-module-control)
 
   if(BUILD_TESTING)
     add_test(NAME prism-camera-frame-tracker-self-test
@@ -233,12 +236,20 @@ else()
     add_test(NAME prism-stream-api-examples-smoke
       COMMAND prism-stream-api-examples)
     add_test(NAME prism-gnss-rtk-status-help COMMAND prism-gnss-rtk-status --help)
+    add_test(NAME prism-rtk-module-control-help COMMAND prism-rtk-module-control --help)
   endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
    CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
   include("${PRISM_SDK_ROOT}/cmake/PrismRkLocalSdk.cmake")
+  add_executable(prism-rklocal-rtk-module-control rtk_module_control.cpp)
+  target_compile_definitions(prism-rklocal-rtk-module-control PRIVATE PRISM_EXAMPLE_RKLOCAL)
+  target_link_libraries(prism-rklocal-rtk-module-control PRIVATE Prism::RkLocal)
+  list(APPEND _prism_supported_example_targets prism-rklocal-rtk-module-control)
+  if(BUILD_TESTING)
+    add_test(NAME prism-rklocal-rtk-module-control-help COMMAND prism-rklocal-rtk-module-control --help)
+  endif()
   if(BUILD_TESTING)
     add_subdirectory("${PRISM_SDK_ROOT}/rk-local-sdk/tests" rklocal-tests)
   endif()

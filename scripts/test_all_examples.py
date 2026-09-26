@@ -8,6 +8,7 @@ import hashlib
 import os
 from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -25,6 +26,18 @@ def run(command: list[str]) -> None:
 
 
 def verify_package() -> None:
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise RuntimeError("invalid SDK VERSION")
+    for relative in ("CMakeLists.txt", "examples/CMakeLists.txt", "rk-local-sdk/CMakeLists.txt"):
+        if f"VERSION {version} " not in (ROOT / relative).read_text(encoding="utf-8"):
+            raise RuntimeError(f"package project version mismatch: {relative}")
+    for provenance in (ROOT / "runtime").glob("*/PROVENANCE.txt"):
+        if f"SDK_VERSION={version}" not in provenance.read_text(encoding="utf-8-sig").splitlines():
+            raise RuntimeError(f"runtime version mismatch: {provenance.relative_to(ROOT)}")
+    for headers in (ROOT / "include", ROOT / "runtime/ros/linux-x64/include", ROOT / "runtime/ros/linux-arm64/include"):
+        if (headers / "prism/usb/rtk_navigation.hpp").exists():
+            raise RuntimeError("retired navigation header must not be published")
     manifest = ROOT / "SHA256SUMS"
     checked = 0
     for line_number, line in enumerate(manifest.read_text(encoding="utf-8").splitlines(), 1):
@@ -94,9 +107,10 @@ def expected_targets(kind: str) -> list[str]:
         "prism-parser-api-examples",
         "prism-stream-api-examples",
         "prism-gnss-rtk-status",
+        "prism-rtk-module-control",
     ]
     if kind == "linux" and platform.machine().lower() in {"arm64", "aarch64"}:
-        targets.extend(["prism-rklocal-capture", "prism-rklocal-gnss-status"])
+        targets.extend(["prism-rklocal-capture", "prism-rklocal-gnss-status", "prism-rklocal-rtk-module-control"])
     return targets
 
 

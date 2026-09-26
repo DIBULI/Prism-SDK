@@ -165,6 +165,8 @@ struct LidarPoint {
   int32_t offset_ns = 0;   // XT32: signed offset from the packet tail timestamp.
   uint8_t return_id = 0;   // XT32: 1 last, 2 strongest, 3 first.
   uint8_t confidence = 0;  // Raw vendor byte (reserved), NOT a quality percentage.
+  uint8_t line = 0;        // MID360/MID360S: original UDP point index % 4.
+  bool line_valid = false; // False for old MID payloads and XT32 (use ring).
 };
 
 struct LidarPointBatch {

@@ -34,9 +34,15 @@ catalogue:
 - [Configuration, acquisition, network, and update](../examples/configuration_api_examples.cpp)
 - [High-level stream wrappers](../examples/stream_api_examples.cpp)
 - [Helpers and all public parsers](../examples/parser_api_examples.cpp)
-- [All 57 Windows Runtime API v12 entries](../examples/windows_runtime_api_examples.cpp)
+- [All 57 Windows Runtime API v18 entries](../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions builds every applicable catalogue on each supported platform.
+
+RTK-module CORS read/save and explicit start/stop are demonstrated in
+[rtk_module_control.cpp](../examples/rtk_module_control.cpp); the same source
+builds against Host and RK-local. See [consent and timeout semantics](rtk-module-control.md).
+Windows loads the independent `RtkModuleControlRuntimeApi` extension; the
+Windows catalogue validates its version, size and all four function pointers.
 
 ## Client lifecycle and basic control
 
@@ -525,7 +531,7 @@ Strict parsers throw if the frame type, protocol version, or payload size is
 wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 `VideoChunk` owns its byte vector.
 
-## Windows Runtime API v12
+## Windows Runtime API v18
 
 <a id="example-windows-runtime"></a>
 ### Load the table and call all 57 function-pointer interfaces
@@ -533,7 +539,7 @@ wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 The complete buildable Windows loader is
 [`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp). After it
 loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
-ABI v12/SDK 1.1.0/MSVC compatibility, and stores the result in `api`, the
+ABI v18/SDK 1.2.0/MSVC compatibility, and stores the result in `api`, the
 function-pointer calls have these direct forms:
 
 | Runtime API field | Corresponding example |
@@ -585,6 +591,6 @@ function-pointer calls have these direct forms:
 | `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 Check every function pointer for null before use. Keep the DLL loaded until all
-SDK-returned objects and the Client have been destroyed. Runtime API v12 is a
+SDK-returned objects and the Client have been destroyed. Runtime API v18 is a
 subset of the direct Linux/macOS API; interfaces absent from this table are not
 available through the packaged Windows DLL.

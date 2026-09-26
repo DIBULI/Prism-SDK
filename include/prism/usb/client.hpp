@@ -14,7 +14,6 @@
 #include "prism/usb/gnss_reception.hpp"
 #include "prism/usb/gnss_observation.hpp"
 #include "prism/usb/rtk.hpp"
-#include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/telemetry.hpp"
 #include "prism/usb/time_sync.hpp"
 #include "prism/usb/timesync_port.hpp"
@@ -86,8 +85,18 @@ class Client {
       uint32_t field_mask = kDeviceConfigFieldAll);
 
   // Persistent external TimeSync connector direction. Hardware always resets
-  // to GnssInput/high-Z; the agent reapplies a persisted output request.
+  // to GnssInput/high-Z; the agent restores the manually persisted mode.
   TimeSyncPortStatus timeSyncPortStatus();
+  TimeSyncRtkStatus timeSyncRtkStatus();
+  TimeSyncRtkVersions timeSyncRtkVersions();
+  TimeSyncCorsStatus timeSyncCorsConfiguration();
+  // Saves on RK, then Agent applies automatically when the module is ready.
+  // Successful persistence does not imply module application or CORS connection.
+  TimeSyncCorsStatus saveTimeSyncCorsConfiguration(const TimeSyncCorsConfiguration& configuration);
+  // Confirm the receiver's terminal control state, not merely an ACK. Running
+  // is not a guarantee of FLOAT/FIX or CORS connectivity. Never retry writes.
+  TimeSyncRtkStatus startRtk(const RtkStartOptions& options = {});
+  TimeSyncRtkStatus stopRtk(uint32_t timeout_ms = 20000);
   TimeSyncPortStatus setTimeSyncPortMode(TimeSyncPortMode mode);
   // Latest sensor-board association between the time-bearing GNSS report and
   // external PPS. Fresh input-mode offsets are constrained to 0..800 ms;
@@ -146,7 +155,6 @@ class Client {
       const std::vector<uint8_t>& data, uint32_t timeout_ms = 3000);
   RtkCorrectionStatus endRtkCorrections();
   RtkCorrectionStatus rtkCorrectionStatus();
-  RtkNavigationStatus rtkNavigationStatus();
   // Streams complete, CRC-validated RTCM3 frames from the rover receiver;
   // NMEA and other receiver output are excluded.
   RoverRtcmStatus startRoverRtcm();

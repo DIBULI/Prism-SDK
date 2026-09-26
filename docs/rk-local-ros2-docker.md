@@ -13,14 +13,13 @@ does not start another Agent or replace the host operating system.
 
 ## Availability and requirements
 
-This is a documentation-only update. The RK-local ROS adapter implementation,
-Dockerfile, build/run helpers and probes are currently in the development
-working tree of **Prism-ROS-adapter**, not published with this SDK commit or
-the SDK `v1.1.0` tag. A fresh GitHub checkout does not yet include those adapter
-changes. The image names above are locally built images, not Docker Hub releases.
+This SDK Release does not publish ROS adapter binaries or Docker images.
+The names above are locally built images, not Docker Hub releases. Rebuild the
+adapter against this SDK before using it with Agent 1.2.0; an existing image is
+not upgraded by downloading the SDK. Confirm adapter API support independently.
 
-- Agent **1.1.0** must be running with its RK-local socket enabled. The build
-  uses SDK **1.1.0**, commit `c5e62d0685deeba85afb9eed34ea3d3ac3c36063`.
+- Agent **1.2.0** must be running with its RK-local socket enabled. The build
+  must use the matching SDK **1.2.0** headers and library.
 - Docker must be installed on RK, with enough free root-filesystem space to
   load and unpack the images. Check `df -h /` and `test -S /run/prism/stream.sock`.
 - Close Viewer/USB capture and other RK-local capture clients. Run only one

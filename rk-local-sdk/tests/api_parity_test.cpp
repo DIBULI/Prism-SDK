@@ -32,7 +32,15 @@ SAME(cameraExposureLimits);
 SAME(setCameraExposureLimits);
 SAME(timeSyncPortStatus);
 SAME(setTimeSyncPortMode);
+SAME(timeSyncPortStatus);
+SAME(timeSyncRtkStatus);
+SAME(timeSyncRtkVersions);
+SAME(timeSyncCorsConfiguration);
+SAME(saveTimeSyncCorsConfiguration);
+SAME(startRtk);
+SAME(stopRtk);
 SAME(gnssTimingStatus);
+SAME(gnssReceptionStatus);
 SAME(wifiHotspotStatus);
 SAME(setWifiHotspotEnabled);
 SAME(startVideo1280x1024);
@@ -49,7 +57,15 @@ SAME(probeLidarNetwork);
 SAME(beginRtkCorrections);
 SAME(endRtkCorrections);
 SAME(rtkCorrectionStatus);
-SAME(rtkNavigationStatus);
+template<class T, class = void> struct HasRetiredNavigation : std::false_type {};
+template<class T> struct HasRetiredNavigation<T,
+    std::void_t<decltype(&T::rtkNavigationStatus)>> : std::true_type {};
+template<class T, class = void> struct HasRetiredNavigationRead : std::false_type {};
+template<class T> struct HasRetiredNavigationRead<T,
+    std::void_t<decltype(&T::readRtkNavigation)>> : std::true_type {};
+static_assert(!HasRetiredNavigation<H>::value && !HasRetiredNavigation<L>::value);
+static_assert(!HasRetiredNavigationRead<H>::value && !HasRetiredNavigationRead<L>::value);
+SAME(gnssObservations);
 SAME(startRoverRtcm);
 SAME(stopRoverRtcm);
 SAME(streamTransferActive);
@@ -66,4 +82,20 @@ static_assert(std::is_same_v<Method<decltype(static_cast<SendPtr>(&L::sendRtkCor
                             Method<decltype(static_cast<HostSendPtr>(&H::sendRtkCorrections))>::type>);
 static_assert(std::is_same_v<Method<decltype(static_cast<SendVector>(&L::sendRtkCorrections))>::type,
                             Method<decltype(static_cast<HostSendVector>(&H::sendRtkCorrections))>::type>);
-int main() { return 0; }
+int main() {
+  // Calls the codec linked into RK-local, not the Host library.
+  for (const uint8_t model : {uint8_t(1), uint8_t(2)}) {
+    prism::Frame frame;
+    frame.type = prism::FrameType::LidarPoints;
+    frame.payload.assign(64, 0);
+    frame.payload[0]=2; frame.payload[2]=48; frame.payload[4]=model;
+    frame.payload[7]=1; frame.payload[16]=1; frame.payload[20]=16;
+    frame.payload[62]=3; frame.payload[63]=1;
+    const auto batch = prism::parseLidarPointBatch(frame);
+    if (batch.points.size()!=1 || batch.points[0].line!=3 || !batch.points[0].line_valid)
+      return 1;
+    if (prism::serializeLidarPoints(batch) !=
+        std::vector<uint8_t>(frame.payload.begin()+48, frame.payload.end())) return 2;
+  }
+  return 0;
+}

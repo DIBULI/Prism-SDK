@@ -1,12 +1,12 @@
 # GNSS 接收、NMEA 识别与授时状态
 
-本页描述开发中的新增接口，尚未替换 GitHub 已发布的 SDK 包。
+适用于 Agent / Host SDK / RK-local SDK 1.2.0；使用匹配的当前头文件和库。
 
 ## 接口与兼容性
 
 **不修改原接口。** `client.gnssTimingStatus()`、`prism::GnssTimingStatus` 的字段、
 布局和含义保持原样。时间查询命令仍为 0x3a/0xb6，报文仍为 v5、104 字节；
-原 `RuntimeApi` 仍为 ABI 12，原函数表不增加成员。
+主 `RuntimeApi` 为 ABI 18；接收诊断使用独立扩展表。
 
 新增独立查询，两种 SDK 使用同一个返回类型和方法签名：
 
@@ -53,18 +53,18 @@ uart_frame_error_count、fifo_overflow_count。flags 位 0..5 依次对应下面
 
 ## Windows 动态运行库
 
-原导出 `prism_usb_sdk_get_runtime_api(12)` 及函数表不变。
+主运行库导出 `prism_usb_sdk_get_runtime_api(18)`。
 新增可选导出 `prism_usb_sdk_get_gnss_reception_api(1)`，返回
 `prism::GnssReceptionRuntimeApi`，仅包含版本、大小、`gnss_reception_status` 函数指针。
 定义见 `prism/usb/gnss_reception_runtime_api.hpp`。
 
-先正常加载旧表，再按需查找新导出；缺失新导出只表示不支持接收诊断。
+加载当前主表及独立诊断导出；缺失导出应报告接口不可用。
 新 Agent 不支持查询、新库未部署、接收诊断源不可用是不同情况，不应伪装成零接收。
 使用头文件+库的常规链接方式时，调用新方法必须链接包含该方法的新库；
 二进制兼容仍要求原有编译器、架构和 C++ 运行库条件一致。
 
 Viewer 将新查询与时间查询分别处理。诊断查询失败时显示不可用并停止本次连接的诊断轮询，
-重新连接后重试，原来的定位、PPS、授时显示继续使用旧接口。旧录像缺少诊断也显示不可用。
+重新连接后重试；定位、PPS、授时仍使用各自专用接口，缺失数据不得伪装成零。
 
 ## 调用示例
 
@@ -93,6 +93,4 @@ try {
 输出模式仍禁止接收自身输出。20 ms PPS 最低脉宽、RMC 校验、0..800 ms 配对
 和 UTC 连贯性检查不放宽。
 
-解除转发限制需要重新构建并刷写配套 Sensor Board BOOT.BIN；仅更新 Viewer/SDK/Agent
-不能恢复旧固件已屏蔽的数据。本次代码修改不表示已经更新设备，也不证明
-“插拔 UART 后才恢复”的物理连接或启动时序根因已经修复。
+请使用 Sensor Board 0.4.27 配套固件。接口错误、无接收数据和未锁定 UTC 必须分别报告。

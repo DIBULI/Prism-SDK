@@ -7,7 +7,7 @@
 
 namespace prism {
 
-constexpr uint16_t kExposureProtocolVersion = 2;
+constexpr uint16_t kExposureProtocolVersion = 3;
 constexpr uint16_t kExposurePayloadSize = 44;
 constexpr uint16_t kExposureLimitsProtocolVersion = 2;
 constexpr uint16_t kExposureLimitsPayloadSize = 28;
@@ -17,11 +17,13 @@ constexpr uint32_t kExposureFieldCamera0 = 1u << 1;
 constexpr uint32_t kExposureFieldCamera1 = 1u << 2;
 constexpr uint32_t kExposureFieldCamera2 = 1u << 3;
 constexpr uint32_t kExposureFieldCamera3 = 1u << 4;
+constexpr uint32_t kExposureFieldUnifiedAutomatic = 1u << 5;
 constexpr uint32_t kExposureFieldCameraAll =
     kExposureFieldCamera0 | kExposureFieldCamera1 |
     kExposureFieldCamera2 | kExposureFieldCamera3;
 constexpr uint32_t kExposureFieldAll =
-    kExposureFieldTargetBrightness | kExposureFieldCameraAll;
+    kExposureFieldTargetBrightness | kExposureFieldCameraAll |
+    kExposureFieldUnifiedAutomatic;
 
 constexpr uint32_t kExposureLimitsFieldMinExposure = 1u << 0;
 constexpr uint32_t kExposureLimitsFieldMaxExposure = 1u << 1;
@@ -66,6 +68,9 @@ struct CameraExposureConfiguration {
 struct ExposureConfiguration {
   uint8_t automatic_camera_mask = kCameraAutomaticMaskAll;
   uint8_t target_brightness = kAutoExposureDefaultTargetBrightness;
+  // All four must be automatic. Brightest-camera / RAW highlight protection;
+  // gains remain independent. Requires Sensor Board EX4 support.
+  bool unified_automatic = false;
   std::array<uint32_t, 4> manual_exposure_time_us{
       kCameraDefaultExposureUs, kCameraDefaultExposureUs,
       kCameraDefaultExposureUs, kCameraDefaultExposureUs};

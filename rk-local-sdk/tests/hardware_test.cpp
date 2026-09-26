@@ -93,10 +93,13 @@ int main(int argc, char** argv) {
         static_cast<unsigned>(s.correction_format), static_cast<unsigned long long>(s.rover_bytes),
         static_cast<unsigned long long>(s.base_bytes), static_cast<unsigned long long>(s.solution_count));
     });
-    check("rtkNavigationStatus", [&] {
-      const auto s = client.rtkNavigationStatus();
-      std::printf("raw_valid=%d smoothed_valid=%d\n", s.solution_valid, s.smoothed_position_valid);
+    check("timeSyncRtkStatus", [&] {
+      const auto s = client.timeSyncRtkStatus();
+      std::printf("linked=%d status_fresh=%d control_state=%u\n", s.linked, s.device_status_fresh, s.control_state);
     });
+    check("timeSyncRtkVersions", [&] { (void)client.timeSyncRtkVersions(); });
+    check("timeSyncCorsConfiguration", [&] { (void)client.timeSyncCorsConfiguration(); });
+    check("gnssObservations", [&] { (void)client.gnssObservations(); });
     check("raw heartbeat", [&] {
       const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(3);
       while (std::chrono::steady_clock::now() < until) {

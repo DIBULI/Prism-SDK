@@ -89,14 +89,14 @@ command-line program already using the Prism USB interface and reconnect it.
 ## Windows x64
 
 Use the Visual Studio 2022 C++ x64 toolchain and CMake. The public C++ ABI
-requires MSVC 14.x with the matching SDK 1.1.0 headers; MinGW is not supported.
+requires MSVC 14.x with the matching SDK 1.2.0 headers; MinGW is not supported.
 Install the current Microsoft Visual C++ 2015-2022 x64 Redistributable for
 deployment, and bind the Prism USB interface to the Windows WinUSB driver.
 Place `prism_usb_sdk.dll` beside the executable.
 
 This package intentionally ships only the DLL, not an import library. Windows
 applications should load `prism_usb_sdk.dll` with `LoadLibraryW`, resolve
-`prism_usb_sdk_get_runtime_api`, and validate Runtime API version 12 before use.
+`prism_usb_sdk_get_runtime_api`, and validate Runtime API version 18 before use.
 The included example implements this pattern and always uses the DLL-compatible
 `/MD` runtime and release iterator ABI, including when a Debug configuration is
 selected.

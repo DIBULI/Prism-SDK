@@ -11,7 +11,6 @@
 #include "prism/usb/lidar_points.hpp"
 #include "prism/usb/runtime_api.hpp"
 #include "prism/usb/rtk.hpp"
-#include "prism/usb/rtk_navigation.hpp"
 #include "prism/usb/streams.hpp"
 #include "prism/usb/telemetry.hpp"
 #include "prism/usb/time_sync.hpp"

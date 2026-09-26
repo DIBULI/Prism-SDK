@@ -95,8 +95,8 @@ void validateAllFunctions(const prism::RuntimeApi& api) {
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, timesync_port_status);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, set_timesync_port_mode);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, gnss_timing_status);
-  PRISM_REQUIRE_RUNTIME_FUNCTION(api, rtk_navigation_status);
-  PRISM_REQUIRE_RUNTIME_FUNCTION(api, parse_rtk_navigation_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, timesync_rtk_status);
+  PRISM_REQUIRE_RUNTIME_FUNCTION(api, timesync_rtk_versions);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, start_rover_rtcm);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, stop_rover_rtcm);
   PRISM_REQUIRE_RUNTIME_FUNCTION(api, parse_rover_rtcm_chunk_view);
@@ -133,6 +133,14 @@ class RuntimeModule {
         throw std::runtime_error("incompatible MSVC runtime family");
       }
       validateAllFunctions(*api_);
+      const auto control_entry = reinterpret_cast<prism::GetRtkModuleControlRuntimeApiFunction>(
+          GetProcAddress(loaded_module, prism::kRtkModuleControlRuntimeApiEntryPoint));
+      control_ = control_entry ? control_entry(prism::kRtkModuleControlRuntimeApiVersion) : nullptr;
+      if (!control_ || control_->abi_version != prism::kRtkModuleControlRuntimeApiVersion ||
+          control_->struct_size < sizeof(prism::RtkModuleControlRuntimeApi) ||
+          !control_->cors_configuration || !control_->save_cors_configuration ||
+          !control_->start_rtk || !control_->stop_rtk)
+        throw std::runtime_error("incompatible RTK-module control extension");
       module_ = loaded_module;
     } catch (...) {
       api_ = nullptr;
@@ -151,14 +159,28 @@ class RuntimeModule {
   }
 
   const prism::RuntimeApi& api() const { return *api_; }
+  const prism::RtkModuleControlRuntimeApi& control() const { return *control_; }
 
  private:
   HMODULE module_ = nullptr;
   const prism::RuntimeApi* api_ = nullptr;
+  const prism::RtkModuleControlRuntimeApi* control_ = nullptr;
 };
 
+// Compile-only examples: the application must explicitly authorize writes and
+// bind options.expected_cors_generation to the configuration shown to its user.
+[[maybe_unused]] void moduleControlCalls(
+    const prism::RtkModuleControlRuntimeApi& api, prism::Client* client,
+    const prism::TimeSyncCorsConfiguration& configuration,
+    const prism::RtkStartOptions& options) {
+  (void)api.cors_configuration(client);
+  (void)api.save_cors_configuration(client, configuration);
+  (void)api.start_rtk(client, options);
+  (void)api.stop_rtk(client, 20000);
+}
+
 // This function is compile-checked but deliberately not executed by main().
-// It provides one minimal call for every RuntimeApi v12 function pointer.
+// It provides one minimal call for every RuntimeApi v18 function pointer.
 [[maybe_unused]] void everyRuntimeApiCall(
     const prism::RuntimeApi& api, prism::Client* client,
     const prism::DeviceInfo& selected_device, const prism::Frame& frame,
@@ -221,8 +243,8 @@ class RuntimeModule {
   (void)api.timesync_port_status(client);
   (void)api.set_timesync_port_mode(client, prism::TimeSyncPortMode::SensorBoardMaster);
   (void)api.gnss_timing_status(client);
-  (void)api.rtk_navigation_status(client);
-  (void)api.parse_rtk_navigation_status(frame);
+  (void)api.timesync_rtk_status(client);
+  (void)api.timesync_rtk_versions(client);
   (void)api.begin_rtk_corrections(client);
   const uint8_t rtcm[] = {0xd3, 0, 0}; // illustration only, not a valid correction frame
   (void)api.send_rtk_corrections(client, rtcm, sizeof(rtcm), 3000);
@@ -279,7 +301,7 @@ int main() {
   try {
     RuntimeModule module;
     validateAllFunctions(module.api());
-    std::cout << "Validated all 57 RuntimeApi v12 function pointers.\n";
+    std::cout << "Validated RuntimeApi v18 and RTK-module control extension v1.\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "error: " << error.what() << '\n';
