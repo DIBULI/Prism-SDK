@@ -19,7 +19,16 @@ target_compile_definitions(prism-rklocal-rtk-module-control PRIVATE PRISM_EXAMPL
 target_link_libraries(prism-rklocal-rtk-module-control PRIVATE Prism::RkLocal)
 target_compile_options(prism-rklocal-rtk-module-control PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
+add_executable(prism-rklocal-rtk-position "../examples/rtk_position.cpp")
+target_compile_definitions(prism-rklocal-rtk-position PRIVATE PRISM_EXAMPLE_RKLOCAL)
+target_link_libraries(prism-rklocal-rtk-position PRIVATE Prism::RkLocal)
+target_compile_options(prism-rklocal-rtk-position PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
 if(BUILD_TESTING)
   add_test(NAME prism-rklocal-rtk-module-control-help COMMAND prism-rklocal-rtk-module-control --help)
+  add_test(NAME prism-rklocal-rtk-position-help COMMAND prism-rklocal-rtk-position --help)
+  add_test(NAME prism-rklocal-rtk-position-self-test COMMAND prism-rklocal-rtk-position --self-test)
+  add_test(NAME prism-rklocal-rtk-position-invalid-duration COMMAND prism-rklocal-rtk-position --seconds 0)
+  set_tests_properties(prism-rklocal-rtk-position-invalid-duration PROPERTIES WILL_FAIL TRUE)
   add_subdirectory(tests)
 endif()

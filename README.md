@@ -64,5 +64,10 @@ and RTK start are separate actions; starting requires explicit consent to send
 live GGA. Use `prism-rtk-module-control --help` for the Host example and
 `prism-rklocal-rtk-module-control --help` from the top-level ARM64 build.
 
+Read continuous receiver positions with `prism-rtk-position --seconds 60`, or
+`prism-rklocal-rtk-position` on RK. English usage instructions live in the source
+comments of [RTK control](examples/rtk_module_control.cpp) and
+[continuous positions](examples/rtk_position.cpp).
+
 All usage guides are in [docs/](docs/README.md). Full package checks:
 `python3 scripts/test_all_examples.py --build-dir build-all-examples`.

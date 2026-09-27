@@ -32,3 +32,6 @@ Saved, applied, connected and positioning are different states. See
 [CORS/RTK control](rtk-module-control.md), [TimeSync modes](timesync-port.md),
 [GNSS diagnostics](gnss-reception-status.md) and the
 [read-only example](../examples/gnss_rtk_status.cpp).
+
+For English usage instructions, see the source comments in
+[RTK control](../examples/rtk_module_control.cpp) and [continuous positions](../examples/rtk_position.cpp).

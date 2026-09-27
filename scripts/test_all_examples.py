@@ -107,10 +107,11 @@ def expected_targets(kind: str) -> list[str]:
         "prism-parser-api-examples",
         "prism-stream-api-examples",
         "prism-gnss-rtk-status",
+        "prism-rtk-position",
         "prism-rtk-module-control",
     ]
     if kind == "linux" and platform.machine().lower() in {"arm64", "aarch64"}:
-        targets.extend(["prism-rklocal-capture", "prism-rklocal-gnss-status", "prism-rklocal-rtk-module-control"])
+        targets.extend(["prism-rklocal-capture", "prism-rklocal-gnss-status", "prism-rklocal-rtk-module-control", "prism-rklocal-rtk-position"])
     return targets
 
 

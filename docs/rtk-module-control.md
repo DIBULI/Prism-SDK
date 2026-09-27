@@ -1,5 +1,8 @@
 # RTK-module CORS configuration and control / CORS 配置与 RTK 启停
 
+English usage instructions are maintained in the source comments:
+[RTK control](../examples/rtk_module_control.cpp) and [continuous positions](../examples/rtk_position.cpp).
+
 Agent / Host SDK / RK-local SDK: **1.2.0**. Use matching current headers and
 libraries. These wrappers use existing Agent RTK-module commands, without a new
 wire protocol or a Sensor Board firmware change.

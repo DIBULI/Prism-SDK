@@ -2,10 +2,10 @@
 
 [简体中文](examples.zh-CN.md)
 
-These examples are intentionally small and safe to run. None of them writes
-persistent device configuration, changes exposure, upgrades firmware, or
-changes the Wi-Fi/LiDAR network configuration. Time synchronization is also
-opt-in.
+These examples are small and safe by default. Read-only examples do not modify
+devices. RTK controls save configuration or start/stop only with explicit
+`save/start/stop` actions; sending GGA also requires `--allow-gga`. Time synchronization
+is opt-in as well.
 
 All commands below run from the repository root.
 
@@ -34,6 +34,18 @@ cmake --build build-example --config Release
 
 Only one process can own a Prism USB device at a time. Close Prism Viewer and
 other SDK programs before running an example.
+
+## RTK example
+
+[`rtk_position.cpp`](../examples/rtk_position.cpp) continuously reads receiver GGA
+and independent ADRNAV results: SINGLE/DGNSS/FLOAT/FIX, coordinates, ellipsoidal height,
+epoch, satellites and optional standard deviations. The same source builds
+`prism-rtk-position` and `prism-rklocal-rtk-position`. It is read-only for 30 seconds
+by default and never starts CORS. `rtk_module_control.cpp` provides explicit save/start/stop.
+
+Build commands, CORS setup, explicit GGA consent, monitoring, stop and test instructions
+are maintained in English at the top of [rtk_module_control.cpp](../examples/rtk_module_control.cpp)
+and [rtk_position.cpp](../examples/rtk_position.cpp).
 
 ## `prism-device-info-time-sync`
 
@@ -193,10 +205,9 @@ Windows catalogue loads the published DLL and verifies that all 57 Runtime API
 entries are present, but it does not open or modify a device. CTest runs these
 catalogues after compilation.
 
-There are eight example source files in total. Linux/macOS build seven targets;
-Windows builds two targets. The platform matrix therefore compiles every source
-file. CMake configuration fails if a new `examples/*.cpp` file is not registered
-as a target, so GitHub Actions cannot silently omit a future example.
+CMake registers all examples by platform, including RK-local targets on Linux ARM64.
+Configuration fails if a new `examples/*.cpp` file is not registered as a target,
+so future examples cannot be silently omitted.
 
 ## Automated test script
 

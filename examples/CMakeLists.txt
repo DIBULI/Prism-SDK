@@ -163,6 +163,7 @@ set(_prism_direct_api_example_sources
   parser_api_examples.cpp
   stream_api_examples.cpp
   gnss_rtk_status.cpp
+  rtk_position.cpp
   rtk_module_control.cpp)
 set(_prism_rklocal_example_sources rklocal_capture.cpp rklocal_gnss_status.cpp)
 set(_prism_windows_runtime_example_sources
@@ -213,6 +214,7 @@ else()
   prism_add_example(prism-parser-api-examples parser_api_examples.cpp)
   prism_add_example(prism-stream-api-examples stream_api_examples.cpp)
   prism_add_example(prism-gnss-rtk-status gnss_rtk_status.cpp)
+  prism_add_example(prism-rtk-position rtk_position.cpp)
   prism_add_example(prism-rtk-module-control rtk_module_control.cpp)
   list(APPEND _prism_supported_example_targets
     prism-camera-imu-capture
@@ -222,6 +224,7 @@ else()
     prism-parser-api-examples
     prism-stream-api-examples
     prism-gnss-rtk-status
+    prism-rtk-position
     prism-rtk-module-control)
 
   if(BUILD_TESTING)
@@ -238,6 +241,10 @@ else()
     add_test(NAME prism-gnss-rtk-status-help COMMAND prism-gnss-rtk-status --help)
     add_test(NAME prism-gnss-numeric-parser-self-test COMMAND prism-gnss-rtk-status --self-test)
     add_test(NAME prism-rtk-module-control-help COMMAND prism-rtk-module-control --help)
+    add_test(NAME prism-rtk-position-help COMMAND prism-rtk-position --help)
+    add_test(NAME prism-rtk-position-self-test COMMAND prism-rtk-position --self-test)
+    add_test(NAME prism-rtk-position-invalid-duration COMMAND prism-rtk-position --seconds 0)
+    set_tests_properties(prism-rtk-position-invalid-duration PROPERTIES WILL_FAIL TRUE)
   endif()
 endif()
 
@@ -248,8 +255,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
   target_compile_definitions(prism-rklocal-rtk-module-control PRIVATE PRISM_EXAMPLE_RKLOCAL)
   target_link_libraries(prism-rklocal-rtk-module-control PRIVATE Prism::RkLocal)
   list(APPEND _prism_supported_example_targets prism-rklocal-rtk-module-control)
+  add_executable(prism-rklocal-rtk-position rtk_position.cpp)
+  target_compile_definitions(prism-rklocal-rtk-position PRIVATE PRISM_EXAMPLE_RKLOCAL)
+  target_link_libraries(prism-rklocal-rtk-position PRIVATE Prism::RkLocal)
+  target_compile_options(prism-rklocal-rtk-position PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  list(APPEND _prism_supported_example_targets prism-rklocal-rtk-position)
   if(BUILD_TESTING)
     add_test(NAME prism-rklocal-rtk-module-control-help COMMAND prism-rklocal-rtk-module-control --help)
+    add_test(NAME prism-rklocal-rtk-position-help COMMAND prism-rklocal-rtk-position --help)
+    add_test(NAME prism-rklocal-rtk-position-self-test COMMAND prism-rklocal-rtk-position --self-test)
   endif()
   if(BUILD_TESTING)
     add_subdirectory("${PRISM_SDK_ROOT}/rk-local-sdk/tests" rklocal-tests)
@@ -268,7 +282,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
 endif()
 
 # CI builds this target explicitly. It represents every example supported by
-# the current packaged runtime: nine on Linux/macOS and two on Windows, where
+# the current packaged runtime. Windows uses RuntimeApi examples, where
 # direct Client linkage is intentionally unavailable.
 add_custom_target(prism-all-examples
   DEPENDS ${_prism_supported_example_targets})

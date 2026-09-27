@@ -26,5 +26,7 @@ Agent 转发接收机数据，不再内置 RTK 解算器；SDK 不生成 FIX，�
 `startRtk` 成功仅确认控制执行，不表示卫星已定位或已获得 FIX。
 保存成功、模块应用成功、CORS 连通和定位成功必须分开判断。
 
+RTK 示例使用说明见源码顶部的英文注释：[CORS 与启停](../examples/rtk_module_control.cpp)、
+[连续读取结果](../examples/rtk_position.cpp)。
 详见 [CORS/RTK 控制](rtk-module-control.md)、[TimeSync](timesync-port.md)、
 [接收诊断](gnss-reception-status.md)和[只读示例](../examples/gnss_rtk_status.cpp)。

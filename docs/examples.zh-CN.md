@@ -2,8 +2,8 @@
 
 [English](examples.md)
 
-这些示例刻意保持小巧且默认安全：不会写入设备持久配置，不会修改曝光，不会升级固件，
-也不会修改 Wi-Fi 或 LiDAR 网络配置。设备时间同步同样必须由用户显式启用。
+这些示例刻意保持小巧且默认安全。只读示例不修改设备；RTK 控制示例只有显式执行
+`save/start/stop` 才保存配置或启停，发送 GGA 还需要 `--allow-gga`。设备时间同步同样必须显式启用。
 
 以下命令均在仓库根目录执行。
 
@@ -11,7 +11,7 @@
 
 1.2.0 新增：Host 的 `prism-gnss-rtk-status` 只读查询；RK 端的
 `prism-rklocal-capture` 提取四路 JPEG 与 IMU，`prism-rklocal-gnss-status`
-不启动采集即可查询 GNSS/PPS。只编译 RK 的两个 C++ 示例可用
+不启动采集即可查询 GNSS/PPS。只编译 RK 的 C++ 示例可用
 `cmake -S rk-local-sdk -B build/rklocal`。命令、单位及占用规则见
 [RK-local 说明](rk-local-sdk.zh-CN.md) 和 [GNSS/RTK 接口](gnss-rtk.zh-CN.md)。
 
@@ -31,6 +31,17 @@ cmake --build build-example --config Release
 
 同一时间只能有一个进程占用 Prism USB 设备。运行示例前请关闭 Prism Viewer 和其他
 SDK 程序。
+
+## RTK 使用案例
+
+[`rtk_position.cpp`](../examples/rtk_position.cpp) 连续读取接收机的 GGA 和独立 ADRNAV
+结果，显示 SINGLE/DGNSS/FLOAT/FIX、经纬度、椭球高、历元、卫星数和可选标准差。
+同一源码提供 `prism-rtk-position` 与 `prism-rklocal-rtk-position`，默认只读 30 秒，
+不会自动启动 CORS。已有 `rtk_module_control.cpp` 用于显式保存账号、启动及停止。
+
+编译、CORS 配置、授权发送 GGA、读取、停止及自测的说明统一放在
+[rtk_module_control.cpp](../examples/rtk_module_control.cpp) 和
+[rtk_position.cpp](../examples/rtk_position.cpp) 顶部的英文注释中。
 
 ## `prism-device-info-time-sync`
 
@@ -174,9 +185,8 @@ v18 后再调用接口。
 DLL 并确认 45 个 Runtime API 入口全部存在，但不会打开或修改设备。CTest 会在编译后
 运行这些目录程序。
 
-仓库现在共有 8 个 example 源文件：Linux/macOS 编译 7 个目标，Windows 编译 2 个
-目标，三平台矩阵合起来会编译全部源文件。如果以后新增 `examples/*.cpp` 却没有注册
-CMake target，配置阶段会直接失败，因此 GitHub Actions 不会静默漏编示例。
+CMake 按平台注册所有示例，Linux ARM64 还编译 RK-local 示例。如果新增
+`examples/*.cpp` 却没有注册 CMake target，配置阶段会直接失败，避免静默漏编。
 
 ## 自动化测试脚本
 

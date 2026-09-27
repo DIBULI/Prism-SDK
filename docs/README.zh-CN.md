@@ -21,6 +21,7 @@
 RK-local 差异表。
 
 - [CORS 配置及 RTK 启停](rtk-module-control.md)
+- RTK 示例（英文使用说明在源码中）：[CORS 与启停](../examples/rtk_module_control.cpp)、[连续定位](../examples/rtk_position.cpp)
 - [原始数据集下载：USB / RK-local](recorded-datasets.md)（SDK 不转换 ROS bag）
 - [当前 TimeSync 模式](timesync-port.md)
 - [RTK-module 版本](rtk-module-versions.md)

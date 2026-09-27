@@ -57,5 +57,9 @@ macOS 使用包内两个 dylib。RK-local 编译命令为
 Host 示例为 `prism-rtk-module-control --help`，顶层 ARM64 构建还提供
 `prism-rklocal-rtk-module-control --help`。
 
+连续读取定位结果用 `prism-rtk-position --seconds 60`，RK-local 对应
+`prism-rklocal-rtk-position`。使用说明以英文保存在源码顶部：
+[CORS 与启停](examples/rtk_module_control.cpp)、[连续读取结果](examples/rtk_position.cpp)。
+
 所有接口说明集中在 [docs/](docs/README.zh-CN.md)。完整包验证：
 `python3 scripts/test_all_examples.py --build-dir build-all-examples`。
