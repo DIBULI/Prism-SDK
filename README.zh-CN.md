@@ -29,6 +29,7 @@ OpenSSL 开发包。RK-local 库内嵌其依赖，仅需 pthreads/dl 和系统 C
 - 最新 TimeSync 模式、RTK-module 版本、4G 与控制状态诊断。
 - 接收机原生 GNSS/RTK 报文、天空图和轨迹模型；不提供 Agent 内部 RTK 解算及旧 raw/smoothed 接口。
 - GNSS 输入诊断、XT32、雷达 line 字段、相机元数据。
+- [独立雷达待机/唤醒](docs/guides/lidar.md#standby-wake)，不改变采集启停行为，需配套当前 Agent。
 - 详见[更新说明](docs/update/v1.2.0.zh-CN.md)及[产物来源](ORIGIN.md)。
 
 ## 编译示例
@@ -50,7 +51,7 @@ sudo udevadm trigger
 
 ARM64 使用同一规则，必要时重新插拔 USB。Windows 使用 DLL Runtime API，
 macOS 使用包内两个 dylib。RK-local 编译命令为
-`cmake -S rk-local-sdk -B build/rklocal`，详见[接口说明与差异](docs/rk-local-sdk.zh-CN.md)。
+`cmake -S rk-local-sdk -B build/rklocal`，详见[接口说明与差异](docs/reference/rk-local.zh-CN.md)。
 
 连接客户端不会自动校时、采集或启动 CORS。保存账号与启动 RTK 是分开的操作；
 启动前必须明确允许向已保存的 CORS 服务发送实时 GGA 位置。

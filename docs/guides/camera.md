@@ -1,5 +1,12 @@
 # Runtime camera exposure
 
+[Documentation index](../README.md)
+
+<!-- page-toc -->
+- [SDK API](#sdk-api)
+- [Current wire format](#current-wire-format)
+<!-- /page-toc -->
+
 Camera exposure is runtime-only. It is not part of
 `DeviceConfiguration`, is never written to `/var/lib/prism`, and resets to the
 device defaults after an agent or sensor-board restart. Reads and writes are

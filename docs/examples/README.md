@@ -1,6 +1,19 @@
 # Prism SDK examples
 
-[简体中文](examples.zh-CN.md)
+[Documentation index](../README.md)
+
+[简体中文](README.zh-CN.md)
+
+<!-- page-toc -->
+- [Build](#build)
+- [RTK example](#rtk-example)
+- [`prism-device-info-time-sync`](#prism-device-info-time-sync)
+- [`prism-camera-imu-capture`](#prism-camera-imu-capture)
+- [`prism-lidar-capture`](#prism-lidar-capture)
+- [Compile-checked API catalogues](#compile-checked-api-catalogues)
+- [Automated test script](#automated-test-script)
+- [Exit status](#exit-status)
+<!-- /page-toc -->
 
 These examples are small and safe by default. Read-only examples do not modify
 devices. RTK controls save configuration or start/stop only with explicit
@@ -15,8 +28,8 @@ New in 1.2.0: `prism-gnss-rtk-status` is a read-only Host snapshot example.
 On-device `prism-rklocal-capture` extracts four JPEG images and IMU samples;
 `prism-rklocal-gnss-status` queries GNSS/PPS without starting capture. Build just
 these C++ examples with `cmake -S rk-local-sdk -B build/rklocal`.
-See [RK-local commands, units and ownership](rk-local-sdk.md) and
-[GNSS/RTK interfaces](gnss-rtk.md).
+See [RK-local commands, units and ownership](../reference/rk-local.md) and
+[GNSS/RTK interfaces](../guides/gnss-rtk.md#receiver-results).
 
 Build all examples from the repository root:
 
@@ -37,15 +50,15 @@ other SDK programs before running an example.
 
 ## RTK example
 
-[`rtk_position.cpp`](../examples/rtk_position.cpp) continuously reads receiver GGA
+[`rtk_position.cpp`](../../examples/rtk_position.cpp) continuously reads receiver GGA
 and independent ADRNAV results: SINGLE/DGNSS/FLOAT/FIX, coordinates, ellipsoidal height,
 epoch, satellites and optional standard deviations. The same source builds
 `prism-rtk-position` and `prism-rklocal-rtk-position`. It is read-only for 30 seconds
 by default and never starts CORS. `rtk_module_control.cpp` provides explicit save/start/stop.
 
 Build commands, CORS setup, explicit GGA consent, monitoring, stop and test instructions
-are maintained in English at the top of [rtk_module_control.cpp](../examples/rtk_module_control.cpp)
-and [rtk_position.cpp](../examples/rtk_position.cpp).
+are maintained in English at the top of [rtk_module_control.cpp](../../examples/rtk_module_control.cpp)
+and [rtk_position.cpp](../../examples/rtk_position.cpp).
 
 ## `prism-device-info-time-sync`
 
@@ -74,7 +87,7 @@ Set and verify device time:
 Sensor Board is the device time master; RK follows its PPS/NMEA and supplies
 Ethernet PTP time. Host UTC is accepted only while external GNSS is not locked;
 the Agent rejects time-setting while GPS is synchronized. Opening never sets time,
-and no populated RTC is required. See [time synchronization](usage.md#time-synchronization).
+and no populated RTC is required. See [time synchronization](../getting-started/README.md#time-synchronization).
 
 On multi-configuration generators (such as Visual Studio), executables are under
 the selected configuration directory, for example `Release`.
@@ -263,4 +276,4 @@ without a complete Camera frame set or LiDAR point batch, respectively.
 
 For the runnable snippets behind every public SDK interface, including persistent settings,
 exposure control, Wi-Fi, LiDAR network management, raw frame parsing, and
-system upgrades, see the [per-interface SDK examples](interface-examples.md).
+system upgrades, see the [per-interface SDK examples](interfaces.md).

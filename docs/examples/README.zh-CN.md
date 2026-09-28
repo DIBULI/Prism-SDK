@@ -1,6 +1,19 @@
 # Prism SDK 示例
 
-[English](examples.md)
+[文档目录](../README.zh-CN.md)
+
+[English](README.md)
+
+<!-- page-toc -->
+- [编译](#编译)
+- [RTK 使用案例](#rtk-使用案例)
+- [`prism-device-info-time-sync`](#prism-device-info-time-sync)
+- [`prism-camera-imu-capture`](#prism-camera-imu-capture)
+- [`prism-lidar-capture`](#prism-lidar-capture)
+- [经编译检查的 API 示例目录](#经编译检查的-api-示例目录)
+- [自动化测试脚本](#自动化测试脚本)
+- [退出码](#退出码)
+<!-- /page-toc -->
 
 这些示例刻意保持小巧且默认安全。只读示例不修改设备；RTK 控制示例只有显式执行
 `save/start/stop` 才保存配置或启停，发送 GGA 还需要 `--allow-gga`。设备时间同步同样必须显式启用。
@@ -13,7 +26,7 @@
 `prism-rklocal-capture` 提取四路 JPEG 与 IMU，`prism-rklocal-gnss-status`
 不启动采集即可查询 GNSS/PPS。只编译 RK 的 C++ 示例可用
 `cmake -S rk-local-sdk -B build/rklocal`。命令、单位及占用规则见
-[RK-local 说明](rk-local-sdk.zh-CN.md) 和 [GNSS/RTK 接口](gnss-rtk.zh-CN.md)。
+[RK-local 说明](../reference/rk-local.zh-CN.md) 和 [GNSS/RTK 接口](../guides/gnss-rtk.md#receiver-results-zh)。
 
 从仓库根目录编译全部示例：
 
@@ -34,14 +47,14 @@ SDK 程序。
 
 ## RTK 使用案例
 
-[`rtk_position.cpp`](../examples/rtk_position.cpp) 连续读取接收机的 GGA 和独立 ADRNAV
+[`rtk_position.cpp`](../../examples/rtk_position.cpp) 连续读取接收机的 GGA 和独立 ADRNAV
 结果，显示 SINGLE/DGNSS/FLOAT/FIX、经纬度、椭球高、历元、卫星数和可选标准差。
 同一源码提供 `prism-rtk-position` 与 `prism-rklocal-rtk-position`，默认只读 30 秒，
 不会自动启动 CORS。已有 `rtk_module_control.cpp` 用于显式保存账号、启动及停止。
 
 编译、CORS 配置、授权发送 GGA、读取、停止及自测的说明统一放在
-[rtk_module_control.cpp](../examples/rtk_module_control.cpp) 和
-[rtk_position.cpp](../examples/rtk_position.cpp) 顶部的英文注释中。
+[rtk_module_control.cpp](../../examples/rtk_module_control.cpp) 和
+[rtk_position.cpp](../../examples/rtk_position.cpp) 顶部的英文注释中。
 
 ## `prism-device-info-time-sync`
 
@@ -69,7 +82,7 @@ SDK 程序。
 
 Sensor Board 是设备时间主时钟；RK 跟随其 PPS/NMEA 并向以太网提供 PTP 时间。
 仅外部 GNSS 尚未锁定时允许提交主机 UTC；GPS 已同步时 Agent 拒绝请求。
-打开连接不会自动校时，不要求板上贴装 RTC。见[时间同步](usage.zh-CN.md#时间同步)。
+打开连接不会自动校时，不要求板上贴装 RTC。见[时间同步](../getting-started/README.zh-CN.md#时间同步)。
 
 Visual Studio 等多配置生成器会把程序放在所选配置目录，例如 `Release`。
 
@@ -235,4 +248,4 @@ python3 scripts/test_all_examples.py \
 收到完整 Camera 帧组或 LiDAR 点云批次，对应流示例返回 3。
 
 持久配置、曝光控制、Wi-Fi、LiDAR 网络管理、原始帧解析和系统升级等每个公开 SDK
-接口的示例，请参阅 [逐接口 SDK 示例](interface-examples.zh-CN.md)。
+接口的示例，请参阅 [逐接口 SDK 示例](interfaces.zh-CN.md)。

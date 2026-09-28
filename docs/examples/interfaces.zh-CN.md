@@ -1,14 +1,23 @@
-# Prism Host SDK per-interface examples
+# Prism Host SDK 逐接口示例
 
-[简体中文](interface-examples.zh-CN.md)
+[文档目录](../README.zh-CN.md)
 
-This cookbook gives every public SDK interface a concrete example. The
-[quick index](development-guide.md#api-quick-index) links each interface to the
-example that uses it. Related calls share one example when they must be used as
-one lifecycle, such as start/read/stop or inspect/confirm/upgrade.
+[English](interfaces.md)
 
-Unless a block says otherwise, direct `Client`, Stream, helper, and parser
-examples are for Linux x86-64 and macOS arm64 and assume:
+<!-- page-toc -->
+- [Client 生命周期与基础控制](#client-生命周期与基础控制)
+- [配置、采集和升级](#配置采集和升级)
+- [Stream 包装类](#stream-包装类)
+- [Helper 和 parser](#helper-和-parser)
+- [Windows Runtime API v18](#windows-runtime-api-v18)
+<!-- /page-toc -->
+
+本手册按生命周期组织基础 SDK 调用示例。[Host 参考目录](../reference/host.zh-CN.md#api-quick-index)
+提供接口背景；GNSS/RTK、雷达待机/唤醒和数据集流程见[功能指南](../README.zh-CN.md#3-功能指南)。
+必须配套使用的调用共用一个生命周期例子，例如 start/read/stop 或 inspect/confirm/upgrade。
+
+除非另有说明，直接 `Client`、Stream、helper 和 parser 示例适用于 Linux x86-64 与
+macOS arm64，并假设已经包含：
 
 ```cpp
 #include <prism/usb_sdk.hpp>
@@ -23,31 +32,24 @@ examples are for Linux x86-64 and macOS arm64 and assume:
 using namespace std::chrono_literals;
 ```
 
-Operations that change persistent configuration, clocks, networks, or firmware
-are guarded by an explicit Boolean in these examples. Obtain real user consent
-before setting that Boolean. All stream and idle-only requirements still apply.
+修改持久配置、时钟、网络或固件的操作都由显式布尔变量保护。设置该变量前必须获得用户
+确认，并继续遵守流状态和 idle-only 限制。
 
-Every snippet in this cookbook is also represented in a compile-checked source
-catalogue:
+本手册中的每组片段也都有对应的、经过编译检查的源码目录：
 
-- [Client lifecycle and basic control](../examples/client_api_examples.cpp)
-- [Configuration, acquisition, network, and update](../examples/configuration_api_examples.cpp)
-- [High-level stream wrappers](../examples/stream_api_examples.cpp)
-- [Helpers and all public parsers](../examples/parser_api_examples.cpp)
-- [All 57 Windows Runtime API v18 entries](../examples/windows_runtime_api_examples.cpp)
+- [Client 生命周期与基础控制](../../examples/client_api_examples.cpp)
+- [配置、采集、网络与升级](../../examples/configuration_api_examples.cpp)
+- [高级 Stream 封装](../../examples/stream_api_examples.cpp)
+- [helper 与全部公共解析器](../../examples/parser_api_examples.cpp)
+- [Windows Runtime API v18 全部 57 个入口](../../examples/windows_runtime_api_examples.cpp)
 
-GitHub Actions builds every applicable catalogue on each supported platform.
+GitHub Actions 会在每个受支持平台上编译该平台适用的全部目录程序。
 
-RTK-module CORS read/save and explicit start/stop are demonstrated in
-[rtk_module_control.cpp](../examples/rtk_module_control.cpp); the same source
-builds against Host and RK-local. See [consent and timeout semantics](rtk-module-control.md).
-Windows loads the independent `RtkModuleControlRuntimeApi` extension; the
-Windows catalogue validates its version, size and all four function pointers.
-
-## Client lifecycle and basic control
+## Client 生命周期与基础控制
 
 <a id="example-client-construction"></a>
-### Default and move construction
+
+### 默认构造与 move
 
 ```cpp
 prism::Client first;
@@ -57,12 +59,12 @@ prism::Client third;
 third = std::move(second);
 ```
 
-`Client` is movable but not copyable. A moved-from object may only be destroyed
-or assigned a new value. `~Client()` closes an open device automatically when
-the owning scope exits; call `close()` explicitly when close errors matter.
+`Client` 可以 move，但不能 copy。被 move 的对象只能析构或重新赋值。持有对象离开
+作用域时，`~Client()` 会自动关闭已打开设备；如果需要处理关闭错误，应显式调用 `close()`。
 
 <a id="example-device-enumeration"></a>
-### Enumerate and open a selected device
+
+### 枚举并打开指定设备
 
 ```cpp
 const auto devices = prism::Client::enumerate();
@@ -71,15 +73,16 @@ if (devices.empty()) {
 }
 
 auto client = prism::Client::open(devices.front());
-// For a single-device application, the equivalent shortcut is:
+// 单设备应用也可以使用：
 // auto client = prism::Client::openFirst();
 ```
 
-Use `DeviceInfo::serial_number` from enumeration to select a specific USB
-device. Both static factories perform the strict SDK/Agent version handshake.
+使用枚举结果中的 `DeviceInfo::serial_number` 选择指定 USB 设备。两个静态 factory
+都会执行严格的 SDK/Agent 版本握手。
 
 <a id="example-client-lifecycle"></a>
-### Reuse one Client object
+
+### 复用一个 Client 对象
 
 ```cpp
 prism::Client client;
@@ -97,11 +100,12 @@ const std::wstring usb_serial = client.serialNumber();
 client.closeDevice();
 
 client.openFirstDevice();
-client.close();  // close() and closeDevice() are equivalent public operations.
+client.close();  // close() 和 closeDevice() 是等价的公开操作。
 ```
 
 <a id="example-keepalive"></a>
-### Enable, query, and disable keepalive
+
+### 启用、查询和禁用 keepalive
 
 ```cpp
 client.setKeepaliveEnabled(true, 1000);
@@ -112,11 +116,11 @@ if (!client.keepaliveEnabled()) {
 client.setKeepaliveEnabled(false);
 ```
 
-Keepalive owns the same command path as other control calls. Do not issue
-uncoordinated commands from another thread.
+Keepalive 与其他控制命令共用命令通路，不要从另一个线程发出未协调的命令。
 
 <a id="example-device-information"></a>
-### Read versions, health, clock, ping, and network information
+
+### 读取版本、健康、时钟、Ping 和网络信息
 
 ```cpp
 const prism::HelloInfo hello = client.hello();
@@ -132,11 +136,11 @@ std::cout << "Agent " << versions.agent
           << ", ping " << board_sequence << '\n';
 ```
 
-`deviceInfo()` returns the fresh device-health snapshot. Enumeration only fills
-USB identity fields.
+`deviceInfo()` 返回设备健康状态的新快照；枚举结果只包含 USB 身份字段。
 
 <a id="example-time-sync"></a>
-### Measure time and optionally synchronize the device
+
+### 测量时间并选择是否同步设备
 
 ```cpp
 if (client.streamTransferActive()) {
@@ -155,12 +159,12 @@ if (user_confirmed_clock_write) {
 }
 ```
 
-The measurement call never modifies a clock. Host time-setting requires a
-correct host clock and is rejected while GNSS is synchronized. Sensor Board
-remains master; RK follows its PPS/NMEA and provides Ethernet PTP. No RTC is required.
+测量接口不会修改任何时钟。主机校时必须保证主机 UTC 正确，GNSS 同步时会被拒绝。
+Sensor Board 始终为主时钟，RK 跟随其 PPS/NMEA 再提供以太网 PTP，不要求 RTC。
 
 <a id="example-wifi"></a>
-### Read and explicitly change Wi-Fi hotspot state
+
+### 读取并显式修改 Wi-Fi 热点状态
 
 ```cpp
 if (client.streamTransferActive()) {
@@ -178,13 +182,13 @@ if (user_confirmed_wifi_change) {
 }
 ```
 
-Changing the hotspot can immediately disconnect network users. USB remains the
-control transport for this operation.
+修改热点可能立即断开网络用户；该操作仍通过 USB 控制通路执行。
 
-## Configuration, acquisition, and update
+## 配置、采集和升级
 
 <a id="example-device-configuration"></a>
-### Read and selectively save persistent configuration
+
+### 读取并选择性保存持久配置
 
 ```cpp
 prism::DeviceConfiguration configuration = client.deviceConfiguration();
@@ -201,11 +205,11 @@ if (user_confirmed_persistent_write) {
 }
 ```
 
-Rate writes are idle-only. The field mask prevents unrelated settings from
-being overwritten.
+速率写入只允许在 idle 状态执行；field mask 可避免覆盖其他无关设置。
 
 <a id="example-exposure"></a>
-### Read and change runtime exposure and gain
+
+### 读取并修改运行时曝光和 gain
 
 ```cpp
 prism::ExposureConfiguration exposure = client.cameraExposure();
@@ -233,13 +237,13 @@ limits = client.setCameraExposureLimits(
     limits, prism::kExposureLimitsFieldAll);
 ```
 
-During capture, calculate the limit from the active `VideoStatus::fps` instead
-of the persistent FPS. The returned `effective_max_exposure_time_us` is the
-configured maximum clamped to that FPS. Exposure settings and limits are
-runtime-only and are not saved.
+采集中应根据当前 `VideoStatus::fps` 计算上限，而不是使用持久 FPS。返回的
+`effective_max_exposure_time_us` 是配置上限按当前 FPS 钳制后的实际值。曝光设置和
+上下限只在运行时生效，不会持久保存。
 
 <a id="example-camera-imu-control"></a>
-### Start and stop the aggregate Camera/IMU session
+
+### 启动和停止 Camera/IMU 聚合会话
 
 ```cpp
 const prism::DeviceInfo info = client.deviceInfo();
@@ -264,10 +268,11 @@ if (stop_through_imu_api) {
 }
 ```
 
-Either stop call stops the shared Camera/IMU capture session.
+任意一个 stop 接口都会停止共享的 Camera/IMU 采集会话。
 
 <a id="example-video-ack"></a>
-### Return Camera flow-control credit
+
+### 归还 Camera 流控 credit
 
 ```cpp
 const uint32_t complete_frame_id = assembled_frame.frame_id;
@@ -277,13 +282,13 @@ if (assembled_frame.has_all_cameras && assembled_frame.has_metadata) {
 }
 ```
 
-ACK only after all JPEGs and matching metadata are received. Retire and ACK an
-older incomplete frame when a newer frame ID proves the old chunks will not
-arrive. See the complete
-[`camera_imu_capture.cpp`](../examples/camera_imu_capture.cpp) implementation.
+只有收到全部 JPEG 和匹配 metadata 后才能 ACK。如果更新的 frame ID 证明旧帧分块不会
+再到达，应丢弃并 ACK 旧残帧。完整实现见
+[`camera_imu_capture.cpp`](../../examples/camera_imu_capture.cpp)。
 
 <a id="example-lidar-control"></a>
-### Start, query, and stop LiDAR
+
+### 启动、查询和停止 LiDAR
 
 ```cpp
 prism::LidarStatus started =
@@ -301,10 +306,11 @@ if (stopped.enabled) {
 }
 ```
 
-The model is mandatory; use `Mid360S` for that product.
+型号参数必须提供；Mid360S 设备应使用 `Mid360S`。
 
 <a id="example-lidar-network"></a>
-### Inspect, save, and probe the LiDAR network
+
+### 检查、保存和探测 LiDAR 网络
 
 ```cpp
 if (client.streamTransferActive()) {
@@ -325,11 +331,11 @@ const prism::LidarNetworkStatus probe = client.probeLidarNetwork();
 std::cout << "reachable=" << probe.target_reachable << '\n';
 ```
 
-`probeLidarNetwork()` tests reachability using the saved configuration; save
-edited values before probing them.
+`probeLidarNetwork()` 使用已保存的配置执行连通性测试；要测试输入的新值，必须先保存。
 
 <a id="example-low-level"></a>
-### Read raw frames and issue a raw command
+
+### 读取原始 Frame 并执行原始命令
 
 ```cpp
 const prism::Frame pong = client.command(prism::FrameType::Ping, {}, 3000);
@@ -345,11 +351,11 @@ for (;;) {
 }
 ```
 
-Use one receive loop per Client. Prefer high-level methods unless implementing
-a dispatcher for stream frames.
+每个 Client 只能有一个接收循环。除非实现 stream frame dispatcher，否则优先使用高级接口。
 
 <a id="example-system-upgrade"></a>
-### Inspect and explicitly perform a system upgrade
+
+### 检查并显式执行系统升级
 
 ```cpp
 const std::string package_path = "prism-system-update.zip";
@@ -376,14 +382,14 @@ if (user_confirmed_upgrade) {
 }
 ```
 
-For low-level upgrade-status frames, use
-`parseUpgradeStatus(frame)` and `parseSensorBoardUpgradeStatus(frame)` only
-with their matching frame types. Keep power and USB stable throughout update.
+低级升级状态帧只能按匹配类型调用 `parseUpgradeStatus(frame)` 或
+`parseSensorBoardUpgradeStatus(frame)`。升级期间必须保持供电和 USB 稳定。
 
-## Stream wrapper classes
+## Stream 包装类
 
 <a id="example-imu-stream"></a>
-### ImuStream lifecycle
+
+### ImuStream 生命周期
 
 ```cpp
 prism::ImuStream imu(client, [](const prism::ImuSample& sample) {
@@ -406,12 +412,12 @@ while (imu.active()) {
 }
 ```
 
-Feed every received frame to `handleFrame()` from the single receive thread.
-`~ImuStream()` makes a best-effort stop, but production code should call
-`stop()` explicitly so an error can be reported.
+必须从唯一接收线程把每个 Frame 交给 `handleFrame()`。`~ImuStream()` 会尽力停止，
+但生产代码应显式调用 `stop()`，以便报告停止错误。
 
 <a id="example-lidar-stream"></a>
-### Point-only and point-plus-IMU LidarStream lifecycles
+
+### 仅点云与点云加 IMU 的 LidarStream 生命周期
 
 ```cpp
 void capture_points_only(prism::Client& client) {
@@ -441,13 +447,14 @@ void capture_points_and_imu(prism::Client& client) {
 }
 ```
 
-Run only one of these lifecycles at a time. `~LidarStream()` also attempts to
-stop an active stream, but explicit `stop()` is the error-reporting path.
+同一时间只能运行其中一个生命周期。`~LidarStream()` 也会尝试停止活动数据流，但显式
+`stop()` 才能返回错误。
 
-## Helpers and parsers
+## Helper 和 parser
 
 <a id="example-host-version"></a>
-### Query the Host SDK version
+
+### 查询 Host SDK 版本
 
 ```cpp
 const std::string sdk_version = prism::hostSdkVersion();
@@ -455,7 +462,8 @@ std::cout << sdk_version << '\n';
 ```
 
 <a id="example-device-name-helpers"></a>
-### Convert device enums to names
+
+### 将设备枚举值转换为名称
 
 ```cpp
 const auto info = client.deviceInfo();
@@ -467,10 +475,11 @@ std::cout << prism::sensorBoardErrorCodeName(info.sensor_board_error_code)
           << '\n';
 ```
 
-The returned `const char*` values are SDK-owned static strings.
+返回的 `const char*` 是由 SDK 管理的静态字符串。
 
 <a id="example-parser-dispatch"></a>
-### Dispatch every public telemetry parser
+
+### 分发全部公开 telemetry parser
 
 ```cpp
 void parse_frame(const prism::Frame& frame) {
@@ -527,22 +536,21 @@ void parse_frame(const prism::Frame& frame) {
 }
 ```
 
-Strict parsers throw if the frame type, protocol version, or payload size is
-wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
-`VideoChunk` owns its byte vector.
+严格 parser 会在 frame type、协议版本或 payload 大小错误时抛异常。`VideoChunkView`
+只在源 `Frame` 存活时有效；`VideoChunk` 拥有自己的字节 vector。
 
 ## Windows Runtime API v18
 
 <a id="example-windows-runtime"></a>
-### Load the table and call all 57 function-pointer interfaces
 
-The complete buildable Windows loader is
-[`device_info_time_sync.cpp`](../examples/device_info_time_sync.cpp). After it
-loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
-ABI v18/SDK 1.2.0/MSVC compatibility, and stores the result in `api`, the
-function-pointer calls have these direct forms:
+### 加载表并调用全部 57 个函数指针接口
 
-| Runtime API field | Corresponding example |
+完整可编译的 Windows loader 位于
+[`device_info_time_sync.cpp`](../../examples/device_info_time_sync.cpp)。程序加载
+`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v18、SDK
+1.2.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
+
+| Runtime API 字段 | 对应例子 |
 | --- | --- |
 | `client_create` | `prism::Client* client = api->client_create();` |
 | `client_destroy` | `api->client_destroy(client);` |
@@ -590,7 +598,6 @@ function-pointer calls have these direct forms:
 | `camera_exposure_limits` | `auto value = api->camera_exposure_limits(client);` |
 | `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
-Check every function pointer for null before use. Keep the DLL loaded until all
-SDK-returned objects and the Client have been destroyed. Runtime API v18 is a
-subset of the direct Linux/macOS API; interfaces absent from this table are not
-available through the packaged Windows DLL.
+使用前必须检查每个函数指针非空。直到所有 SDK 返回对象和 Client 都销毁后才能卸载 DLL。
+Runtime API v18 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
+调用。

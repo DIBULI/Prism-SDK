@@ -1,6 +1,19 @@
 # RK-local SDK: C++ interface
 
-[简体中文](rk-local-sdk.zh-CN.md) · [SDK README](../README.md)
+[Documentation index](../README.md)
+
+[简体中文](rk-local.zh-CN.md) · [SDK README](../../README.md)
+
+<!-- page-toc -->
+- [Current version](#current-version)
+- [Package and build](#package-and-build)
+- [Host API alignment and explicit differences](#host-api-alignment-and-explicit-differences)
+- [Control operations](#control-operations)
+- [Connection, capture and ownership](#connection-capture-and-ownership)
+- [GNSS and navigation](#gnss-and-navigation)
+- [CORS configuration and receiver control](#cors-configuration-and-receiver-control)
+- [Errors and timeouts](#errors-and-timeouts)
+<!-- /page-toc -->
 
 The commands below use this binary distribution; no private source checkout is required.
 
@@ -17,11 +30,11 @@ Use matching current headers/libraries and rebuild consumers. Include
 
 ## Package and build
 
-- [Public C++ header](../include/prism/rklocal_sdk.hpp)
-- [ARM64 archive](../runtime/linux-arm64/libprism_rklocal_sdk.a)
+- [Public C++ header](../../include/prism/rklocal_sdk.hpp)
+- [ARM64 archive](../../runtime/linux-arm64/libprism_rklocal_sdk.a)
 - [Imported CMake target](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake): `Prism::RkLocal`
-- [Camera/IMU example](../examples/rklocal_capture.cpp)
-- [Read-only GNSS example](../examples/rklocal_gnss_status.cpp)
+- [Camera/IMU example](../../examples/rklocal_capture.cpp)
+- [Read-only GNSS example](../../examples/rklocal_gnss_status.cpp)
 
 From the SDK root on RK:
 
@@ -148,9 +161,9 @@ client.upgradeSystem("/path/prism-system-update.zip", {},
 ```
 
 Wi-Fi matches Host hotspot query/enable/disable, not arbitrary SSID/password writes.
-TimeSync supports `GnssInput`, `PpsNmeaOutput` and `Rtk`; see [mode guide](../docs/timesync-port.md).
+TimeSync supports `GnssInput`, `PpsNmeaOutput` and `Rtk`; see [mode guide](../guides/time-sync.md#port-modes).
 RTK-module handles NTRIP. Both SDKs configure the saved account and start/stop positioning;
-see [CORS / RTK control](../docs/rtk-module-control.md).
+see [CORS / RTK control](../guides/gnss-rtk.md#cors-control).
 Rover output is CRC-validated receiver RTCM3, not echoed CORS data.
 
 ## Connection, capture and ownership
@@ -234,7 +247,7 @@ receiver is disconnected; check `configuration_applied` separately.
 `stopRtk()` stops receiver RTK/CORS while preserving timing. Neither is merely a UI toggle.
 
 Both SDKs share types, validation, deadlines and confirmed-state semantics.
-See [the complete bilingual API guide and examples](../docs/rtk-module-control.md).
+See [the complete bilingual API guide and examples](../guides/gnss-rtk.md#cors-control).
 Use `gnssObservations()` for receiver-native results; running does not guarantee FIX.
 
 ## Errors and timeouts

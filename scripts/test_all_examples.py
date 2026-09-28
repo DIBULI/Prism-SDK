@@ -13,6 +13,8 @@ import subprocess
 import sys
 import time
 
+from check_docs import check_docs
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURATION = "Release"
@@ -26,6 +28,7 @@ def run(command: list[str]) -> None:
 
 
 def verify_package() -> None:
+    check_docs(ROOT)
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
         raise RuntimeError("invalid SDK VERSION")

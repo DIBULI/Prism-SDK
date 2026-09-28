@@ -33,7 +33,7 @@ Host SDK prefixes, not ROS adapter binaries or Docker images.
 - Receiver-native GNSS/RTK observations, sky/trajectory display helpers; no
   Agent-side RTK solver or retired raw/smoothed navigation interface.
 - GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
-- [Independent LiDAR standby / wake](docs/lidar-power.md) (development extension; requires updated Agent).
+- [Independent LiDAR standby / wake](docs/guides/lidar.md#standby-wake) (requires the matching current Agent package).
 - [Release notes](docs/update/v1.2.0.md), [provenance](ORIGIN.md) and `SHA256SUMS`.
 
 ## Build consumer examples
@@ -58,7 +58,7 @@ the adjacent DLL; do not directly link the Linux/macOS Client examples on Window
 macOS examples use the two bundled dylibs without a Homebrew runtime dependency.
 
 For RK-local build `cmake -S rk-local-sdk -B build/rklocal` on the RK, or use
-the supplied ARM64 toolchain; see [RK-local API and differences](docs/rk-local-sdk.md).
+the supplied ARM64 toolchain; see [RK-local API and differences](docs/reference/rk-local.md).
 
 Opening a client does not set time, start acquisition or start CORS. CORS save
 and RTK start are separate actions; starting requires explicit consent to send

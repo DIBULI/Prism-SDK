@@ -1,6 +1,20 @@
 # RK-local SDK：C++ 接口
 
-[English](rk-local-sdk.md) · [返回 SDK README](../README.zh-CN.md)
+[文档目录](../README.zh-CN.md)
+
+[English](rk-local.md) · [返回 SDK README](../../README.zh-CN.md)
+
+<!-- page-toc -->
+- [当前版本](#当前版本)
+- [文件与编译](#文件与编译)
+- [与 Host SDK 的一致范围及明确差异](#与-host-sdk-的一致范围及明确差异)
+- [控制能力示例](#控制能力示例)
+- [连接与资源管理](#连接与资源管理)
+- [相机和 IMU](#相机和-imu)
+- [GPS、PPS 和 RTK 数据](#gpspps-和-rtk-数据)
+- [CORS 配置和接收机控制](#cors-配置和接收机控制)
+- [超时与错误](#超时与错误)
+<!-- /page-toc -->
 
 下文使用本仓库的二进制发布包，无需获取私有实现源码。
 
@@ -15,11 +29,11 @@ Agent、Host SDK 和 RK-local SDK 均为 **1.2.0**，线协议 **1**，主 Runti
 
 ## 文件与编译
 
-- [公共头文件](../include/prism/rklocal_sdk.hpp)
-- [ARM64 静态库](../runtime/linux-arm64/libprism_rklocal_sdk.a)
+- [公共头文件](../../include/prism/rklocal_sdk.hpp)
+- [ARM64 静态库](../../runtime/linux-arm64/libprism_rklocal_sdk.a)
 - [CMake 导入目标](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake)：`Prism::RkLocal`
-- [相机/IMU 示例](../examples/rklocal_capture.cpp)
-- [只读 GNSS 示例](../examples/rklocal_gnss_status.cpp)
+- [相机/IMU 示例](../../examples/rklocal_capture.cpp)
+- [只读 GNSS 示例](../../examples/rklocal_gnss_status.cpp)
 
 在 RK 上从 SDK 仓库根目录运行：
 
@@ -146,9 +160,9 @@ client.upgradeSystem("/path/prism-system-update.zip", {},
 ```
 
 Wi-Fi只开放与Host相同的热点查询/启停，不支持任意SSID/密码写入。
-TimeSync 支持 `GnssInput`、`PpsNmeaOutput`、`Rtk`，见[模式说明](../docs/timesync-port.md)。
+TimeSync 支持 `GnssInput`、`PpsNmeaOutput`、`Rtk`，见[模式说明](../guides/time-sync.md#port-modes)。
 SDK 负责配置保存在 RK 的 CORS 账号和控制 RTK；RTK-module 自行 NTRIP 登录和收流，
-见[CORS 配置与 RTK 启停](../docs/rtk-module-control.md)。
+见[CORS 配置与 RTK 启停](../guides/gnss-rtk.md#cors-control)。
 rover输出是接收机CRC校验通过的RTCM3，不是CORS回显。
 
 ## 连接与资源管理
@@ -235,7 +249,7 @@ JPEG 缓冲区转移所有权，不额外复制图像字节；对象析构自动
 `startRtk(options)` 将显式 GGA 授权绑定到用户确认的配置代次。
 `stopRtk()` 停止接收机 RTK 和 CORS 输入，保留授时；不是仅隐藏界面结果。
 
-两种 SDK 共用类型、参数校验、超时和执行确认规则，见[完整接口和示例](../docs/rtk-module-control.md)。
+两种 SDK 共用类型、参数校验、超时和执行确认规则，见[完整接口和示例](../guides/gnss-rtk.md#cors-control)。
 用 `gnssObservations()` 读取接收机原生结果，运行中并不保证 FIX。
 
 ## 超时与错误

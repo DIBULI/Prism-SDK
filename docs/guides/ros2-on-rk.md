@@ -1,6 +1,17 @@
 # ROS 2 Docker on RK with the RK-local SDK
 
-[简体中文](rk-local-ros2-docker.zh-CN.md) · [Documentation index](README.md) · [RK-local API](rk-local-sdk.md)
+[Documentation index](../README.md)
+
+[简体中文](ros2-on-rk.zh-CN.md) · [Documentation index](../README.md) · [RK-local API](../reference/rk-local.md)
+
+<!-- page-toc -->
+- [Availability and requirements](#availability-and-requirements)
+- [Load an offline image](#load-an-offline-image)
+- [Start on RK](#start-on-rk)
+- [Minimal RK kernel: Docker bridge/NAT failure](#minimal-rk-kernel-docker-bridgenat-failure)
+- [Interfaces and limitations](#interfaces-and-limitations)
+- [Building from the development working tree](#building-from-the-development-working-tree)
+<!-- /page-toc -->
 
 Run Prism ROS Adapter on RK3576 through the Agent's Unix socket
 `/run/prism/stream.sock`. The container uses the RK-local SDK, not USB, and
@@ -127,8 +138,8 @@ and `-p` port publishing are unavailable. It does not stop or reconfigure
 
 Topic names, messages and CORS raw-RTCM input follow
 [Prism-ROS-adapter's interface documentation](https://github.com/DIBULI/Prism-ROS-adapter/blob/master/README.md#published-topics).
-SDK-level details are in the [RK-local API](rk-local-sdk.md) and
-[GNSS/RTK guide](gnss-rtk.md).
+SDK-level details are in the [RK-local API](../reference/rk-local.md) and
+[GNSS/RTK guide](gnss-rtk.md#receiver-results).
 
 - SDK/Agent accept raw RTCM data; the CORS/NTRIP client handles server login.
 - `device_serial` is USB-only; `rklocal_socket` selects a Unix socket, not TCP.

@@ -1,5 +1,14 @@
 # Prism system update package
 
+[Documentation index](../README.md)
+
+<!-- page-toc -->
+- [Archive layout](#archive-layout)
+- [Obtain and inspect a package](#obtain-and-inspect-a-package)
+- [Upgrade sequence](#upgrade-sequence)
+- [Host SDK API](#host-sdk-api)
+<!-- /page-toc -->
+
 Prism system upgrades are distributed as one ZIP file. The user must supply a
 package containing both the RK agent and the sensor-board firmware. The public
 Host SDK and Viewer do not expose standalone sensor-board firmware upgrade.
@@ -33,42 +42,43 @@ The embedded `PRISM_AGENT_VERSION` marker must equal `agent_version`. Both
 images are extracted with bounded sizes and verified against their manifest
 SHA-256 before the first device write.
 
-## Create a package
+## Obtain and inspect a package
 
-Use the repository script so filenames, versions, hashes, compression, and
-manifest fields remain deterministic:
+Use a publisher-provided combined Agent + Sensor Board ZIP. This binary SDK
+repository does not include firmware sources or package-creation tools. Do not
+rename an image ZIP or a single BOOT.BIN into an update package.
 
-```sh
-python scripts/create_system_update_package.py \
-  --agent ../dist/sbin/prism-agent \
-  --sensor-board /path/to/BOOT.BIN \
-  --package-version 1.2.0 \
-  --sensor-board-version 0.4.27 \
-  --output prism-system-update-2026.07.24.zip
+Inspect a package without opening a device:
+
+```cpp
+#include <prism/usb_sdk.hpp>
+const auto package = prism::inspectSystemUpgradePackage(package_path);
+// Present package.agent_version and package.sensor_board_version for approval.
 ```
 
-Inspect the result without opening a USB device:
-
-```sh
-usb-sdk/build-msvc/prism-system_upgrade.exe \
-  --inspect prism-system-update-2026.07.24.zip
-```
+Linux/macOS direct C++ consumers and RK-local use the public helper. Windows
+runtime-loaded clients use the matching function table; see the
+[Windows examples](../examples/interfaces.md#windows-runtime-api-v18).
 
 ## Upgrade sequence
 
-The device must be open and camera/IMU streaming must be stopped.
+The device must be open and camera, IMU and LiDAR streaming must be stopped.
 
 1. The Host SDK validates the entire ZIP, manifest, embedded agent version, and
    both SHA-256 values.
-2. Using the currently matching Host SDK/agent pair, the SDK stages
-   `BOOT.BIN` on RK and relays it through the sensor-board control link.
-3. The sensor-board commits only after QSPI update-slot read-back succeeds.
+2. Using the currently matching SDK/Agent pair, the SDK compares the reported
+   Sensor Board version with the package. A known matching version is skipped;
+   otherwise the SDK stages `BOOT.BIN` on RK and relays it to Sensor Board.
+3. When flashing is needed, Sensor Board commits only after QSPI update-slot
+   read-back succeeds. A same-version skip sends no OTA transaction.
 4. The SDK uploads and commits the agent as the final transaction.
 5. If the target version changed, close the old host application and reconnect
    only with the Host SDK whose semantic version exactly matches the new agent.
 
-The sensor-board image crosses two links, so progress counts host-to-RK staging
-and RK-to-sensor-board transfer separately. A sensor-board failure prevents the
+When Sensor Board is flashed, its image crosses two links, so progress counts
+host-to-RK staging and RK-to-sensor-board transfer separately. A same-version skip
+counts zero Sensor Board transfer bytes and reports `SkippedSameVersion`.
+A sensor-board failure prevents the
 agent replacement from starting; keep the package and retry after correcting
 the connection or power problem.
 
@@ -90,8 +100,8 @@ auto result = client.upgradeSystem(
     });
 ```
 
-`SystemUpgradeResult::complete` is true when the sensor-board commit is
-verified and the final agent commit is accepted. For a same-version reinstall
+`SystemUpgradeResult::complete` is true when the Sensor Board commit is
+verified (or its matching version was skipped) and the final Agent commit is accepted. For a same-version reinstall
 with restart verification enabled, the restarted process must also be
 verified. Component-level update frames remain an internal transport detail
 and are not standalone public upgrade workflows.

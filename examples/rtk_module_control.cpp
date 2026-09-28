@@ -16,7 +16,7 @@ For every command below, replace ./build/examples/prism-rtk-module-control
 with ./build-rklocal/prism-rklocal-rtk-module-control, and replace
 ./build/examples/prism-rtk-position with ./build-rklocal/prism-rklocal-rtk-position.
 These directly linked examples are not Windows targets. Windows consumers use
-the RTK Runtime API extension documented in docs/rtk-module-control.md.
+the RTK Runtime API extension documented in docs/guides/gnss-rtk.md#cors-control.
 
 Prerequisites:
   - Agent is running and RTK-module is connected.

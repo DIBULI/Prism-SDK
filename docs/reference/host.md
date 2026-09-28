@@ -1,7 +1,42 @@
 # Prism Agent SDK API Reference
 
-This document describes the Prism Agent SDK `1.2.0` public C++ host API for
-communicating with the Prism RK3576 USB agent.
+[Documentation index](../README.md) · [简体中文](host.zh-CN.md)
+
+<!-- page-toc -->
+<a id="api-quick-index"></a>
+
+- [IMU start/stop ownership](#imu-startstop-ownership)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Example naming](#example-naming)
+- [Device Discovery](#device-discovery)
+- [DeviceInfo Status Snapshot](#deviceinfo-status-snapshot)
+- [Connection Lifetime](#connection-lifetime)
+- [RTK-module CORS and positioning control](#rtk-module-cors-and-positioning-control)
+- [Basic Commands](#basic-commands)
+- [WiFi hotspot](#wifi-hotspot)
+- [Persistent device configuration](#persistent-device-configuration)
+- [Runtime camera exposure](#runtime-camera-exposure)
+- [Automatic camera white balance](#automatic-camera-white-balance)
+- [Video Streaming](#video-streaming)
+- [System Heartbeat](#system-heartbeat)
+- [IMU Streaming](#imu-streaming)
+- [System Upgrade](#system-upgrade)
+- [Low-Level Frames](#low-level-frames)
+- [Error Handling](#error-handling)
+- [Recommended Integration Pattern](#recommended-integration-pattern)
+<!-- /page-toc -->
+
+This reference describes the Prism Agent SDK `1.2.0` Host client lifecycle and
+core control/stream APIs. Feature guides hold the detailed operational contracts:
+
+- [Camera exposure and gain](../guides/camera.md)
+- [GNSS results, CORS configuration and RTK start/stop](../guides/gnss-rtk.md)
+- [Time synchronization and TimeSync modes](../guides/time-sync.md)
+- [LiDAR capture, standby/wake and point metadata](../guides/lidar.md)
+- [Raw dataset download](../guides/datasets.md)
+- [Combined firmware update](../guides/firmware-update.md)
+- [Per-interface code examples](../examples/interfaces.md)
 
 The SDK header is:
 
@@ -67,7 +102,7 @@ int main() {
 ## Example naming
 
 The table below names implementation-tree examples. This binary distribution
-ships compile-checked consumer examples listed in [the example guide](examples.md),
+ships compile-checked consumer examples listed in [the example guide](../examples/README.md),
 including `prism-device-info-time-sync`, `prism-camera-imu-capture`,
 `prism-gnss-rtk-status` and `prism-rtk-module-control`. No private source build is needed.
 
@@ -182,7 +217,7 @@ or IMU streaming is active.
 | `imu_fps`, `camera_fps` | Current configured IMU and camera rates. |
 | `sensor_board_online` | Whether the inter-board control link is current. |
 | `sensor_board_time_synced` | Whether the sensor-board has a valid UTC source. |
-| `sensor_board_time_sync_source` | Internal source metadata; show internal/external timing using the dedicated live timing status. See [time model](time-sync-api.md). |
+| `sensor_board_time_sync_source` | Internal source metadata; show internal/external timing using the dedicated live timing status. See [time model](../guides/time-sync.md#time-model). |
 | `wifi` | WiFi presence, configured enable state, AP/DHCP state, interface, SSID, address and error. |
 
 Enumeration and device status intentionally share `DeviceInfo`: entries
@@ -219,9 +254,9 @@ Queries never return passwords. Saving does not imply application or connection.
 START requires GGA consent for the reviewed saved generation and confirms module state.
 STOP preserves timing. Use `gnssObservations()` for receiver-native solutions.
 
-See [CORS configuration, consent, start/stop and examples](rtk-module-control.md),
-[TimeSync modes](timesync-port.md), and
-[RTK-module versions](rtk-module-versions.md).
+See [CORS configuration, consent, start/stop and examples](../guides/gnss-rtk.md#cors-control),
+[TimeSync modes](../guides/time-sync.md#port-modes), and
+[RTK-module versions](../guides/gnss-rtk.md#module-versions).
 
 ## Basic Commands
 
@@ -521,7 +556,7 @@ Query `timeSyncPortStatus()` or explicitly call `setTimeSyncPortMode(mode)`.
 Modes are `GnssInput`, `PpsNmeaOutput`, and `Rtk`. Manual persisted mode is restored
 on Agent restart; changing modes requires idle capture and safe wiring.
 Mode application is independent of receiver readiness or CORS connection.
-See [current mode documentation](timesync-port.md).
+See [current mode documentation](../guides/time-sync.md#port-modes).
 
 ## Runtime camera exposure
 
@@ -568,7 +603,7 @@ version/size, field mask, four-bit automatic-camera mask, shared target,
 two zero reserved bytes, four little-endian manual exposure times, and four
 little-endian sensor gains scaled by 1024. A legacy 28-byte v1 set request is
 accepted while preserving the current gains; all responses use v2. See
-[Runtime camera exposure](runtime-exposure.md).
+[Runtime camera exposure](../guides/camera.md).
 
 ## Automatic camera white balance
 

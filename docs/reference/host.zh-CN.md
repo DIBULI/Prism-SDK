@@ -1,6 +1,41 @@
 # Prism Agent SDK API 参考
 
-本文档说明 Prism Agent SDK `1.2.0` 的公开 C++17 主机接口。SDK 通过 USB 与 Prism 设备端 agent 通信，在 Windows 上使用 WinUSB，在 Linux 和 macOS 上使用 libusb-1.0；三个平台使用相同的应用层 API。
+[文档目录](../README.zh-CN.md) · [English](host.md)
+
+<!-- page-toc -->
+<a id="api-quick-index"></a>
+
+- [运行要求](#运行要求)
+- [快速开始](#快速开始)
+- [设备发现与生命周期](#设备发现与生命周期)
+- [DeviceInfo 设备状态快照](#deviceinfo-设备状态快照)
+- [版本与基本信息](#版本与基本信息)
+- [RTK-module CORS 配置与定位启停](#rtk-module-cors-配置与定位启停)
+- [WiFi 热点](#wifi-热点)
+- [Keepalive 与离线保护](#keepalive-与离线保护)
+- [持久化配置](#持久化配置)
+- [运行时相机曝光](#运行时相机曝光)
+- [NTP-like 时间同步](#ntp-like-时间同步)
+- [系统心跳](#系统心跳)
+- [图像传输](#图像传输)
+- [IMU 传输](#imu-传输)
+- [系统升级](#系统升级)
+- [低级帧接口](#低级帧接口)
+- [线程与接收循环](#线程与接收循环)
+- [异常处理](#异常处理)
+- [推荐集成顺序](#推荐集成顺序)
+<!-- /page-toc -->
+
+本文档说明 Prism Agent SDK `1.2.0` 的 Host 生命周期与基础控制、数据流接口。
+Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的完整操作约束统一见：
+
+- [相机曝光与增益](../guides/camera.md)
+- [GNSS 结果、CORS 配置与 RTK 启停](../guides/gnss-rtk.md)
+- [时间同步与 TimeSync 模式](../guides/time-sync.md)
+- [雷达采集、待机/唤醒与逐点元数据](../guides/lidar.md)
+- [原始数据集下载](../guides/datasets.md)
+- [联合固件升级](../guides/firmware-update.md)
+- [逐接口代码示例](../examples/interfaces.zh-CN.md)
 
 统一头文件：
 
@@ -135,7 +170,7 @@ DeviceInfo Client::deviceInfo();
 | `imu_fps`、`camera_fps` | 当前配置的 IMU 和 camera 帧率 |
 | `sensor_board_online` | 板间控制链路是否在有效超时窗口内 |
 | `sensor_board_time_synced` | sensor-board 当前是否具有有效 UTC 时间源 |
-| `sensor_board_time_sync_source` | 底层来源元数据；界面用实时状态区分内部/外部授时，见[时间模型](time-sync-api.md) |
+| `sensor_board_time_sync_source` | 底层来源元数据；界面用实时状态区分内部/外部授时，见[时间模型](../guides/time-sync.md#time-model) |
 | `wifi` | WiFi 是否存在、启用策略、AP/DHCP 状态、接口、SSID、地址和错误 |
 
 `enumerate()` 和状态接口共用 `DeviceInfo` 类型：枚举结果只填写 USB
@@ -217,8 +252,8 @@ Agent 将账号保存在 RK，RTK-module 自行 NTRIP 登录、收流并送入�
 保存、已应用、已联网是三个不同状态；启停会确认同一命令代次的模块最终状态。
 定位结果来自 `gnssObservations()` 的接收机原生报文；运行中不代表已 FIX。
 
-详见[CORS 配置与 RTK 启停完整说明](rtk-module-control.md)、
-[TimeSync 模式](timesync-port.md)和[模块版本查询](rtk-module-versions.md)。
+详见[CORS 配置与 RTK 启停完整说明](../guides/gnss-rtk.md#cors-control)、
+[TimeSync 模式](../guides/time-sync.md#port-modes)和[模块版本查询](../guides/gnss-rtk.md#module-versions)。
 
 ## WiFi 热点
 
@@ -359,7 +394,7 @@ config = client.saveDeviceConfiguration(
 支持 `GnssInput`（PPS/NMEA 输入）、`PpsNmeaOutput`（时间输出）、`Rtk`（RTK-module）。
 切换前停止采集，输出模式必须先断开外部发送端。Agent 重启优先恢复手动保存模式。
 模式已应用不等于接收机就绪或 CORS 已连接；选择 RTK 模式不会自动授权发送 GGA。
-见[TimeSync 模式和安全操作](timesync-port.md)。
+见[TimeSync 模式和安全操作](../guides/time-sync.md#port-modes)。
 
 ## 运行时相机曝光
 
@@ -404,7 +439,7 @@ client.setCameraExposure(2, exposure);
 当前曝光线协议为版本 2 和严格的 44 字节固定 payload，包括四路曝光时间与
 四路 `gain_x1024`。兼容输入允许 28 字节 v1 设置请求并保留当前增益；所有
 响应均为 v2。未知掩码、保留位或越界参数都会被拒绝。完整布局见
-[运行时相机曝光](runtime-exposure.md)。
+[运行时相机曝光](../guides/camera.md)。
 
 ## NTP-like 时间同步
 

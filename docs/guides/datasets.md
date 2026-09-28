@@ -1,5 +1,12 @@
 # 原始数据集导出 / Recorded raw datasets
 
+[Documentation index](../README.md)
+
+<!-- page-toc -->
+- [接口](#接口)
+- [边界与失败处理](#边界与失败处理)
+<!-- /page-toc -->
+
 Host USB `prism::Client` 与 RK-local `prism::rklocal::Client` 提供相同的 C++ 接口。
 **SDK 只导出原始格式**：不生成 ROS1/ROS2 bag，不重编码图像，不重写点云或时间戳。
 Viewer 可以在下载完成后自行转换 ROS bag；ROS Adapter 不提供离线数据集下载。

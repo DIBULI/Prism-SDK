@@ -1,6 +1,17 @@
 # RK 本机通过 RK-local SDK 使用 ROS 2 Docker
 
-[English](rk-local-ros2-docker.md) · [文档目录](README.zh-CN.md) · [RK-local 接口](rk-local-sdk.zh-CN.md)
+[文档目录](../README.zh-CN.md)
+
+[English](ros2-on-rk.md) · [文档目录](../README.zh-CN.md) · [RK-local 接口](../reference/rk-local.zh-CN.md)
+
+<!-- page-toc -->
+- [发布状态与前提](#发布状态与前提)
+- [加载离线镜像](#加载离线镜像)
+- [在 RK 上启动](#在-rk-上启动)
+- [精简 RK 内核的 Docker 网桥/NAT 问题](#精简-rk-内核的-docker-网桥nat-问题)
+- [接口与限制](#接口与限制)
+- [从开发工作树构建](#从开发工作树构建)
+<!-- /page-toc -->
 
 ROS 节点运行在 RK3576 本机的 Docker 容器中，通过
 `/run/prism/stream.sock` 连接现有 Agent，使用 RK-local SDK，不走 USB。
@@ -121,7 +132,7 @@ sudo docker info
 
 话题名、消息和 CORS 原始 RTCM 输入方式参考
 [Prism-ROS-adapter 接口说明](https://github.com/DIBULI/Prism-ROS-adapter/blob/master/README.md#published-topics)。
-SDK 接口详见 [RK-local](rk-local-sdk.zh-CN.md) 和 [GNSS/RTK](gnss-rtk.zh-CN.md)。
+SDK 接口详见 [RK-local](../reference/rk-local.zh-CN.md) 和 [GNSS/RTK](gnss-rtk.md#receiver-results-zh)。
 
 - SDK/Agent 接收原始 RTCM；CORS/NTRIP 登录由上层客户端负责。
 - `device_serial` 只用于 USB；`rklocal_socket` 是 Unix socket 路径，不是 TCP 地址。

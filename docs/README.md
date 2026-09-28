@@ -2,32 +2,66 @@
 
 [简体中文](README.zh-CN.md) · [Repository overview](../README.md)
 
-Interface reference and usage documentation is maintained in this directory.
-Headers and example sources remain in `include/` and `examples/`;
-`rk-local-sdk/` retains its standalone build entry and tests.
+Current baseline: **SDK / Agent 1.2.0**, **Sensor Board 0.4.27**. Use matching
+headers and libraries. Commands in these guides run from the SDK repository root
+unless stated otherwise.
 
-| Topic | English | 简体中文 |
+## 1. Start here
+
+- [Install, link, connect and make your first query](getting-started/README.md)
+  · [中文](getting-started/README.zh-CN.md)
+- Running directly on RK? Start with [RK-local setup and Host differences](reference/rk-local.md).
+- [Build and run the examples](examples/README.md) before integrating a feature.
+
+## 2. API reference
+
+| Client | Reference | Transport |
 | --- | --- | --- |
-| Installation and linking | [Installation](installation.md) | [安装指南](installation.zh-CN.md) |
-| Host quick start | [Usage](usage.md) | [使用指南](usage.zh-CN.md) |
-| Host complete API reference | [Development guide](development-guide.md) | [开发手册](development-guide.zh-CN.md) |
-| Host per-interface snippets | [Interface examples](interface-examples.md) | [逐接口示例](interface-examples.zh-CN.md) |
-| RK-local C++ API, Host differences and limitations | [RK-local API](rk-local-sdk.md) | [RK-local 接口说明](rk-local-sdk.zh-CN.md) |
-| ROS 2 Docker on RK (Ubuntu 22.04 / 24.04) | [RK-local ROS Docker](rk-local-ros2-docker.md) | [RK 本机 ROS Docker](rk-local-ros2-docker.zh-CN.md) |
-| GNSS, PPS, CORS and RTK | [GNSS/RTK](gnss-rtk.md) | [GNSS/RTK](gnss-rtk.zh-CN.md) |
-| Build and run example programs | [Examples](examples.md) | [示例使用说明](examples.zh-CN.md) |
-| Release 1.2.0 notes | [Update notes](update/v1.2.0.md) | [更新说明](update/v1.2.0.zh-CN.md) |
+| Host `prism::Client` | [Host API](reference/host.md) · [中文](reference/host.zh-CN.md) | USB on Linux, macOS and Windows |
+| RK-local `prism::rklocal::Client` | [RK-local API and differences](reference/rk-local.md) · [中文](reference/rk-local.zh-CN.md) | Local Agent socket on RK |
 
-Shared method names do not imply identical
-transport, clock source, queue behavior or ABI; consult the RK-local differences
-before substituting clients.
+Shared method names do not imply identical clock inputs, capture ownership,
+queues or binary ABI. Read the RK-local differences before substituting clients.
+The public [headers](../include/prism/) define signatures; feature guides below
+collect operational constraints and related examples in one place.
 
-- [CORS configuration and RTK controls](rtk-module-control.md)
-- RTK examples with English usage comments: [control](../examples/rtk_module_control.cpp), [positions](../examples/rtk_position.cpp)
-- [Raw recorded dataset download: USB / RK-local](recorded-datasets.md) (no ROS bag conversion)
-- [Current TimeSync modes](timesync-port.md)
-- [RTK-module versions](rtk-module-versions.md)
-- [XT32](xt32.md) and [LiDAR line fields](livox-line.md)
-- [Independent LiDAR standby / wake](lidar-power.md)
+## 3. Feature guides
 
-GNSS reception diagnostics: [GNSS reception status](gnss-reception-status.md).
+| Task | One place to read | Language |
+| --- | --- | --- |
+| Camera exposure, gain, limits and unified auto-exposure | [Camera](guides/camera.md) | EN |
+| Receiver results, sky data, CORS accounts, RTK start/stop, versions and diagnostics | [GNSS / RTK](guides/gnss-rtk.md) | EN / 中文 sections |
+| UTC validity, manual time-setting and persistent input/output/RTK modes | [Time synchronization](guides/time-sync.md) | EN / 中文 sections |
+| LiDAR capture, hardware standby/wake, MID line and XT32 point time | [LiDAR](guides/lidar.md) | EN |
+| List and download original datasets over USB or RK-local | [Raw datasets](guides/datasets.md) | 中文 / EN notes |
+| Inspect and apply a combined Agent + Sensor Board update | [Firmware update](guides/firmware-update.md) | EN |
+| ROS 2 on RK in Ubuntu 22.04 / 24.04 Docker | [ROS 2 on RK](guides/ros2-on-rk.md) · [中文](guides/ros2-on-rk.zh-CN.md) | EN / 中文 |
+
+Frequently used controls:
+
+- [RTK start/stop and CORS configuration](guides/gnss-rtk.md#cors-control)
+- [LiDAR standby/wake versus capture start/stop](guides/lidar.md#capture-vs-power)
+- [TimeSync mode selection](guides/time-sync.md#port-modes)
+- [Four-camera unified automatic exposure](guides/camera.md#unified-automatic-exposure-four-cameras)
+
+## 4. Examples
+
+- [Runnable programs and build commands](examples/README.md) · [中文](examples/README.zh-CN.md)
+- [Per-interface code cookbook](examples/interfaces.md) · [中文](examples/interfaces.zh-CN.md)
+- [Example source directory](../examples/) — usage comments remain in English.
+
+## 5. Release and package information
+
+- [v1.2.0 release notes](update/v1.2.0.md) · [中文](update/v1.2.0.zh-CN.md)
+- [Binary provenance](../ORIGIN.md) · [Package checksums](../SHA256SUMS)
+
+## Documentation layout
+
+`getting-started/` is the first-use path; `reference/` describes clients;
+`guides/` groups features; `examples/` explains runnable code; `update/` keeps
+release history. Add new details to the relevant feature guide rather than
+creating another top-level one-feature document. Keep both indexes and all links
+in sync when moving a page.
+
+Run `python3 scripts/check_docs.py` to validate local links, section anchors and
+index coverage. It also runs as part of `scripts/test_all_examples.py --verify-only`.
