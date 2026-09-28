@@ -10,13 +10,22 @@ examples and documentation. No SDK implementation or device firmware is included
 - Runtime API: `18`; RTK-module control extension: `1`; raw dataset extension: `1`.
 - LiDAR hardware power runtime extension: `1`; existing Runtime API layout unchanged.
 - Source repository: `DIBULI/Prism-agent`.
-- Immutable source commit: `af9ae80dbc19da4b15fee0082dd7e28e1f8381f5`.
-- Build: [matched SDK distribution run 36430588320](https://github.com/DIBULI/Prism-agent/actions/runs/36430588320).
+- Immutable source commit: `d6d32d048bc2ab853e6a5322adabf981abfe90a3`.
+- Build: [matched SDK distribution run 36453359377](https://github.com/DIBULI/Prism-agent/actions/runs/36453359377).
 - All four platform jobs passed their source tests before packaging.
 
 All installed Host headers are identical across platforms after normalizing
 Windows CRLF to LF. RK-local uses the same Host types and adds its own C++ Client.
 Consumers must replace headers and libraries together and rebuild.
+
+This build preserves the Host USB keepalive worker across idle system-time
+calibration, including failure paths, and rejects unavailable or discontinuous
+clock measurements instead of sending another epoch-sized correction. Deploy
+the matched Agent, which waits for canonical PPS mapping readiness before
+acknowledging calibration. No public API/ABI or wire version changes. RK-local/Web
+share the corrected measurement logic but do not use the Host USB worker.
+Sensor Board firmware is unchanged.
+Clock rollback and UTC retention are not addressed by this change.
 
 Packaging applies a header-only GCC 9/11 compatibility adjustment to
 `gnss_plot.hpp`: initialize the optional numeric-parser payload before parsing

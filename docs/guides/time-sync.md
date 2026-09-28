@@ -73,7 +73,7 @@ RK-local 进程与 RK 共用系统时钟，不能靠 `synchronizeSystemTime()` �
 
 ```cpp
 // RK-local only; utc_us 是函数入口时刻的外部 UTC 微秒值。
-const auto result = client.setDeviceTime(utc_us, 25000);
+const auto result = client.setDeviceTime(utc_us, 35000);
 ```
 
 SDK 按单调时间推进传入标签，通过 Agent 设置 Sensor Board 并验证后续时间映射。
@@ -84,6 +84,23 @@ Host 使用 `synchronizeSystemTime()`；两端该时间输入方式不完全相�
 - 校时不能绕过 Sensor Board 直接置位 IMU 的 UTC 有效标志。
 - `verified` 为成功条件；超时或未确认不代表已回滚。
 - 不应在每次连接时自动执行校时。
+
+刷新后的 1.2.0 Host SDK 在空闲校时期间暂缓发送 USB 心跳，成功返回或异常退出时
+自动恢复发送，保持原有心跳开关和发送间隔，不要求应用通过断开重连恢复心跳。
+不要为了绕过这一问题关闭采集时的心跳保护。校时失败仍需处理，USB 真正断开时仍需重连；
+该修复不保证 UTC 保持，也不处理时间回退。RK-local/Web 不使用 Host USB 心跳线程。
+
+配套 Agent 等待三个新鲜 PPS 对齐样本，且在 PHC 验证后确认统一时间基准仍就绪，
+才报告校时成功。SDK 将零值、倒退或不可能的时间跨度视为无效样本，最多六秒只重读，
+不会将 `0` 当作 1970 年时间下发二次校时；验证中出现新的时间纪元则明确失败。
+Host/RK-local 为 TIME_SET 保留至少 35 秒等待窗口，不放宽 PPS 对齐精度和新鲜度要求。
+部署本轮匹配的 Agent/SDK；不需要更新 Sensor Board，也不改变时间来源或 UTC 保持策略。
+
+The refreshed 1.2.0 Host SDK pauses USB heartbeat writes during idle calibration
+and releases that pause on both success and exception, preserving the caller's
+enable state and interval. Do not disable the capture watchdog as a workaround.
+Calibration errors remain errors, and a genuinely disconnected USB device still
+requires reconnection. This fix does not change UTC retention or clock rollback.
 
 ### 4. TimeSync 接口模式
 
