@@ -109,4 +109,15 @@ struct RtkModuleControlRuntimeApi {
 };
 using GetRtkModuleControlRuntimeApiFunction = const RtkModuleControlRuntimeApi* (*)(uint32_t);
 
+// Additive extension; the RuntimeApi v18 layout remains unchanged.
+constexpr uint32_t kLidarPowerRuntimeApiVersion = 1;
+inline constexpr char kLidarPowerRuntimeApiEntryPoint[] = "prism_usb_sdk_get_lidar_power_api";
+struct LidarPowerRuntimeApi {
+  uint32_t abi_version;
+  uint32_t struct_size;
+  LidarPowerStatus (*query)(Client*, LidarModel, uint32_t);
+  LidarPowerStatus (*set_standby)(Client*, LidarModel, bool, uint32_t);
+};
+using GetLidarPowerRuntimeApiFunction = const LidarPowerRuntimeApi* (*)(uint32_t);
+
 }  // namespace prism

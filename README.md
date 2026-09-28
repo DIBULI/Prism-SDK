@@ -33,6 +33,7 @@ Host SDK prefixes, not ROS adapter binaries or Docker images.
 - Receiver-native GNSS/RTK observations, sky/trajectory display helpers; no
   Agent-side RTK solver or retired raw/smoothed navigation interface.
 - GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
+- [Independent LiDAR standby / wake](docs/lidar-power.md) (development extension; requires updated Agent).
 - [Release notes](docs/update/v1.2.0.md), [provenance](ORIGIN.md) and `SHA256SUMS`.
 
 ## Build consumer examples

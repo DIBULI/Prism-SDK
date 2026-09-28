@@ -8,9 +8,10 @@ examples and documentation. No SDK implementation or device firmware is included
 - Host / RK-local / required Agent version: `1.2.0`.
 - Qualified Sensor Board: `0.4.27`; USB / RK-local protocol: `1`.
 - Runtime API: `18`; RTK-module control extension: `1`; raw dataset extension: `1`.
+- LiDAR hardware power runtime extension: `1`; existing Runtime API layout unchanged.
 - Source repository: `DIBULI/Prism-agent`.
-- Immutable source commit: `d7161c93baa4e652c2cdbbefb1e9922c6327c244`.
-- Build: [matched SDK distribution run 36255581761](https://github.com/DIBULI/Prism-agent/actions/runs/36255581761).
+- Immutable source commit: `af9ae80dbc19da4b15fee0082dd7e28e1f8381f5`.
+- Build: [matched SDK distribution run 36430588320](https://github.com/DIBULI/Prism-agent/actions/runs/36430588320).
 - All four platform jobs passed their source tests before packaging.
 
 All installed Host headers are identical across platforms after normalizing

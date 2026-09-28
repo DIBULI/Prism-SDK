@@ -16,6 +16,7 @@
 #include "prism/usb/gnss_observation.hpp"
 #include "prism/usb/rtk.hpp"
 #include "prism/usb/telemetry.hpp"
+#include "prism/usb/lidar_power.hpp"
 #include "prism/usb/time_sync.hpp"
 #include "prism/usb/timesync_port.hpp"
 #include "prism/usb/update.hpp"
@@ -153,6 +154,14 @@ class Client {
   LidarStatus startLidar(LidarModel model);
   LidarStatus stopLidar();
   LidarStatus lidarStatus();
+  // Independent hardware control, NOT capture start/stop. All streams must be
+  // stopped explicitly first. Wake does not start SDK reception; no persistence.
+  LidarPowerStatus lidarPowerStatus(LidarModel model,uint32_t timeout_ms=3000) {
+    return detail::lidarPowerCommand(*this,model,0,timeout_ms);
+  }
+  LidarPowerStatus setLidarStandby(LidarModel model,bool standby,uint32_t timeout_ms=10000) {
+    return detail::lidarPowerCommand(*this,model,standby?2:1,timeout_ms);
+  }
   LidarNetworkStatus lidarNetworkStatus();
   LidarNetworkStatus saveLidarNetworkConfiguration(
       const LidarNetworkConfiguration& configuration);

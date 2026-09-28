@@ -191,6 +191,13 @@ class Client {
   LidarStatus startLidar(LidarModel model);
   LidarStatus stopLidar();
   LidarStatus lidarStatus();
+  // Same idle-only hardware operation and result as the Host SDK.
+  LidarPowerStatus lidarPowerStatus(LidarModel model,uint32_t timeout_ms=3000) {
+    return ::prism::detail::lidarPowerCommand(*this,model,0,timeout_ms);
+  }
+  LidarPowerStatus setLidarStandby(LidarModel model,bool standby,uint32_t timeout_ms=10000) {
+    return ::prism::detail::lidarPowerCommand(*this,model,standby?2:1,timeout_ms);
+  }
   LidarNetworkStatus lidarNetworkStatus();
   LidarNetworkStatus saveLidarNetworkConfiguration(const LidarNetworkConfiguration& configuration);
   LidarNetworkStatus probeLidarNetwork();

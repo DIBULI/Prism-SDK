@@ -28,5 +28,6 @@ before substituting clients.
 - [Current TimeSync modes](timesync-port.md)
 - [RTK-module versions](rtk-module-versions.md)
 - [XT32](xt32.md) and [LiDAR line fields](livox-line.md)
+- [Independent LiDAR standby / wake](lidar-power.md)
 
 GNSS reception diagnostics: [GNSS reception status](gnss-reception-status.md).
