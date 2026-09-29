@@ -629,7 +629,11 @@ imu.stop();
 
 ## 系统升级
 
-公开 SDK 只接受包含 agent 和 sensor-board 固件的完整 ZIP，不提供单独升级某一组件的 API。
+`upgradeSystem()` 接受包含 Agent 和 Sensor Board 固件的完整 ZIP。
+新版 1.2.0 C++ SDK 另提供 `startSensorBoardUpdate()` 与 `sensorBoardUpdateStatus()`，
+用于 Agent 后台执行独立 Sensor Board 维护升级；先停止采集和录制，Agent/Web 保持运行。
+Host 与 RK-local 的方法及类型一致，RK-local 还提供不占用采集连接的同名自由函数。
+这组接口不扩展 Windows Runtime API v18 表。详见[维护接口](../guides/firmware-update.md#agent-managed-sensor-board-maintenance)。
 
 ```cpp
 SystemUpgradePackageInfo inspectSystemUpgradePackage(
