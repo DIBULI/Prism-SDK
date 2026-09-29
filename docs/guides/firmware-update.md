@@ -7,11 +7,13 @@
 - [Obtain and inspect a package](#obtain-and-inspect-a-package)
 - [Upgrade sequence](#upgrade-sequence)
 - [Host SDK API](#host-sdk-api)
+- [Agent-managed Sensor Board maintenance](#agent-managed-sensor-board-maintenance)
 <!-- /page-toc -->
 
 Prism system upgrades are distributed as one ZIP file. The user must supply a
 package containing both the RK agent and the sensor-board firmware. The public
-Host SDK and Viewer do not expose standalone sensor-board firmware upgrade.
+Viewer uses this combined package workflow. The C++ SDK additionally supports
+the standalone maintenance workflow below.
 
 ## Archive layout
 
@@ -104,4 +106,56 @@ auto result = client.upgradeSystem(
 verified (or its matching version was skipped) and the final Agent commit is accepted. For a same-version reinstall
 with restart verification enabled, the restarted process must also be
 verified. Component-level update frames remain an internal transport detail
-and are not standalone public upgrade workflows.
+and are not the new background maintenance interface below.
+
+## Agent-managed Sensor Board maintenance
+
+With the refreshed Agent/SDK **1.2.0**, stop all capture and finish recording,
+but keep Agent/Web running. The image includes an Agent-managed CLI:
+
+```sh
+sudo prism-sensor-board-upgrade --version 0.4.27 /usr/share/prism/firmware/sensor-board/BOOT.BIN
+prism-sensor-board-upgrade --status
+```
+
+`--version` must match the supplied BIN. A fresh known matching board version
+skips writing; `--force` bypasses only this skip. Without a version, equal-version
+skip is unavailable. `--no-wait` returns after verified upload and commit.
+`--status` shows the current/latest maintenance task, not UART diagnostics.
+Starting locally requires root. The tool never opens UART or automatically falls
+back to the legacy direct-UART updater. Leave TimeSync RTK mode explicitly first.
+
+Host and RK-local C++ clients share identical methods and result types:
+
+```cpp
+prism::SensorBoardUpdateOptions options;
+options.version = "0.4.27";
+options.force = false;
+auto task = client.startSensorBoardUpdate("BOOT.BIN", options);
+// After commit, the connection may close; reconnect and query the same task.
+auto state = client.sensorBoardUpdateStatus(task.task_id);
+// state.active(), state.successful(), state.state, state.error_code, state.message
+// state.received / total_size: upload; device_received: board transfer bytes.
+```
+
+States are `Idle`, `Receiving`, `Flashing`, `Complete`, `Failed`, `Skipped`,
+`Aborted`. The Agent validates size and SHA-256 before Flash, owns programming,
+read-back and restart/version verification, and rejects conflicting operations.
+Web displays progress without stopping its service. This is a new wire extension;
+an earlier 1.2.0 Agent build reports unsupported rather than falling back.
+
+RK-local also provides free functions with the same names, plus an optional
+control-socket argument. They coexist with an idle Web/capture connection and do
+not require `Client::open()`. `sensorBoardUpdateStatus()` also accepts a timeout.
+The Windows Runtime API v18 table is unchanged: use direct linked C++ methods
+with the matching MSVC SDK for this new maintenance API, not the runtime table.
+
+An incomplete upload expires after 120 seconds without writing Flash. After
+commit, disconnecting SSH/USB/Web does not cancel the job; do not remove power
+or restart Agent. This is not power-loss/crash continuation. Task status is
+in memory until the next task or Agent restart. If a reply is lost, query status
+before retrying; never assume timeout means failure. SHA-256 checks integrity,
+not publisher authenticity. Use trusted board-specific firmware only.
+
+The first installation of these new binaries still requires one Agent/Web
+restart. Sensor Board firmware and its OTA protocol are unchanged.

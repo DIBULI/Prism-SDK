@@ -22,6 +22,12 @@ ARM64 applications on RK3576. It connects through `/run/prism/stream.sock`;
 Agent alone owns UARTs, CSI/V4L2, time synchronization and aggregate capture.
 GNSS/RTK methods share the actual Host SDK types, not parallel copies.
 
+Sensor Board maintenance uses the same `startSensorBoardUpdate()` and
+`sensorBoardUpdateStatus()` Client APIs as Host. RK-local additionally exposes
+free functions with these names for the independent control socket, so an idle
+Web Client may remain connected. Starting locally requires root. See the
+[maintenance guide](../guides/firmware-update.md#agent-managed-sensor-board-maintenance).
+
 ## Current version
 
 Agent and both SDKs use **1.2.0**, protocol **1**. Main Runtime ABI is **18**.

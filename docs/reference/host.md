@@ -30,6 +30,11 @@
 This reference describes the Prism Agent SDK `1.2.0` Host client lifecycle and
 core control/stream APIs. Feature guides hold the detailed operational contracts:
 
+`Client::startSensorBoardUpdate(path, options)` and
+`Client::sensorBoardUpdateStatus(task_id)` provide
+[Agent-managed background maintenance](../guides/firmware-update.md#agent-managed-sensor-board-maintenance).
+These direct C++ APIs do not extend the Windows Runtime API v18 table.
+
 - [Camera exposure and gain](../guides/camera.md)
 - [GNSS results, CORS configuration and RTK start/stop](../guides/gnss-rtk.md)
 - [Time synchronization and TimeSync modes](../guides/time-sync.md)

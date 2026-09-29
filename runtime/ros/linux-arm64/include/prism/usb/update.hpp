@@ -2,10 +2,36 @@
 
 #include <cstdint>
 #include <string>
+#include <functional>
+#include <vector>
 
 #include "prism/usb/common.hpp"
 
 namespace prism {
+
+enum class SensorBoardUpdateState : uint16_t {
+  Idle=0, Receiving=1, Flashing=2, Complete=3, Failed=4, Skipped=5, Aborted=6
+};
+struct SensorBoardUpdateOptions {
+  std::string version; // Empty: explicit raw BIN flash, no version-based skip.
+  bool force=false;    // Bypasses only equal-version skip, never safety checks.
+};
+struct SensorBoardUpdateJob {
+  uint64_t task_id=0;
+  SensorBoardUpdateState state=SensorBoardUpdateState::Idle;
+  uint16_t error_code=0;
+  uint32_t received=0,total_size=0,device_received=0;
+  uint32_t installed_version=0,target_version=0; // major:8/minor:8/patch:16
+  std::string message;
+  bool active() const {return state==SensorBoardUpdateState::Receiving||state==SensorBoardUpdateState::Flashing;}
+  bool successful() const {return state==SensorBoardUpdateState::Complete||state==SensorBoardUpdateState::Skipped;}
+};
+SensorBoardUpdateJob parseSensorBoardUpdateJob(const Frame&);
+namespace detail {
+using SensorUpdateCommand=std::function<Frame(const std::vector<uint8_t>&)>;
+SensorBoardUpdateJob startSensorBoardUpdate(const SensorUpdateCommand&,const std::string&,const SensorBoardUpdateOptions&);
+SensorBoardUpdateJob sensorBoardUpdateStatus(const SensorUpdateCommand&,uint64_t);
+}
 
 struct UpgradeStatus {
   uint16_t code = 0;

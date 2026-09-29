@@ -10,13 +10,20 @@ examples and documentation. No SDK implementation or device firmware is included
 - Runtime API: `18`; RTK-module control extension: `1`; raw dataset extension: `1`.
 - LiDAR hardware power runtime extension: `1`; existing Runtime API layout unchanged.
 - Source repository: `DIBULI/Prism-agent`.
-- Immutable source commit: `d6d32d048bc2ab853e6a5322adabf981abfe90a3`.
-- Build: [matched SDK distribution run 36453359377](https://github.com/DIBULI/Prism-agent/actions/runs/36453359377).
+- Immutable source commit: `21c09ae94bbc66d3719c4a9cb684c9badeaec04a`.
+- Build: [matched SDK distribution run 36532500195](https://github.com/DIBULI/Prism-agent/actions/runs/36532500195).
 - All four platform jobs passed their source tests before packaging.
 
 All installed Host headers are identical across platforms after normalizing
 Windows CRLF to LF. RK-local uses the same Host types and adds its own C++ Client.
 Consumers must replace headers and libraries together and rebuild.
+
+This refresh adds identical Host/RK-local direct C++ Sensor Board maintenance
+methods and the RK-local independent maintenance connection. Requires this
+Agent build; no board firmware update. Existing Runtime API v18 is unchanged.
+The client header includes the subsequent documentation-only clarification
+from `41a87b0`: distinguish combined upgrades from standalone maintenance.
+This changes no declaration, ABI or compiled implementation.
 
 This build preserves the Host USB keepalive worker across idle system-time
 calibration, including failure paths, and rejects unavailable or discontinuous

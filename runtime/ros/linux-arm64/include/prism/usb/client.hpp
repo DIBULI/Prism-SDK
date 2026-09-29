@@ -187,12 +187,16 @@ class Client {
                 uint32_t timeout_ms = 3000);
 
   // System upgrades are package-only. A valid ZIP always contains both the
-  // RK agent and sensor-board BOOT.BIN; standalone sensor-board OTA is not
-  // exposed by the public SDK.
+  // RK agent and sensor-board BOOT.BIN. For standalone Agent-managed board
+  // maintenance, use startSensorBoardUpdate() below.
   SystemUpgradeResult upgradeSystem(
       const std::string& package_path,
       const UpgradeOptions& options = {},
       const std::function<void(const SystemUpgradeProgress&)>& progress = {});
+  // Starts an Agent-owned, connection-independent task; does not wait for Flash.
+  SensorBoardUpdateJob startSensorBoardUpdate(const std::string& image_path,
+      const SensorBoardUpdateOptions& options = {});
+  SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id = 0);
 
  private:
   UpgradeStatus upgradeAgentImage(

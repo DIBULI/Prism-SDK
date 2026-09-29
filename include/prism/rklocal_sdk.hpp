@@ -28,6 +28,14 @@ inline constexpr uint32_t kWaitForever = UINT32_MAX;
 GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0,
     const std::string& control_socket="/run/prism/control.sock", uint32_t timeout_ms=500);
 
+// Concurrent maintenance side channel; never opens the capture Client.
+// Starting requires root on RK. Read-only status is available to local users.
+SensorBoardUpdateJob startSensorBoardUpdate(const std::string& image_path,
+    const SensorBoardUpdateOptions& options = {},
+    const std::string& control_socket="/run/prism/control.sock");
+SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id=0,
+    const std::string& control_socket="/run/prism/control.sock",uint32_t timeout_ms=1000);
+
 enum class ErrorCode {
   InvalidArgument = -1, System = -2, Protocol = -3, Timeout = -4,
   Closed = -5, Busy = -6, Remote = -7, VersionMismatch = -8
@@ -218,6 +226,9 @@ class Client {
   SystemUpgradeResult upgradeSystem(const std::string& package_path,
       const UpgradeOptions& options = {},
       const std::function<void(const SystemUpgradeProgress&)>& progress = {});
+  SensorBoardUpdateJob startSensorBoardUpdate(const std::string& image_path,
+      const SensorBoardUpdateOptions& options = {});
+  SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id = 0);
 
  private:
   UpgradeStatus upgradeAgentImage(const std::vector<uint8_t>& image,
