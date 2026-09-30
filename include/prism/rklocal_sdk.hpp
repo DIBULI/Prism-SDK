@@ -109,6 +109,14 @@ struct FrameSet {
   uint64_t timestamp_us = 0;
   VideoMetadata metadata;
   std::array<Image, kCameraCount> image;
+  // Missing/corrupt cameras are empty; never reuse a previous image.
+  uint8_t cameraMask() const noexcept {
+    uint8_t mask = 0;
+    for (size_t i = 0; i < image.size(); ++i)
+      if (image[i].data && image[i].size) mask |= static_cast<uint8_t>(1u << i);
+    return mask;
+  }
+  bool complete() const noexcept { return cameraMask() == 0x0f; }
 };
 
 class Client {
@@ -136,6 +144,9 @@ class Client {
   // Timeout/no data => nullopt. Transport/protocol/Agent failure => Error.
   // 0 is nonblocking; kWaitForever waits until data or disconnection.
   std::optional<ImuSample> readImu(uint32_t timeout_ms = 3000);
+  // Can return a partial set after a newer frame or a bounded assembly timeout.
+  // Check cameraMask()/image[i].size; missing metadata keeps timestamp_us=0.
+  // A read timeout returns nullopt and does not stop any sensor stream.
   std::optional<FrameSet> readFrameSet(uint32_t timeout_ms = 3000);
 
   GnssTimingStatus gnssTimingStatus();

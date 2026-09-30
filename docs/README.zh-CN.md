@@ -30,6 +30,7 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 | 定位结果、天空图、CORS 账号、RTK 启停、版本与接收诊断 | [GNSS / RTK](guides/gnss-rtk.md#receiver-results-zh) | 中英文分节 |
 | UTC 有效性、手动校时、输入/输出/RTK 模式与持久化 | [时间同步](guides/time-sync.md) | 中英文分节 |
 | 雷达采集、待机/唤醒、MID line、XT32 逐点时间 | [雷达](guides/lidar.md) | 英文 |
+| 单路缺失与部分相机帧组 | [独立数据流](guides/stream-resilience.md) | 英文 |
 | 通过 USB 或 RK-local 浏览、下载原始数据集 | [原始数据集](guides/datasets.md) | 中文，含英文部署说明 |
 | 检查及应用 Agent + Sensor Board 联合升级包 | [固件升级](guides/firmware-update.md) | 英文 |
 | RK 本机 Ubuntu 22.04 / 24.04 Docker 中运行 ROS 2 | [RK 本机 ROS 2](guides/ros2-on-rk.zh-CN.md) · [English](guides/ros2-on-rk.md) | 中英文 |

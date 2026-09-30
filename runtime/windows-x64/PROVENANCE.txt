@@ -1,2 +1,5 @@
 AGENT_SOURCE_COMMIT=21c09ae94bbc66d3719c4a9cb684c9badeaec04a
 SDK_VERSION=1.2.0
+HEADER_SOURCE_COMMIT=7f8bc7d4b09fe158ca24eef8740e1b778c634456
+RUNTIME_REUSED=unchanged-compiled-sources-and-ABI
+REFRESH_CI=blocked-before-execution

@@ -23,6 +23,7 @@ void save(const char* directory, const prism::rklocal::FrameSet& frames) {
   if (mkdir(directory, 0755) != 0)
     throw std::runtime_error("JPEG directory must be new and writable");
   for (std::size_t i = 0; i < frames.image.size(); ++i) {
+    if (!frames.image[i].data || !frames.image[i].size) continue;
     const auto path = std::string(directory) + "/camera" + std::to_string(i) + ".jpg";
     FILE* f = std::fopen(path.c_str(), "wb");
     if (!f) throw std::runtime_error("cannot create " + path);
@@ -82,7 +83,7 @@ int main(int argc, char** argv) {
         ++frame_count;
       } // Buffers released automatically, including on exceptions.
       if (Clock::now() >= report) {
-        std::printf("IMU0=%llu IMU1=%llu four-camera-frame-sets=%llu\n",
+        std::printf("IMU0=%llu IMU1=%llu camera-frame-sets=%llu\n",
                     static_cast<unsigned long long>(imu_count[0]),
                     static_cast<unsigned long long>(imu_count[1]),
                     static_cast<unsigned long long>(frame_count));

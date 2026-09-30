@@ -33,6 +33,7 @@ collect operational constraints and related examples in one place.
 | Receiver results, sky data, CORS accounts, RTK start/stop, versions and diagnostics | [GNSS / RTK](guides/gnss-rtk.md) | EN / 中文 sections |
 | UTC validity, manual time-setting and persistent input/output/RTK modes | [Time synchronization](guides/time-sync.md) | EN / 中文 sections |
 | LiDAR capture, hardware standby/wake, MID line and XT32 point time | [LiDAR](guides/lidar.md) | EN |
+| Missing sensor streams and partial camera sets | [Independent streams](guides/stream-resilience.md) | EN |
 | List and download original datasets over USB or RK-local | [Raw datasets](guides/datasets.md) | 中文 / EN notes |
 | Inspect and apply a combined Agent + Sensor Board update | [Firmware update](guides/firmware-update.md) | EN |
 | ROS 2 on RK in Ubuntu 22.04 / 24.04 Docker | [ROS 2 on RK](guides/ros2-on-rk.md) · [中文](guides/ros2-on-rk.zh-CN.md) | EN / 中文 |
