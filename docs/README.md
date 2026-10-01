@@ -36,14 +36,6 @@ collect operational constraints and related examples in one place.
 | Missing sensor streams and partial camera sets | [Independent streams](guides/stream-resilience.md) | EN |
 | List and download original datasets over USB or RK-local | [Raw datasets](guides/datasets.md) | 中文 / EN notes |
 | Inspect and apply a combined Agent + Sensor Board update | [Firmware update](guides/firmware-update.md) | EN |
-| ROS 2 on RK in Ubuntu 22.04 / 24.04 Docker | [ROS 2 on RK](guides/ros2-on-rk.md) · [中文](guides/ros2-on-rk.zh-CN.md) | EN / 中文 |
-
-Frequently used controls:
-
-- [RTK start/stop and CORS configuration](guides/gnss-rtk.md#cors-control)
-- [LiDAR standby/wake versus capture start/stop](guides/lidar.md#capture-vs-power)
-- [TimeSync mode selection](guides/time-sync.md#port-modes)
-- [Four-camera unified automatic exposure](guides/camera.md#unified-automatic-exposure-four-cameras)
 
 ## 4. Examples
 
@@ -54,7 +46,7 @@ Frequently used controls:
 ## 5. Release and package information
 
 - [v1.2.0 release notes](update/v1.2.0.md) · [中文](update/v1.2.0.zh-CN.md)
-- [Binary provenance](../ORIGIN.md) · [Package checksums](../SHA256SUMS)
+- [Package compatibility](../ORIGIN.md) · [Package checksums](../SHA256SUMS)
 
 ## Documentation layout
 

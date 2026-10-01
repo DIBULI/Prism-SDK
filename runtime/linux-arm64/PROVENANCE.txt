@@ -1,4 +1,6 @@
-AGENT_SOURCE_COMMIT=7f8bc7d4b09fe158ca24eef8740e1b778c634456
 SDK_VERSION=1.2.0
 BASELINE=Ubuntu 20.04
-BUILD=local-docker-verified
+ARCH=linux-arm64
+GLIBC_MIN=2.31
+RKLOCAL_PIC=1
+BINARY_STATUS=unchanged-during-documentation-refresh

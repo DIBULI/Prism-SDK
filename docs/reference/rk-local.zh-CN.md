@@ -68,6 +68,9 @@ target_link_libraries(my_rk_app PRIVATE Prism::RkLocal)
 miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so。
 源码构建需要目标架构OpenSSL开发头文件和静态libcrypto.a（Ubuntu: libssl-dev）。
 
+当前配套固件仅输出内部对齐后的 IMU；启动或重新对齐时可暂时无样本，应继续读取其他数据流。
+该行为不要求 GNSS 锁定，也不单独证明 UTC 有效，见[时间说明](../guides/time-sync.md)。
+
 ## 与 Host SDK 的一致范围及明确差异
 
 连接后的以下同名方法共用 Host 控制实现、参数/返回类型和默认参数。

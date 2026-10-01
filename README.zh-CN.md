@@ -23,14 +23,23 @@ Linux 动态库内嵌 OpenSSL，使用系统 libusb；Host 静态链接需要安
 OpenSSL 开发包。RK-local 库内嵌其依赖，仅需 pthreads/dl 和系统 C/C++ 运行库。
 `runtime/ros/` 是匹配的 SDK 安装前缀，不包含 ROS adapter 或 Docker 镜像。
 
-## 本次更新
+## 1.2.0 包含的功能
 
+以下是本版本的累计功能，不仅是最近一次修复。
+
+- USB 发现与连接、设备/版本/状态查询、参数配置及 Wi-Fi 热点管理。
+- 四路相机图像和元数据、IMU 采集与启停示例。
+- 运行时曝光、模拟增益、限制范围及统一自动曝光。
+- 显式校时，分别查询内部对齐与 UTC 授时状态。
+- 部分相机帧和独立数据流：单路缺失不停止其余采集。
+- USB/RK-local 原始数据集浏览和下载；SDK 不转换 ROS bag。
+- 联合系统升级及独立 Sensor Board 后台维护。
 - Host/RK-local 统一 CORS 配置、RTK 启停接口。
 - 最新 TimeSync 模式、RTK-module 版本、4G 与控制状态诊断。
 - 接收机原生 GNSS/RTK 报文、天空图和轨迹模型；不提供 Agent 内部 RTK 解算及旧 raw/smoothed 接口。
 - GNSS 输入诊断、XT32、雷达 line 字段、相机元数据。
 - [独立雷达待机/唤醒](docs/guides/lidar.md#standby-wake)，不改变采集启停行为，需配套当前 Agent。
-- 详见[更新说明](docs/update/v1.2.0.zh-CN.md)及[产物来源](ORIGIN.md)。
+- 详见[更新说明](docs/update/v1.2.0.zh-CN.md)及[包兼容说明](ORIGIN.md)。
 
 ## 编译示例
 

@@ -61,13 +61,19 @@ their retained manual values and gains. Manual per-camera changes are rejected
 until unified mode is disabled. The default is independent control. This is
 runtime-only, not a saved device setting. Viewer and Web expose both choices.
 
-The FPGA collects **matching frame IDs from all four cameras**, once per frame;
-an incomplete or mixed set cannot increase exposure. The brightest RAW8 mean
-controls the common exposure, rather than averaging bright and dark views.
-Independently, any camera with more than 6553 pixels (0.5% of 1280x1024) at RAW8
-code >=250 vetoes increasing exposure and shortens it. Gains remain independently
-controlled, including gain reduction on that camera when highlights clip.
-The usual exposure/gain limits and a RAW8 mean deadband of +/-4 still apply.
+The current matching firmware uses **the active cameras** for unified exposure;
+a missing camera does not indefinitely hold the other cameras' brightness control.
+Exposure feedback must belong to the same measurement group. All active cameras
+share an exposure duration, while analog gains remain independent.
+
+The highlight policy permits up to approximately **20% saturated pixels** before
+highlight protection reduces brightness. This is a control threshold, not a
+promise of zero clipping or image quality. Exposure/gain limits still apply.
+Automatic gain changes wait for applied feedback and are limited to at most
+**five updates per second**, with smaller steps near the brightness target and
+faster response to large lighting changes. Missing-camera recovery does not
+block gain updates for the remaining cameras. These behaviors require the
+current 0.4.27 firmware package, not merely an unchanged version string.
 
 All four physical TRIG0 widths and metadata exposure values match, including
 mode transitions: the largest per-camera readout guard is applied to **all**
@@ -155,20 +161,20 @@ same layout and a full field mask.
 
 | Offset | Size | Field |
 | --- | --- | --- |
-| 0 | 2 | protocol version, exactly `2` |
+| 0 | 2 | protocol version, exactly `3` |
 | 2 | 2 | payload size, exactly `44` |
-| 4 | 4 | field mask: bit 0 target; bits 1..4 camera 0..3 |
+| 4 | 4 | field mask: bit 0 target; bits 1..4 camera 0..3; bit 5 unified mode |
 | 8 | 1 | automatic-camera mask; bits 0..3 only |
 | 9 | 1 | shared automatic-exposure target brightness |
-| 10 | 2 | zero reserved |
+| 10 | 2 | unified mode: `0` or `1`; all other bits must be zero |
 | 12 | 16 | `manual_exposure_time_us[4]`, little-endian `u32` |
 | 28 | 16 | `gain_x1024[4]`, little-endian `u32` |
 
-The current implementation strictly rejects different versions or sizes,
-unknown mask bits, nonzero reserved bytes, invalid camera-mask bits, and
-out-of-range values. The agent accepts the 28-byte v1 set payload only as a
-compatibility input and preserves the current gains; v2 responses are always
-44 bytes.
+The current SDK sends and reads the 44-byte version-3 exposure payload.
+Unknown field bits, invalid mode/camera-mask values and out-of-range settings
+are rejected. Unified mode requires the automatic-camera mask to include all
+four logical slots; hardware availability is evaluated separately. Applications
+should use the public setters rather than constructing older payload layouts.
 
 `EXPOSURE_LIMITS_GET` (`0x36`) has no payload.
 `EXPOSURE_LIMITS_SET` (`0x37`) and `EXPOSURE_LIMITS_RESPONSE` (`0xb4`) use the

@@ -69,7 +69,9 @@ samples.
 
 `ImuSample` exposes `fsync_event`, `fsync_delay_valid`, and
 `timestamp_synced`; applications do not need to decode the raw flag bits. On
-an FSYNC event, `timestamp_us` is the UTC time of the tagged IMU sample.
+an FSYNC event, `timestamp_us` is the tagged IMU sample's time in the common
+device timeline, which may be boot-relative or UTC. Internal alignment alone is
+not UTC lock. See [IMU timing](../guides/time-sync.md#imu-publication-and-epoch--imu-输出与时间域).
 
 ## Requirements
 
@@ -736,7 +738,7 @@ copy.
 | `carrier_width_bytes` | Width of the raw carrier frame in bytes. |
 | `image_height_per_camera` | Raw image height per camera. |
 | `meta_row_bytes` | Metadata row size in bytes. |
-| `trigger_time_ns` | Shared four-camera TRIG0 rising-edge Unix UTC timestamp from the sensor-board; zero before PPS/RMC synchronization. It is not an exposure-center, MIPI-arrival, ISP, or delivery timestamp. |
+| `trigger_time_ns` | Shared camera trigger rising-edge timestamp in the device time domain (boot-relative or UTC); zero means unavailable. It is not an exposure-center, MIPI-arrival, ISP, or delivery timestamp. |
 | `exposure_us[4]` | Actual exposure time used by each camera for this frame, in microseconds. Valid metadata reports `50..(floor(1000000 / camera_fps) - 5000)` in both PL-auto and manual modes. |
 | `analog_gain_x1024[4]` | Applied per-camera SC130GS sensor gain metadata, scaled by 1024 and configurable through the runtime exposure API. |
 | `digital_gain_x1024[4]` | Read-only actual digital gain metadata, scaled by 1024. It is not configurable through the exposure API. |
@@ -843,9 +845,9 @@ only structured `ImuSample` values to the viewer.
 | --- | --- |
 | `sensor_id` | IMU sensor index. |
 | `format` | Agent-defined IMU sample format. |
-| `flags` | Sample flags. Bit 0 is FSYNC, bit 1 is valid FSYNC delay, bit 2 reports a preserved raw timestamp/sample gap, and bit 7 means `timestamp_us` is synchronized UTC. |
+| `flags` | Sample flags. Bit 0 is FSYNC, bit 1 is valid FSYNC delay, bit 2 reports a preserved raw timestamp/sample gap, and bit 7 means alignment to the device timeline, not proof of UTC. |
 | `sample_id` | Monotonic sample counter per sensor. |
-| `timestamp_us` | sensor-board timestamp in microseconds; Unix UTC when flags bit 7 is set, otherwise unsynchronized sensor-board-local time. |
+| `timestamp_us` | Measurement timestamp in device microseconds; the epoch may be boot-relative or UTC. Bit 7 alone does not identify the epoch. |
 | `accel_mg[3]` | Acceleration in milli-g. Axis order is board-defined. |
 | `gyro_mdps[3]` | Angular velocity in milli-degree-per-second. |
 | `temp_milli_c` | Temperature in milli-degree Celsius. |

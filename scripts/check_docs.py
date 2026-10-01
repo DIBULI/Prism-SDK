@@ -62,7 +62,10 @@ def check_docs(root: Path = ROOT) -> None:
     root = root.resolve()
     paths = set(root.glob("*.md")) | set((root / "docs").rglob("*.md"))
     paths |= set((root / "rk-local-sdk").glob("*.md"))
-    texts = {p.resolve(): prose(p.read_text(encoding="utf-8")) for p in paths}
+    raw_texts = {p.resolve(): p.read_text(encoding="utf-8") for p in paths}
+    unlisted = {p for p, text in raw_texts.items()
+                if "<!-- documentation-index: unlisted -->" in text}
+    texts = {p: prose(text) for p, text in raw_texts.items()}
     ids = {p: anchors(text) for p, text in texts.items()}
     graph = {p: set() for p in texts}
     errors = []
@@ -101,12 +104,12 @@ def check_docs(root: Path = ROOT) -> None:
             seen.add(page)
             pending.extend(graph.get(page, ()))
         for page in sorted((root / "docs").rglob("*.md")):
-            if page.resolve() not in seen:
+            if page.resolve() not in seen and page.resolve() not in unlisted:
                 errors.append(f"docs/{name}: unreachable page: {page.relative_to(root)}")
     if errors:
         raise RuntimeError("\n".join(errors))
     print(f"Verified {checked} local links/anchors in {len(texts)} Markdown files; "
-          "both documentation indexes reach every docs page.")
+          f"both indexes reach all listed pages ({len(unlisted)} unlisted pages checked).")
 
 
 if __name__ == "__main__":

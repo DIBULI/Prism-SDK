@@ -80,6 +80,11 @@ The device must be open and camera, IMU and LiDAR streaming must be stopped.
 When Sensor Board is flashed, its image crosses two links, so progress counts
 host-to-RK staging and RK-to-sensor-board transfer separately. A same-version skip
 counts zero Sensor Board transfer bytes and reports `SkippedSameVersion`.
+A refreshed firmware file can have the same displayed version as an older build.
+If the publisher requires that replacement, use the standalone maintenance
+workflow with an explicit `--force` (or `options.force=true`), after checking the
+supplied file's checksum. A successful combined upgrade with a version skip is
+not proof that the replacement Sensor Board firmware was installed.
 A sensor-board failure prevents the
 agent replacement from starting; keep the package and retry after correcting
 the connection or power problem.

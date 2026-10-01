@@ -99,11 +99,11 @@ struct ImuSample {
   uint8_t format = 0;
   uint16_t flags = 0;
   uint32_t sample_id = 0;
-  uint64_t timestamp_us = 0;  // Unix UTC when flags bit 7 is set; otherwise sensor-board local.
+  uint64_t timestamp_us = 0;  // Device timeline; UTC only when the device has a valid UTC epoch.
   bool fsync_event = false;        // First ODR sample after an IMU FSYNC edge.
   bool fsync_delay_valid = false;  // ICM-42688 delay field was not 0xffff.
   bool sample_gap = false;         // Raw IMU timestamp exposed a >4 ODR gap.
-  bool timestamp_synced = false;   // timestamp_us is synchronized UTC.
+  bool timestamp_synced = false;   // Aligned to the device timeline; not independent proof of UTC.
   std::array<int32_t, 3> accel_mg{};
   std::array<int32_t, 3> gyro_mdps{};
   int32_t temp_milli_c = 0;

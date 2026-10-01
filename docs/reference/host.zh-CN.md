@@ -161,7 +161,7 @@ DeviceInfo Client::deviceInfo();
 | --- | --- |
 | `usb_speed`、`usb3_connected` | 当前 USB 协商速率，以及是否为 SuperSpeed 或更高 |
 | `detected_imu_count`、`imu_present_mask` | sensor-board 实际检测到的 IMU 数量和位掩码 |
-| `imu_receiving_mask`、`imu_time_synced_mask`、`imu_init_error_mask` | 各 IMU 的接收、UTC 同步和初始化错误状态 |
+| `imu_receiving_mask`、`imu_time_synced_mask`、`imu_init_error_mask` | 各 IMU 的接收、内部时间对齐和初始化错误状态 |
 | `imu_init_error_reason[0..1]` | 各 IMU 初始化失败的具体原因：WHO_AM_I、配置读回、FIFO 总线、样本超时或未知 |
 | `detected_camera_count`、`camera_present_mask` | PL 中 SC130GS I2C 初始化成功的相机数量和位掩码；停止采集时仍有效，也可以报告部分安装 |
 | `camera_streaming_mask` | RK carrier/ISP/JPEG 持续生成完整四路帧组时为 `0x0f`。四帧主机 credit 耗尽期间沿用最近一次健康状态，因为 USB 主机反压时无法继续观察生产端；不会报告部分传输 |
@@ -556,7 +556,7 @@ while (running) {
 
 `VIDEO_META` 载荷固定为 84 字节。前 24 字节的字段布局保持不变，随后依次为：
 `trigger_time_ns`（字节 24–31）是 sensor-board 在四路公共 TRIG0 上升沿锁存的
-Unix UTC 纳秒值；PPS/RMC 尚未同步时为 0。它不是曝光中心、MIPI 到达、ISP 输出
+设备公共时间域中的纳秒值（启动相对时间或 UTC）；0 表示不可用。它不是曝光中心、MIPI 到达、ISP 输出
 或 USB 交付时间。其后为 `exposure_us[4]`（字节 32–47）、
 `analog_gain_x1024[4]`（字节 48–63）、`digital_gain_x1024[4]`
 （字节 64–79）和 `meta_crc32`（字节 80–83）。
@@ -616,16 +616,18 @@ imu.stop();
 | --- | --- |
 | `sensor_id` | IMU 编号 |
 | `sample_id` | 每个 IMU 独立的单调样本计数 |
-| `timestamp_us` | bit 7 置位时为 Unix UTC，否则为 sensor-board 本地时间 |
+| `timestamp_us` | 设备公共时间域中的测量微秒；可以是启动相对时间或 UTC，bit 7 本身不能判定时间域 |
 | `accel_mg[3]` | milli-g |
 | `gyro_mdps[3]` | milli-degree/s |
 | `temp_milli_c` | milli-degree Celsius |
 | `fsync_event` | 当前样本为 FSYNC 后第一个 ODR 样本 |
 | `fsync_delay_valid` | ICM-42688 FSYNC delay 字段有效 |
 | `sample_gap` | 原始 IMU 时间戳检测到超过 4 个 ODR 的间隔 |
-| `timestamp_synced` | `timestamp_us` 已同步为 UTC |
+| `timestamp_synced` | `timestamp_us` 已对齐设备公共时间基准，不单独表示 UTC 有效 |
 
 不要直接比较 IMU0 与 IMU1 的 `sample_id`，它们是两个独立计数器。跨 IMU 对齐应使用同步后的 `timestamp_us` 和 FSYNC 标志。
+当前配套固件只输出内部对齐后的 IMU，启动或重对齐期间可暂时无数据，不补发未对齐样本。
+这不依赖 GPS 锁定；使用绝对 UTC 前仍需确认时间域，见[时间说明](../guides/time-sync.md)。
 
 ## 系统升级
 

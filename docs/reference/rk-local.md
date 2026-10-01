@@ -74,6 +74,11 @@ The target supplies C++17, headers, archive, pthreads and dl. System C/C++ runti
 are required. miniz/libcrypto are embedded; libusb/libcrypto.so/libssl.so are not required.
 Source builds need target OpenSSL headers and static libcrypto.a (Ubuntu: libssl-dev).
 
+Current matching firmware publishes only internally aligned IMU samples. An
+IMU may briefly have no samples at startup or while re-aligning; keep reading
+other streams. This does not require GNSS and is not proof of UTC validity.
+See [time semantics](../guides/time-sync.md).
+
 ## Host API alignment and explicit differences
 
 These connected-client methods reuse Host control implementations, parameter/return

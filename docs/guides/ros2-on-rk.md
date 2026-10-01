@@ -1,5 +1,7 @@
 # ROS 2 Docker on RK with the RK-local SDK
 
+<!-- documentation-index: unlisted -->
+
 [Documentation index](../README.md)
 
 [简体中文](ros2-on-rk.zh-CN.md) · [Documentation index](../README.md) · [RK-local API](../reference/rk-local.md)

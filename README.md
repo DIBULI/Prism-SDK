@@ -28,13 +28,22 @@ Host SDK prefixes, not ROS adapter binaries or Docker images.
 
 ## What's included
 
+This is the cumulative feature set of 1.2.0, not only the latest refresh.
+
+- USB discovery, device/version/status queries, configuration and Wi-Fi hotspot management.
+- Four-camera image/metadata and IMU acquisition, stream control and capture examples.
+- Runtime exposure, analog gain, limits and unified automatic exposure.
+- Explicit clock synchronization and separate internal alignment / UTC status.
+- Partial camera sets and independent streams: one missing source does not stop the others.
+- Raw dataset browsing/download over USB and RK-local; no SDK bag conversion.
+- Combined system upgrades and independent background Sensor Board maintenance.
 - Unified Host/RK-local CORS configuration and RTK start/stop APIs.
 - Current TimeSync modes, RTK-module firmware versions, 4G/control diagnostics.
 - Receiver-native GNSS/RTK observations, sky/trajectory display helpers; no
   Agent-side RTK solver or retired raw/smoothed navigation interface.
 - GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
 - [Independent LiDAR standby / wake](docs/guides/lidar.md#standby-wake) (requires the matching current Agent package).
-- [Release notes](docs/update/v1.2.0.md), [provenance](ORIGIN.md) and `SHA256SUMS`.
+- [Release notes](docs/update/v1.2.0.md), [package compatibility](ORIGIN.md) and `SHA256SUMS`.
 
 ## Build consumer examples
 

@@ -1,5 +1,7 @@
 # RK 本机通过 RK-local SDK 使用 ROS 2 Docker
 
+<!-- documentation-index: unlisted -->
+
 [文档目录](../README.zh-CN.md)
 
 [English](ros2-on-rk.md) · [文档目录](../README.zh-CN.md) · [RK-local 接口](../reference/rk-local.zh-CN.md)

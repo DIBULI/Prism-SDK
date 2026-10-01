@@ -33,14 +33,6 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 | 单路缺失与部分相机帧组 | [独立数据流](guides/stream-resilience.md) | 英文 |
 | 通过 USB 或 RK-local 浏览、下载原始数据集 | [原始数据集](guides/datasets.md) | 中文，含英文部署说明 |
 | 检查及应用 Agent + Sensor Board 联合升级包 | [固件升级](guides/firmware-update.md) | 英文 |
-| RK 本机 Ubuntu 22.04 / 24.04 Docker 中运行 ROS 2 | [RK 本机 ROS 2](guides/ros2-on-rk.zh-CN.md) · [English](guides/ros2-on-rk.md) | 中英文 |
-
-常用操作直达：
-
-- [CORS 账号配置与 RTK 启停](guides/gnss-rtk.md#cors-control)
-- [雷达待机/唤醒与采集启停的区别](guides/lidar.md#capture-vs-power)
-- [TimeSync 模式选择](guides/time-sync.md#port-modes)
-- [四相机统一自动曝光](guides/camera.md#unified-automatic-exposure-four-cameras)
 
 ## 4. 示例
 
@@ -51,7 +43,7 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 ## 5. 版本与发布信息
 
 - [v1.2.0 更新说明](update/v1.2.0.zh-CN.md) · [English](update/v1.2.0.md)
-- [二进制来源](../ORIGIN.md) · [文件校验清单](../SHA256SUMS)
+- [包兼容说明](../ORIGIN.md) · [文件校验清单](../SHA256SUMS)
 
 ## 文档维护约定
 

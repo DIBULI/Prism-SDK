@@ -47,11 +47,33 @@ PPS 存在且脉宽合法，不保证 NMEA 有效，也不保证 UTC 锁定。
 | `DeviceInfo.sensor_board_time_synced` | 板端 UTC 状态 |
 | `DeviceInfo.imu_time_synced_mask` | 各 IMU 最近状态的时间同步位 |
 | `GnssTimingStatus.time_synced` | 实时外部授时锁定 |
-| `ImuSample.timestamp_synced` | 当前样本时间戳是否可作为 UTC 使用 |
+| `ImuSample.timestamp_synced` | 当前样本是否已对齐设备公共时间基准；单独不能证明 UTC 有效 |
 | `ImuSample.fsync_event` / `fsync_delay_valid` | 当前样本的 FSYNC 事件与延迟有效性 |
 
-外部 GNSS、内部时间线、IMU FSYNC 和每条样本 UTC 有效性分别判断。
-不要把 `fsync_event=true` 等同于外部授时成功，也不要从外部 GNSS 未锁定推断 IMU 未同步。
+外部授时锁定、公共时间域和 IMU 内部对齐分别判断。
+不要把 `fsync_event=true` 或 `timestamp_synced=true` 等同于外部授时成功，
+也不要从外部 GNSS 未锁定推断 IMU 未对齐。
+
+### IMU publication and epoch / IMU 输出与时间域
+
+当前配套固件只输出已经对齐设备内部时间基准的 IMU 样本。启动、重连或重新对齐时，
+该路 IMU 可以暂时没有输出；未对齐的历史样本不会随后补发，也不会阻塞其他相机或传感器。
+首条数据的等待时间不是固定值，读取超时应按[独立数据流](stream-resilience.md)处理。
+
+`timestamp_synced` 表示测量时间已对齐公共设备时间线，不代表已经取得日历时间。
+没有建立 UTC 时，`timestamp_us` 可为设备启动后的相对微秒；不得仅凭该标志或数值大小
+把它标记为 Unix UTC。确认时间域时结合设备授时状态，录制时保留时间域元数据。
+已建立 UTC 后的内部保持也不等于外部 GNSS 仍然锁定。
+
+The current matching firmware publishes only IMU samples aligned to the common
+device timeline. Startup/re-alignment can temporarily withhold that IMU without
+blocking other streams; withheld samples are not replayed. `timestamp_synced`
+is an alignment flag, **not independent evidence of UTC**. Without an established
+UTC epoch, retain boot-relative time. Check timing status and dataset epoch
+metadata before combining measurements with external UTC data.
+
+This behavior requires the current 0.4.27 firmware; replacing SDK libraries alone
+does not change an older device. Public fields and ABI remain unchanged.
 
 Heartbeat 只提供 RK 系统时间，不携带其他设备状态：
 

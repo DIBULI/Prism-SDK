@@ -37,13 +37,17 @@ continue independently.
 
 ## Sensor Board and recordings
 
-The corresponding FPGA firmware accepts any initialized camera subset. A
-source that stops producing frame boundaries is excluded after two seconds
-(at the production 100 MHz AXI clock). Membership changes realign the camera
-ring; healthy streams can therefore have a bounded recovery gap. Existing
-in-flight AXI operations finish before a slot can be reused. The fixed internal
-carrier keeps four slots; missing slots have zero exposure and zero payload,
-and Agent never exports these slots as JPEG images.
+The matching firmware accepts any initialized camera subset. Detecting a lost
+camera and restoring the active set can cause a bounded recovery gap. Missing
+slots contain no usable image; do not repeat an old frame as a replacement.
+Unified exposure uses active-camera feedback, and a missing camera does not
+indefinitely hold exposure or gain updates on the others.
+
+The current firmware also withholds each IMU's samples until they are internally
+aligned. Temporary IMU silence during startup/re-alignment does not stop other
+streams. Withheld samples are not replayed. Internal alignment does not require
+GPS and must not be mistaken for UTC lock; see [time semantics](time-sync.md).
+Use the current matching firmware package for these behaviors.
 
 Viewer/Web show missing-source warnings and keep acquisition running. They
 write only received data and mark recordings with missing camera sets or
