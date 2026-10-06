@@ -27,6 +27,8 @@ inline constexpr uint32_t kWaitForever = UINT32_MAX;
 // single RK-local capture connection. Uses the same cursor/session/result model.
 GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0,
     const std::string& control_socket="/run/prism/control.sock", uint32_t timeout_ms=500);
+GnssRawBatch gnssRaw(uint64_t cursor=0, uint64_t session=0,
+    const std::string& control_socket="/run/prism/control.sock", uint32_t timeout_ms=500);
 
 // Concurrent maintenance side channel; never opens the capture Client.
 // Starting requires root on RK. Read-only status is available to local users.
@@ -152,6 +154,7 @@ class Client {
   GnssTimingStatus gnssTimingStatus();
   GnssReceptionStatus gnssReceptionStatus();
   GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
+  GnssRawBatch gnssRaw(uint64_t cursor=0, uint64_t session=0);
   RtkCorrectionStatus rtkCorrectionStatus();
   RtkCorrectionStatus beginRtkCorrections();
   // Raw RTCM2.x/RTCM3 bytes, automatically split into <=16 KiB commands.
@@ -213,6 +216,14 @@ class Client {
   // Same idle-only hardware operation and result as the Host SDK.
   LidarPowerStatus lidarPowerStatus(LidarModel model,uint32_t timeout_ms=3000) {
     return ::prism::detail::lidarPowerCommand(*this,model,0,timeout_ms);
+  }
+  LidarSpeedStatus lidarSpeedStatus(LidarModel model,uint32_t timeout_ms=3000) {
+    return ::prism::detail::lidarSpeedCommand(*this,model,0,timeout_ms);
+  }
+  LidarSpeedStatus setLidarSpeedMode(LidarModel model,LidarSpeedMode mode,uint32_t timeout_ms=5000) {
+    if(mode!=LidarSpeedMode::Normal && mode!=LidarSpeedMode::Low)
+      throw std::invalid_argument("select Normal or Low motor speed");
+    return ::prism::detail::lidarSpeedCommand(*this,model,static_cast<uint8_t>(mode),timeout_ms);
   }
   LidarPowerStatus setLidarStandby(LidarModel model,bool standby,uint32_t timeout_ms=10000) {
     return ::prism::detail::lidarPowerCommand(*this,model,standby?2:1,timeout_ms);

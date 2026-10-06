@@ -164,7 +164,7 @@ DeviceInfo Client::deviceInfo();
 | `imu_receiving_mask`、`imu_time_synced_mask`、`imu_init_error_mask` | 各 IMU 的接收、内部时间对齐和初始化错误状态 |
 | `imu_init_error_reason[0..1]` | 各 IMU 初始化失败的具体原因：WHO_AM_I、配置读回、FIFO 总线、样本超时或未知 |
 | `detected_camera_count`、`camera_present_mask` | PL 中 SC130GS I2C 初始化成功的相机数量和位掩码；停止采集时仍有效，也可以报告部分安装 |
-| `camera_streaming_mask` | RK carrier/ISP/JPEG 持续生成完整四路帧组时为 `0x0f`。四帧主机 credit 耗尽期间沿用最近一次健康状态，因为 USB 主机反压时无法继续观察生产端；不会报告部分传输 |
+| `camera_streaming_mask` | bit 0..3 独立表示各相机最近是否产生完整图像；单路缺失或停帧时可以报告部分位掩码。USB 主机反压期间保留最近观察状态，不把消费者阻塞误报为相机硬件故障 |
 | `sensor_board_error_code`、`sensor_board_error_flags`、`sensor_board_error` | sensor-board/相机流水线当前故障分类、机器可读标志和可读原因；覆盖相机/TC 初始化、相机运行、DDR FIFO/AXI、TC 下溢/时钟丢失、相机未全部就绪、控制链路离线及四路帧流停滞。`0x01000000` 仅在有主机 credit 时，首帧超过 5 秒仍未产生，或后续完整帧组超过 4 秒未产生时置位；USB 主机反压不计为 sensor-board 故障 |
 | `product_serial` | 产品/USB gadget 序列号 |
 | `imu_fps`、`camera_fps` | 当前配置的 IMU 和 camera 帧率 |

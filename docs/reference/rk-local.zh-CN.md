@@ -82,9 +82,11 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
 | 持久化配置 | deviceConfiguration、saveDeviceConfiguration |
 | 运行时曝光 | cameraExposure、setExposureConfiguration、setCameraExposure、setAutoExposureTargetBrightness、cameraExposureLimits、setCameraExposureLimits |
 | GNSS/PPS/RTK | gnssTimingStatus、gnssReceptionStatus、gnssObservations、timeSyncRtkStatus、timeSyncRtkVersions、timeSyncPortStatus、setTimeSyncPortMode |
+| 接收机/CORS 原始字节 | gnssRaw；见[原始流说明](../guides/gnss-rtk.md#original-bytes) |
 | CORS 配置 / RTK 启停 | timeSyncCorsConfiguration、saveTimeSyncCorsConfiguration、startRtk、stopRtk |
 | 相机/IMU | startVideo1280x1024、startImu、stopVideo、stopImu、sendVideoAck |
 | LiDAR | startLidar、stopLidar、lidarStatus、lidarNetworkStatus、saveLidarNetworkConfiguration、probeLidarNetwork |
+| 雷达硬件控制 | lidarPowerStatus、setLidarStandby、lidarSpeedStatus、setLidarSpeedMode；见[型号限制](../guides/lidar.md) |
 | rover原始流 | startRoverRtcm、stopRoverRtcm |
 | Wi-Fi热点 | wifiHotspotStatus、setWifiHotspotEnabled |
 | 校时/升级 | synchronizeTimeNtpLike、synchronizeSystemTime、upgradeSystem |

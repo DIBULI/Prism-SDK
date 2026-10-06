@@ -17,3 +17,5 @@
 #include "prism/usb/timesync_port.hpp"
 #include "prism/usb/update.hpp"
 #include "prism/usb/wifi.hpp"
+
+#include "prism/usb/camera_assembler.hpp"

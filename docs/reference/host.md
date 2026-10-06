@@ -215,10 +215,10 @@ or IMU streaming is active.
 | --- | --- |
 | `usb_speed`, `usb3_connected` | Negotiated USB link speed and whether it is SuperSpeed or faster. |
 | `detected_imu_count`, `imu_present_mask` | IMUs detected by sensor-board. |
-| `imu_receiving_mask`, `imu_time_synced_mask`, `imu_init_error_mask` | Per-IMU receive, UTC-sync and initialization state. |
+| `imu_receiving_mask`, `imu_time_synced_mask`, `imu_init_error_mask` | Per-IMU receive, internal time-alignment and initialization state; alignment alone does not imply external UTC lock. |
 | `imu_init_error_reason[0..1]` | Actionable reason for each IMU initialization failure: WHO_AM_I, configuration readback, FIFO bus, sample timeout, or unknown. |
 | `detected_camera_count`, `camera_present_mask` | Cameras whose SC130GS I2C initialization completed in PL. This remains valid while capture is stopped and may report a partial population. |
-| `camera_streaming_mask` | `0x0f` while the RK carrier/ISP/JPEG pipeline continues to produce complete four-camera frame sets. A previously healthy stream remains `0x0f` while four-frame host credit is exhausted, because no additional producer observation is possible under host USB back-pressure. Partial masks are never published. |
+| `camera_streaming_mask` | Bit 0..3 reports each camera's recent complete-image production independently. Partial masks are valid when a camera is missing or stalled. USB host back-pressure preserves the last observed state rather than misclassifying a blocked producer as a hardware fault. |
 | `sensor_board_error_code`, `sensor_board_error_flags`, `sensor_board_error` | Current sensor-board/camera-pipeline failure classification, machine-readable flags, and readable detail. Covers camera/TC initialization, camera runtime, DDR FIFO/AXI, TC underflow/clock loss, missing cameras, an offline control link, and a four-camera production stall. Bit `0x01000000` is asserted after five seconds without the first produced frame set or four seconds without a subsequent set while host credit is available. Host USB ACK back-pressure is not classified as a sensor-board fault. |
 | `product_serial` | Product/USB gadget serial number. |
 | `imu_fps`, `camera_fps` | Current configured IMU and camera rates. |

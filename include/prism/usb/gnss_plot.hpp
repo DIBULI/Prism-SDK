@@ -17,26 +17,13 @@ inline std::vector<std::string> split(const std::string& s,char sep=',') {
   std::vector<std::string> r;size_t at=0;
   for(;;){auto e=s.find(sep,at);r.push_back(s.substr(at,e-at));if(e==s.npos)return r;at=e+1;}
 }
-#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 11
-// Older GCC versions misdiagnose the disengaged optional payload after
-// inlining this stream parser. Keep the call boundary, not a warning override.
-__attribute__((noinline))
-#endif
 inline std::optional<double> number(const std::string& s,double low=-1e12,double high=1e12) {
-  std::istringstream in(s);in.imbue(std::locale::classic());
-  // Initialize the payload before extraction, including invalid input paths.
-  std::optional<double> result{0.0};
-  in>>std::noskipws>>*result;
-  if(!in||!in.eof()||!std::isfinite(*result)||*result<low||*result>high)result.reset();
-  return result;
+  std::istringstream in(s);in.imbue(std::locale::classic());double x=0;
+  in>>std::noskipws>>x;if(!in||!in.eof()||!std::isfinite(x)||x<low||x>high)return {};return x;
 }
 inline int integer(const std::string& s,int low,int high) {
   auto n=number(s,low,high);return n&&std::floor(*n)==*n?int(*n):-1;
 }
-#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 11
-// The same disengaged-optional inlining issue affects coordinate returns.
-__attribute__((noinline))
-#endif
 inline std::optional<double> coordinate(const std::string& s,const std::string& hemi,bool lat) {
   auto n=number(s,0,lat?9000:18000);if(!n)return {};
   if(hemi!=(lat?"N":"E")&&hemi!=(lat?"S":"W"))return {};

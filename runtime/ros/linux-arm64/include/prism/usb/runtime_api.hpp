@@ -120,4 +120,15 @@ struct LidarPowerRuntimeApi {
 };
 using GetLidarPowerRuntimeApiFunction = const LidarPowerRuntimeApi* (*)(uint32_t);
 
+// Optional extension; does not change the base or power API ABI.
+constexpr uint32_t kLidarSpeedRuntimeApiVersion = 1;
+inline constexpr char kLidarSpeedRuntimeApiEntryPoint[] = "prism_usb_sdk_get_lidar_speed_api";
+struct LidarSpeedRuntimeApi {
+  uint32_t abi_version;
+  uint32_t struct_size;
+  LidarSpeedStatus (*query)(Client*, LidarModel, uint32_t);
+  LidarSpeedStatus (*set_mode)(Client*, LidarModel, LidarSpeedMode, uint32_t);
+};
+using GetLidarSpeedRuntimeApiFunction = const LidarSpeedRuntimeApi* (*)(uint32_t);
+
 }  // namespace prism

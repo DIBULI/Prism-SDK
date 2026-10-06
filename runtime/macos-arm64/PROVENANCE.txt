@@ -1,6 +1,5 @@
 SDK_VERSION=1.2.0
 ARCH=macos-arm64
-BINARY_STATUS=unchanged-during-documentation-refresh
-DEPLOYMENT_TARGET=13.0
+BUILD=matched-runtime-refresh
 MIN_MACOS=13.0
 LIBUSB=1.0.30

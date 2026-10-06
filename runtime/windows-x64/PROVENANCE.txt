@@ -1,4 +1,5 @@
 SDK_VERSION=1.2.0
 ARCH=windows-x64
-RUNTIME_API=18
-BINARY_STATUS=previously-validated-compatible-runtime-retained
+BUILD=matched-runtime-refresh
+TOOLCHAIN=MSVC
+MIN_WINDOWS=10

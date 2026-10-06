@@ -14,9 +14,11 @@
 #include "prism/usb/gnss_timing.hpp"
 #include "prism/usb/gnss_reception.hpp"
 #include "prism/usb/gnss_observation.hpp"
+#include "prism/usb/gnss_raw.hpp"
 #include "prism/usb/rtk.hpp"
 #include "prism/usb/telemetry.hpp"
 #include "prism/usb/lidar_power.hpp"
+#include "prism/usb/lidar_speed.hpp"
 #include "prism/usb/time_sync.hpp"
 #include "prism/usb/timesync_port.hpp"
 #include "prism/usb/update.hpp"
@@ -120,6 +122,7 @@ class Client {
   GnssReceptionStatus gnssReceptionStatus();
   // Independent cursor, no stream ownership, no CORS/GNSS configuration writes.
   GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
+  GnssRawBatch gnssRaw(uint64_t cursor=0, uint64_t session=0);
 
   // Runtime-only exposure control. These values are not persisted and may be
   // read or changed while acquisition is active. Automatic exposure uses one
@@ -158,6 +161,14 @@ class Client {
   // stopped explicitly first. Wake does not start SDK reception; no persistence.
   LidarPowerStatus lidarPowerStatus(LidarModel model,uint32_t timeout_ms=3000) {
     return detail::lidarPowerCommand(*this,model,0,timeout_ms);
+  }
+  LidarSpeedStatus lidarSpeedStatus(LidarModel model,uint32_t timeout_ms=3000) {
+    return detail::lidarSpeedCommand(*this,model,0,timeout_ms);
+  }
+  LidarSpeedStatus setLidarSpeedMode(LidarModel model,LidarSpeedMode mode,uint32_t timeout_ms=5000) {
+    if(mode!=LidarSpeedMode::Normal && mode!=LidarSpeedMode::Low)
+      throw std::invalid_argument("select Normal or Low motor speed");
+    return detail::lidarSpeedCommand(*this,model,static_cast<uint8_t>(mode),timeout_ms);
   }
   LidarPowerStatus setLidarStandby(LidarModel model,bool standby,uint32_t timeout_ms=10000) {
     return detail::lidarPowerCommand(*this,model,standby?2:1,timeout_ms);

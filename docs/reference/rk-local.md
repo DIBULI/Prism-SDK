@@ -90,9 +90,11 @@ types and defaults. Compile tests compare same-named public interfaces and param
 | Persistent configuration | deviceConfiguration, saveDeviceConfiguration |
 | Runtime exposure | cameraExposure, setExposureConfiguration, setCameraExposure, setAutoExposureTargetBrightness, cameraExposureLimits, setCameraExposureLimits |
 | GNSS/PPS/RTK | gnssTimingStatus, gnssReceptionStatus, gnssObservations, timeSyncRtkStatus, timeSyncRtkVersions, timeSyncPortStatus, setTimeSyncPortMode |
+| Original receiver/CORS bytes | gnssRaw; see [original streams](../guides/gnss-rtk.md#original-bytes) |
 | CORS configuration / RTK control | timeSyncCorsConfiguration, saveTimeSyncCorsConfiguration, startRtk, stopRtk |
 | Camera/IMU | startVideo1280x1024, startImu, stopVideo, stopImu, sendVideoAck |
 | LiDAR | startLidar, stopLidar, lidarStatus, lidarNetworkStatus, saveLidarNetworkConfiguration, probeLidarNetwork |
+| LiDAR hardware controls | lidarPowerStatus, setLidarStandby, lidarSpeedStatus, setLidarSpeedMode; [model limits](../guides/lidar.md) |
 | Raw rover stream | startRoverRtcm, stopRoverRtcm |
 | Wi-Fi hotspot | wifiHotspotStatus, setWifiHotspotEnabled |
 | Time/upgrade | synchronizeTimeNtpLike, synchronizeSystemTime, upgradeSystem |

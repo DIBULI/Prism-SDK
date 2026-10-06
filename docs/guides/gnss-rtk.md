@@ -9,6 +9,7 @@ here. 本页集中说明定位、账号、启停、版本及接收诊断，不�
 - [CORS configuration and RTK start/stop / CORS 配置与启停](#cors-control)
 - [Module firmware versions / 模块固件版本](#module-versions)
 - [Reception diagnostics / 接收诊断](#reception-diagnostics)
+- [Original observations, ephemerides and CORS / 原始观测、星历与差分](#original-bytes)
 
 TimeSync input/output selection and clock validity are documented separately in
 [time synchronization / 时间同步](time-sync.md).
@@ -25,6 +26,7 @@ an RTK solver, manufacture FIX states, or provide a separate smoothed position.
 | Live GGA, fix, satellites, PPS/timing freshness | `gnssTimingStatus()` |
 | UART/framing/parse diagnostics | `gnssReceptionStatus()` |
 | Receiver reports for sky and positions | `gnssObservations(cursor, session)` |
+| Original receiver binary/text and module CORS bytes | `gnssRaw(cursor, session)` |
 | Module link, 4G, CORS counters and execution state | `timeSyncRtkStatus()` |
 | Application / bootloader versions | `timeSyncRtkVersions()` |
 | Saved CORS endpoint; password never returned | `timeSyncCorsConfiguration()` |
@@ -62,6 +64,7 @@ Agent 转发接收机数据，不再内置 RTK 解算器；SDK 不生成 FIX，�
 | 实时 GGA、定位、卫星数和 PPS/授时 | `gnssTimingStatus()` |
 | 串口接收、帧和解析诊断 | `gnssReceptionStatus()` |
 | 天空图及接收机定位报文 | `gnssObservations(cursor, session)` |
+| 接收机原始二进制/文本及模块 CORS 字节 | `gnssRaw(cursor, session)` |
 | 模块连接、4G、CORS 计数和控制执行状态 | `timeSyncRtkStatus()` |
 | 应用/引导程序版本 | `timeSyncRtkVersions()` |
 | 已存 CORS 配置，不返回密码 | `timeSyncCorsConfiguration()` |
@@ -83,6 +86,34 @@ RTK 示例使用说明见源码顶部的英文注释：[CORS 与启停](../../ex
 [连续读取结果](../../examples/rtk_position.cpp)。
 详见 [CORS/RTK 控制](#cors-control)、[TimeSync](time-sync.md#port-modes)、
 [接收诊断](#reception-diagnostics)和[只读示例](../../examples/gnss_rtk_status.cpp)。
+
+<a id="original-bytes"></a>
+
+## Original observations, ephemerides and CORS / 原始观测、星历与差分
+
+Both clients provide `GnssRawBatch gnssRaw(uint64_t cursor=0, uint64_t session=0)`.
+Use a cursor/session independent of `gnssObservations`; return both from the last
+batch in the next query. Drain while `more` is true. Check `gap`, record `flags`
+and `lost_bytes`; discard partial decoder frames on gaps or session changes.
+An unknown loss amount is not proof of zero loss. Cursors refer to a bounded
+cache, not permanent storage. Each record is a fragment, not necessarily a frame.
+
+`Receiver` records preserve the enabled original text/binary output, including
+observations and ephemerides. `CorsRtcm` records preserve module-received,
+CRC-accepted RTCM3; they exclude login headers and credentials and do not prove
+that a correction was applied. Nothing is synthesized when the receiver does
+not emit a message. Ephemerides may need a longer recording interval.
+
+Receive indexes use the device monotonic clock, not measurement UTC. Original
+epochs remain inside the receiver messages. Raw streams can contain precise
+location. Querying does not start CORS, change receiver output or record files;
+applications own recording and must preserve the gap metadata.
+
+两种 SDK 的 `gnssRaw()` 接口一致，游标/会话与文本观测接口分开维护。
+字节片段保留启用的原始观测、星历及模块收到并通过 CRC 的 RTCM3；
+不伪造缺失内容，也不等于差分已被接收机应用。接收索引不是测量 UTC。
+应用自行录制，并在缺失或会话变化时重置残帧解析；调用接口不会启动 CORS。
+
 
 <a id="cors-control"></a>
 

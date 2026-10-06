@@ -7,6 +7,7 @@ use the same SDK lifecycle; model-specific point metadata is described below.
 
 - [Capture versus hardware power control](#capture-vs-power)
 - [Standby, wake, confirmation and timeouts](#standby-wake)
+- [MID360S normal/low speed](#speed)
 - [MID360 / MID360S line metadata](#livox-line)
 - [XT32 preparation and per-point timestamps](#xt32)
 
@@ -82,6 +83,26 @@ Protocol fixtures cover query, standby, wake, idempotency, transition, rejection
 CRC/identity checks and timeout. Hardware power consumption is not measured by
 these APIs.
 
+<a id="speed"></a>
+
+## MID360S normal/low speed
+
+Both clients expose `lidarSpeedStatus(model, timeout_ms=3000)` and
+`setLidarSpeedMode(model, mode, timeout_ms=10000)`. Use model `Mid360S` and
+`LidarSpeedMode::Normal` or `LidarSpeedMode::Low`. Stop all capture streams first.
+These operations do not change network configuration or start acquisition.
+Readback, not a successful send alone, confirms the requested mode.
+
+This is model/firmware-specific: MID360 and XT32 are not accepted. Missing
+support or unconfirmed readback is an error, never silently treated as success.
+Do not assume that a setting survives power cycling; query after reconnecting.
+The matched SDK provides the version-1 speed extension while retaining Runtime
+API 18. Update the complete headers/runtime package together.
+
+MID360S 支持独立正常/低速切换，先停止全部采集，再设置并回读确认。
+MID360、XT32 不支持此接口；不要根据命令发送成功或重启前的状态推断当前转速。
+
+
 <a id="livox-line"></a>
 
 ## MID360 / MID360S point line
@@ -115,8 +136,8 @@ point records; it does not change their headers, timestamps or bandwidth.
 
 `serializeLidarPoints()` preserves line and validity in recorded data. ROS
 PointCloud2 publishes UINT8 `line` at offset 14 and UINT8 `line_valid` at offset
-15, retaining the 20-byte point stride and UINT32 nanosecond `offset_time` at
-offset 16. RK Web records the original payload, including these bytes.
+15; current ROS clouds use a 28-byte point stride and UINT32 nanosecond
+`offset_time` at offset 16. RK Web records the original payload, including line metadata.
 
 XT32 remains unchanged: use `ring` 0..31 and explicit `offset_ns`; its MID
 `line_valid` is false. Do not substitute MID line for XT32 ring.

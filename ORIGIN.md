@@ -8,7 +8,7 @@ documentation. Device firmware is distributed separately.
 - Host SDK, RK-local SDK and required Agent version: **1.2.0**.
 - Matching Sensor Board firmware: **0.4.27**. Use the current firmware package
   for internally aligned IMU output and missing-camera/shared-exposure fixes.
-- Runtime API: **18**. RTK-module control, raw dataset and LiDAR power extensions: **1**.
+- Runtime API: **18**. RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
 - Update headers and libraries together and rebuild consumers. A matching version
   number alone does not establish that an older device has every current feature.
 
@@ -19,14 +19,15 @@ documentation. Device firmware is distributed separately.
 - RK-local: Linux ARM64 static library with PIC; pthreads/dl and system C/C++
   runtimes are required. Do not link Host and RK-local static libraries together.
 - macOS: Apple Silicon, macOS 13+, bundled libusb. No Intel package.
-- Windows: x64/MSVC, Windows 10/11. The compatible, previously validated DLL
-  is retained; a documentation refresh does not imply that it was rebuilt.
+- Windows: x64/MSVC, Windows 10/11.
 
 ## Package verification
 
 `SHA256SUMS` verifies the distributed files; Release archives also have download
 checksums. Per-platform `PROVENANCE.txt` records public compatibility information.
-This documentation refresh leaves runtime libraries unchanged. It does not
-upgrade firmware, restart devices or establish new physical-hardware validation.
+Headers and all platform libraries are updated together, including raw GNSS
+reading and LiDAR speed control. Installing this SDK does not upgrade device
+firmware or restart devices. Platform builds and package checks are separate
+from physical-hardware validation.
 
 [Setup](docs/getting-started/README.md) · [API differences](docs/reference/rk-local.md)
