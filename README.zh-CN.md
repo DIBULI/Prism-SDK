@@ -1,5 +1,10 @@
 # Prism SDK 1.2.0
 
+**分层许可：**公开头文件、示例和集成文件采用 Apache-2.0；
+SDK 核心库保持闭源；允许随应用分发未修改的二进制并保留版权及许可，
+具体以[SDK 二进制许可](licenses/Prism-SDK-Binary-LICENSE.txt)为准。详见[许可范围](LICENSE)、
+[Apache-2.0 正文](licenses/Apache-2.0.txt)与[第三方声明](THIRD_PARTY_NOTICES.md)。
+
 [English](README.md) · [接口文档](docs/README.zh-CN.md)
 
 本仓库发布 Host SDK 和 RK-local C++17 SDK 的公共头文件、编译好的库、

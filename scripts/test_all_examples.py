@@ -29,6 +29,13 @@ def run(command: list[str]) -> None:
 
 def verify_package() -> None:
     check_docs(ROOT)
+    for relative in (
+        "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md",
+        "licenses/Apache-2.0.txt", "licenses/Prism-SDK-Binary-LICENSE.txt",
+    ):
+        path = ROOT / relative
+        if not path.is_file() or path.stat().st_size == 0:
+            raise RuntimeError(f"missing package license/notice: {relative}")
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
         raise RuntimeError("invalid SDK VERSION")

@@ -1,0 +1,31 @@
+Prism SDK is a mixed-license binary distribution.
+
+The SDK CORE IMPLEMENTATION AND ITS COMPILED LIBRARIES REMAIN PROPRIETARY
+AND CLOSED-SOURCE. They are NOT licensed under Apache-2.0.
+Their use, static/dynamic linking and redistribution with applications are
+governed by licenses/Prism-SDK-Binary-LICENSE.txt. Redistribution of unmodified
+SDK binaries with applications is permitted under that license.
+
+The following project-owned public source/interface materials are licensed
+under the Apache License, Version 2.0 (full text: licenses/Apache-2.0.txt):
+
+  * include/ -- the distributed public headers, including inline helpers;
+  * examples/, scripts/, cmake/, docs/ -- public examples, build/validation
+    scripts, CMake integration files and documentation;
+  * rk-local-sdk/ -- the published example/test source and CMake integration
+    only; this does not license or disclose the SDK implementation;
+  * runtime/ros/*/include/ -- copies of the distributed public headers;
+  * runtime/ros/*/lib/cmake/ and runtime/ros/*/lib/udev/ -- integration files;
+  * the repository's project-owned top-level CMake/Markdown files and
+    .github/, .gitignore and .gitattributes build/repository configuration.
+
+Separately attributed files and third-party components retain their own
+licenses. See THIRD_PARTY_NOTICES.md and the license texts accompanying them.
+
+No .so, .dylib, .dll, .a, .lib, .exe, or other compiled SDK implementation
+is covered by the Apache source grant above, regardless of where it is copied
+or whether it is linked statically or dynamically into another program.
+Compilation of the Apache-licensed examples does not relicense SDK code
+linked into those programs.
+
+No SDK implementation source or trademark rights are granted by this notice.

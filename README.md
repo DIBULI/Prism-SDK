@@ -1,5 +1,12 @@
 # Prism SDK 1.2.0
 
+**Mixed licensing:** public headers, examples and integration files are
+Apache-2.0; the SDK core libraries remain proprietary and closed-source.
+Unmodified SDK binaries may be redistributed with applications under the
+[SDK binary license](licenses/Prism-SDK-Binary-LICENSE.txt), retaining notices.
+See [scope](LICENSE), [Apache-2.0](licenses/Apache-2.0.txt) and
+[third-party notices](THIRD_PARTY_NOTICES.md).
+
 [简体中文](README.zh-CN.md) · [API documentation](docs/README.md)
 
 Binary distribution of the Host SDK and RK-local C++17 SDK. Includes public
