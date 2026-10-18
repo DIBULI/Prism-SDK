@@ -1,6 +1,0 @@
-SDK_VERSION=1.2.0
-ARCH=linux-arm64
-BUILD=matched-runtime-refresh
-BASELINE=Ubuntu 20.04
-GLIBC_MIN=2.31
-RKLOCAL_STATIC_PIC=1

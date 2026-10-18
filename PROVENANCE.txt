@@ -1,0 +1,4 @@
+AGENT_BASE=cef369fd0fa0e2999e9175f14b83373d8a6b10d8
+SDK_VERSION=1.2.1
+CHANGES=PPS default 5000us; version and regression tests only
+BUILD=Ubuntu20.04 GCC9, static OpenSSL, dynamic libusb

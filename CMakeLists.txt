@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
-
-if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
-    CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND
-   NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING
-    "Minimum macOS version supported by the packaged SDK")
+project(PrismSdkExamples VERSION 1.2.1 LANGUAGES C CXX)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+  message(FATAL_ERROR "This maintenance distribution is Linux x64 only")
 endif()
-
-project(PrismSdkExamples VERSION 1.2.0 LANGUAGES C CXX)
-
-include(CTest)
-
-add_subdirectory(examples)
+list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/runtime/ros/linux-x64")
+find_package(PrismUsbSdk 1.2.1 EXACT CONFIG REQUIRED)
+file(GLOB examples CONFIGURE_DEPENDS examples/*.cpp)
+foreach(source IN LISTS examples)
+  get_filename_component(name "${source}" NAME_WE)
+  add_executable(prism-${name} "${source}")
+  target_link_libraries(prism-${name} PRIVATE Prism::UsbSdk)
+endforeach()

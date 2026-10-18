@@ -1,8 +1,0 @@
-/build/
-/build-*/
-/dist/
-/.idea/
-/.vscode/
-.DS_Store
-__pycache__/
-*.pyc
