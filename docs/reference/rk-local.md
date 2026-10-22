@@ -30,7 +30,7 @@ Web Client may remain connected. Starting locally requires root. See the
 
 ## Current version
 
-Agent and both SDKs use **1.2.0**, protocol **1**. Main Runtime ABI is **18**.
+Agent and both SDKs use **1.3.0**, protocol **1**. Main Runtime ABI is **19**.
 Use matching current headers/libraries and rebuild consumers. Include
 `<prism/rklocal_sdk.hpp>`; the public API is C++17.
 
@@ -134,8 +134,10 @@ types and defaults. Compile tests compare same-named public interfaces and param
   Host and local static archives in one executable (shared codec symbols).
   Choose one backend per executable. Local packages target Linux ARM64;
   Agent enforces socket permissions and capture ownership.
-- Joint ZIP upgrades require manifest.ini, prism-agent and BOOT.BIN. Local reconnects
-  to the same socket; Host re-enumerates USB. A different Agent version needs matching SDK.
+- Joint ZIP upgrades require manifest.ini, prism-agent and BOOT.BIN; format v2 adds
+  applications.zip. See the [full update guide](../guides/firmware-update.md) for
+  capability and restart requirements. Local reconnects to the same socket;
+  Host re-enumerates USB. A different Agent version needs matching SDK.
 
 ## Control operations
 
@@ -249,7 +251,7 @@ milliseconds of day. Ellipsoidal height = MSL altitude + geoid separation.
 
 Use `gnssObservations(cursor, session)` for receiver-native GGA/ADRNAV/GST messages.
 Check receiver solution type, validity and freshness. `timeSyncRtkStatus()` reports
-module control state; running does not imply FIX. Use matching headers and ABI 18 libraries.
+module control state; running does not imply FIX. Use matching headers and ABI 19 libraries.
 
 ## CORS configuration and receiver control
 

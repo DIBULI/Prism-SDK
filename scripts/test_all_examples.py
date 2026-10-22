@@ -48,6 +48,20 @@ def verify_package() -> None:
     for headers in (ROOT / "include", ROOT / "runtime/ros/linux-x64/include", ROOT / "runtime/ros/linux-arm64/include"):
         if (headers / "prism/usb/rtk_navigation.hpp").exists():
             raise RuntimeError("retired navigation header must not be published")
+    host_headers = {p.relative_to(ROOT / "include"): p.read_bytes()
+                    for p in (ROOT / "include").rglob("*.hpp")
+                    if p.name != "rklocal_sdk.hpp"}
+    for arch in ("x64", "arm64"):
+        prefix = ROOT / "runtime/ros" / f"linux-{arch}" / "include"
+        installed = {p.relative_to(prefix): p.read_bytes() for p in prefix.rglob("*.hpp")}
+        if installed != host_headers:
+            raise RuntimeError(f"Host/ROS headers differ for {arch}")
+    for relative in ("prism/usb/runtime_api.hpp", "prism/usb/network_runtime_api.hpp"):
+        contents = (ROOT / "include" / relative).read_text(encoding="utf-8")
+        pattern = (r"kRuntimeApiVersion\s*=\s*19" if "network_" not in relative
+                   else r"kNetworkRuntimeApiVersion\s*=\s*3")
+        if not re.search(pattern, contents):
+            raise RuntimeError(f"SDK 1.3.0 ABI mismatch in {relative}")
     manifest = ROOT / "SHA256SUMS"
     checked = 0
     for line_number, line in enumerate(manifest.read_text(encoding="utf-8").splitlines(), 1):
@@ -109,6 +123,8 @@ def expected_targets(kind: str) -> list[str]:
             "prism-windows-runtime-api-examples",
         ]
     targets = [
+        "prism-network-connect",
+        "prism-profile-raw12-decode",
         "prism-device-info-time-sync",
         "prism-camera-imu-capture",
         "prism-client-api-examples",
@@ -134,6 +150,7 @@ def configure(build_dir: Path, kind: str, generator: str | None) -> None:
             [
                 f"-DCMAKE_BUILD_TYPE={CONFIGURATION}",
                 "-DCMAKE_CXX_FLAGS=-Werror",
+                "-DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON",
             ]
         )
         if kind == "macos":

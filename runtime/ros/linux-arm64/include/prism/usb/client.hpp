@@ -1,4 +1,5 @@
 #pragma once
+#include "prism/usb/network.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -40,6 +41,10 @@ class Client {
                                            uint16_t pid = kDefaultPid);
   static Client openFirst(uint16_t vid = kDefaultVid, uint16_t pid = kDefaultPid);
   static Client open(const DeviceInfo& device);
+  static Client openNetwork(const NetworkOptions& options);
+  void openNetworkDevice(const NetworkOptions& options);
+  bool isNetwork() const;
+  uint32_t networkCameraMaxFps() const; // Negotiated 10/20; 0 for USB/closed.
 
   // Explicit device lifecycle for applications that keep one Client object.
   // The static factories provide the same strict version-checked lifecycle.
@@ -58,6 +63,7 @@ class Client {
   HelloInfo hello();
   // Returns a fresh device status snapshot. Unlike heartbeat, this contains
   // device status and can be queried while camera/IMU streams are active.
+  // device_model uses cached Agent identity (v5); legacy v4 returns Unknown.
   DeviceInfo deviceInfo();
   DeviceVersions deviceVersions();
   TimeInfo boardTime();
@@ -144,7 +150,17 @@ class Client {
 
   // Camera and IMU share one aggregate capture session. Video start enables
   // both paths; startImu confirms the IMU selection/rate for that session.
+  // Network sessions cap camera delivery at20 FPS wired or10 FPS Wi-Fi. fps=0 resolves the
+  // saved default on the Agent before capping; persistent/USB rates are intact.
   VideoStatus startVideo1280x1024(uint32_t fps = 0);
+  VideoStatus startProfileVideo(uint32_t fps = 0);
+  VideoStatus startProfileVideoGpu(uint32_t fps = 0);
+  // Strict four-camera RAW12/GPU capture (options=7). No-argument entry stays
+  // at 1 FPS for binary/source compatibility. Explicit 2 needs capable firmware.
+  // Does not change persistent configuration. Mixed 1315 uses
+  // startProfileVideoGpu (options=3); legacy 41M3 uses options=0.
+  VideoStatus startPrism415mVideo();
+  VideoStatus startPrism415mVideo(uint32_t fps);
   // Either stop method stops both Camera and IMU acquisition.
   void stopVideo();
   ImuStreamStatus startImu(uint32_t sensor_count = 2,
@@ -193,6 +209,8 @@ class Client {
   RoverRtcmStatus startRoverRtcm();
   RoverRtcmStatus stopRoverRtcm();
 
+  // A read timeout preserves an incomplete USB frame for the next readFrame
+  // or command call. Serialize Client reads/commands; ambiguous I/O requires close.
   Frame readFrame(uint32_t timeout_ms = 3000);
   Frame command(FrameType type, const std::vector<uint8_t>& payload = {},
                 uint32_t timeout_ms = 3000);
@@ -210,10 +228,11 @@ class Client {
   SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id = 0);
 
  private:
+  VideoStatus startVideoWithOptions(uint32_t fps, uint32_t options);
   UpgradeStatus upgradeAgentImage(
       const std::vector<uint8_t>& image,
       const UpgradeOptions& options,
-      const std::function<void(const UpgradeStatus&)>& progress);
+      const std::function<void(const UpgradeStatus&)>& progress, bool full_package = false);
   SensorBoardUpgradeStatus upgradeSensorBoardImage(
       const std::vector<uint8_t>& image,
       const UpgradeOptions& options,

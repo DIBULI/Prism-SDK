@@ -26,10 +26,11 @@
 - [推荐集成顺序](#推荐集成顺序)
 <!-- /page-toc -->
 
-本文档说明 Prism Agent SDK `1.2.0` 的 Host 生命周期与基础控制、数据流接口。
+本文档说明 Prism Agent SDK `1.3.0` 的 Host 生命周期与基础控制、数据流接口。
 Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的完整操作约束统一见：
 
 - [相机曝光与增益](../guides/camera.md)
+- [设备型号、明文 TCP 与独立 RAW12](../guides/network-raw.md)
 - [GNSS 结果、CORS 配置与 RTK 启停](../guides/gnss-rtk.md)
 - [时间同步与 TimeSync 模式](../guides/time-sync.md)
 - [雷达采集、待机/唤醒与逐点元数据](../guides/lidar.md)
@@ -43,7 +44,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 #include "prism/usb_sdk.hpp"
 ```
 
-> 当前线协议版本为 `1`，Agent、Host SDK 与 RK-local SDK 均为 `1.2.0`。Host SDK 与 agent 的语义版本必须完全一致。例如 Host SDK `1.2.0` 只接受 agent `1.2.0`。打开设备时 SDK 会自动执行严格的 `HELLO` 校验，版本不匹配时不会进入兼容模式。
+> 当前线协议版本为 `1`，Agent、Host SDK 与 RK-local SDK 均为 `1.3.0`。Host SDK 与 agent 的语义版本必须完全一致。例如 Host SDK `1.3.0` 只接受 agent `1.3.0`。打开设备时 SDK 会自动执行严格的 `HELLO` 校验，版本不匹配时不会进入兼容模式。
 
 ## 运行要求
 
@@ -55,7 +56,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 | macOS | libusb-1.0，SHA-256 使用系统 CommonCrypto；不需要 udev 规则 |
 | 默认 VID | `0x2207` |
 | 默认 PID | `0x1201` |
-| Host SDK | `1.2.0` |
+| Host SDK | `1.3.0` |
 | 线协议 | `1` |
 
 Linux 首次安装 udev 规则：
@@ -167,6 +168,7 @@ DeviceInfo Client::deviceInfo();
 | `camera_streaming_mask` | bit 0..3 独立表示各相机最近是否产生完整图像；单路缺失或停帧时可以报告部分位掩码。USB 主机反压期间保留最近观察状态，不把消费者阻塞误报为相机硬件故障 |
 | `sensor_board_error_code`、`sensor_board_error_flags`、`sensor_board_error` | sensor-board/相机流水线当前故障分类、机器可读标志和可读原因；覆盖相机/TC 初始化、相机运行、DDR FIFO/AXI、TC 下溢/时钟丢失、相机未全部就绪、控制链路离线及四路帧流停滞。`0x01000000` 仅在有主机 credit 时，首帧超过 5 秒仍未产生，或后续完整帧组超过 4 秒未产生时置位；USB 主机反压不计为 sensor-board 故障 |
 | `product_serial` | 产品/USB gadget 序列号 |
+| `device_model` | 缓存的已确认型号 `DeviceModel`；枚举或旧 v4 响应为 `Unknown`，用 `deviceModelName()` 显示，不按 USB 名称/IP 推断 |
 | `imu_fps`、`camera_fps` | 当前配置的 IMU 和 camera 帧率 |
 | `sensor_board_online` | 板间控制链路是否在有效超时窗口内 |
 | `sensor_board_time_synced` | sensor-board 当前是否具有有效 UTC 时间源 |
@@ -632,10 +634,10 @@ imu.stop();
 ## 系统升级
 
 `upgradeSystem()` 接受包含 Agent 和 Sensor Board 固件的完整 ZIP。
-新版 1.2.0 C++ SDK 另提供 `startSensorBoardUpdate()` 与 `sensorBoardUpdateStatus()`，
+新版 1.3.0 C++ SDK 另提供 `startSensorBoardUpdate()` 与 `sensorBoardUpdateStatus()`，
 用于 Agent 后台执行独立 Sensor Board 维护升级；先停止采集和录制，Agent/Web 保持运行。
 Host 与 RK-local 的方法及类型一致，RK-local 还提供不占用采集连接的同名自由函数。
-这组接口不扩展 Windows Runtime API v18 表。详见[维护接口](../guides/firmware-update.md#agent-managed-sensor-board-maintenance)。
+这组接口不扩展 Windows Runtime API v19 表。详见[维护接口](../guides/firmware-update.md#agent-managed-sensor-board-maintenance)。
 
 ```cpp
 SystemUpgradePackageInfo inspectSystemUpgradePackage(
@@ -664,13 +666,16 @@ const auto result = client.upgradeSystem(
     });
 ```
 
-升级 ZIP 必须包含：
+旧版 format v1 升级 ZIP 必须恰好包含：
 
 ```text
 manifest.ini
 prism-agent
 BOOT.BIN
 ```
+
+format v2 还包含 `applications.zip`，用于更新 Web/网络服务，且有不同的重启与验证要求；
+请参阅[完整升级说明](../guides/firmware-update.md)。
 
 若升级包内 agent 版本与当前 Host SDK 不同，升级后的 agent 会按设计拒绝旧 SDK。此时应关闭应用，并使用与新 agent 完全同版本的 Host SDK 重新连接。
 

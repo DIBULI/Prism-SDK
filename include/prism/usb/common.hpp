@@ -194,6 +194,22 @@ struct DeviceWifiInfo {
   std::string error;
 };
 
+enum class DeviceModel : uint8_t {
+  Unknown = 0,
+  Prism41M3 = 1,
+  Prism415M = 2,
+  Prism1315 = 3,
+};
+
+inline const char* deviceModelName(DeviceModel model) {
+  switch (model) {
+    case DeviceModel::Prism41M3: return "41M3";
+    case DeviceModel::Prism415M: return "415M";
+    case DeviceModel::Prism1315: return "1315";
+    default: return "Unknown";
+  }
+}
+
 struct DeviceInfo {
   std::wstring path;
   std::wstring serial_number;
@@ -227,6 +243,9 @@ struct DeviceInfo {
   uint16_t camera_fps = 0;
   std::string product_serial;
   DeviceWifiInfo wifi;
+  // Agent's verified, cached identity; enumeration/legacy v4 leaves Unknown.
+  // Independent of USB PID/name and current per-camera health masks.
+  DeviceModel device_model = DeviceModel::Unknown;
 };
 
 struct Frame {

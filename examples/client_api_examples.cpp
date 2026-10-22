@@ -122,6 +122,10 @@ prism::WifiHotspotStatus setWifiHotspot(
 }  // namespace prism_sdk_examples
 
 int main() {
+  if (prism::hostSdkVersion() != "1.3.0") {
+    std::cerr << "SDK headers/runtime version mismatch\n";
+    return 1;
+  }
   std::cout << "Compile-checked Client lifecycle, discovery, status, time, "
                "and Wi-Fi API examples. No device operation was performed.\n";
   return 0;

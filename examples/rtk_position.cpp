@@ -1,5 +1,5 @@
 /*
-Continuous RTK position example -- Prism-SDK 1.2.0
+Continuous RTK position example -- Prism-SDK 1.3.0
 =================================================
 Read-only: never starts/stops RTK, opens CORS, changes TimeSync mode, starts
 Camera/IMU/LiDAR capture or sets device time. No Agent/SDK library changes needed.

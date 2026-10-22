@@ -73,7 +73,7 @@ Automatic gain changes wait for applied feedback and are limited to at most
 **five updates per second**, with smaller steps near the brightness target and
 faster response to large lighting changes. Missing-camera recovery does not
 block gain updates for the remaining cameras. These behaviors require the
-current 0.4.27 firmware package, not merely an unchanged version string.
+current 0.5.0 firmware package, not merely an unchanged version string.
 
 All four physical TRIG0 widths and metadata exposure values match, including
 mode transitions: the largest per-camera readout guard is applied to **all**
@@ -88,7 +88,7 @@ and scene dynamic range are physical limits. Darker views may remain dark.
 
 Requires Sensor Board **EX4** support, exposure wire payload **v3** (44 bytes,
 field-mask bit 5; former reserved u16 at byte 10: bit 0 = unified) and matched
-SDK headers/libraries (**Runtime ABI 18**). EX3 retains independent mode. Mode
+SDK headers/libraries (**Runtime ABI 19**). EX3 retains independent mode. Mode
 changes are acknowledged by Sensor Board even when idle; an older board rejects
 EX4 and Agent leaves its previous mode intact instead of reporting success.
 An idle mode change first applies the configured camera/IMU rates (without

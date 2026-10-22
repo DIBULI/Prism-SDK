@@ -33,8 +33,8 @@ waking, start capture explicitly when wanted. Read the
 
 These operations control the radar hardware, not just the application's receive
 stream. They require an Agent build containing the LiDAR power command extension;
-older 1.2.0 builds reject the new commands as unsupported. A version string alone
-does not establish support. Update the complete 1.2.0 package together.
+Agent builds without that extension reject these commands as unsupported. A version string alone
+does not establish support. Update the complete 1.3.0 package together.
 
 Host `prism::Client` and RK-local `prism::rklocal::Client` share the C++ API:
 
@@ -75,7 +75,7 @@ auto awake = client.setLidarStandby(model, false, 15000);
   I/O; the Agent serializes power control with capture changes and upgrades.
 - Host and RK-local share the C++ methods above. Windows runtime-loaded clients
   use the version-1 `prism_usb_sdk_get_lidar_power_api` extension with `query` and
-  `set_standby` callbacks. The existing RuntimeApi v18 layout remains unchanged.
+  `set_standby` callbacks. The existing RuntimeApi v19 layout remains unchanged.
   Check version, table size and function pointers before use; an absent extension
   is unsupported, not a successful operation.
 
@@ -97,7 +97,7 @@ This is model/firmware-specific: MID360 and XT32 are not accepted. Missing
 support or unconfirmed readback is an error, never silently treated as success.
 Do not assume that a setting survives power cycling; query after reconnecting.
 The matched SDK provides the version-1 speed extension while retaining Runtime
-API 18. Update the complete headers/runtime package together.
+API 19. Update the complete headers/runtime package together.
 
 MID360S 支持独立正常/低速切换，先停止全部采集，再设置并回读确认。
 MID360、XT32 不支持此接口；不要根据命令发送成功或重启前的状态推断当前转速。
@@ -142,7 +142,7 @@ PointCloud2 publishes UINT8 `line` at offset 14 and UINT8 `line_valid` at offset
 XT32 remains unchanged: use `ring` 0..31 and explicit `offset_ns`; its MID
 `line_valid` is false. Do not substitute MID line for XT32 ring.
 
-Use matching Runtime ABI **18** headers and libraries for both SDK transports.
+Use matching Runtime ABI **19** headers and libraries for both SDK transports.
 Rebuild applications; do not copy these headers over old binary SDK packages.
 
 <a id="xt32"></a>
@@ -157,7 +157,7 @@ the laser/motor. No LiDAR IMU events are produced; onboard IMU is unaffected.
 
 ### RK preparation
 
-Use the matching current Agent 1.2.0 package. Set the RK host IP/netmask and the
+Use the matching current Agent 1.3.0 package. Set the RK host IP/netmask and the
 actual LiDAR source IP with the LiDAR network configuration interface. The Agent
 accepts unicast to RK or broadcast UDP on port 2368, filtered by source and RK
 network interface. It does not change the LiDAR IP, destination, RPM or return mode.
@@ -212,7 +212,7 @@ in-memory type, not a wire/storage ABI.
 
 ### Binary compatibility
 
-Current Runtime API ABI is **18**. Use matching 1.2.0 headers/libraries and rebuild
+Current Runtime API ABI is **19**. Use matching 1.3.0 headers/libraries and rebuild
 applications. SDK and Agent semantic versions must match. XT32 explicit point
 times and Livox line/validity metadata are included; Livox v1/v2 frames are supported.
 

@@ -9,7 +9,7 @@
 - [配置、采集和升级](#配置采集和升级)
 - [Stream 包装类](#stream-包装类)
 - [Helper 和 parser](#helper-和-parser)
-- [Windows Runtime API v18](#windows-runtime-api-v18)
+- [Windows Runtime API v19](#windows-runtime-api-v19)
 <!-- /page-toc -->
 
 本手册按生命周期组织基础 SDK 调用示例。[Host 参考目录](../reference/host.zh-CN.md#api-quick-index)
@@ -41,7 +41,7 @@ using namespace std::chrono_literals;
 - [配置、采集、网络与升级](../../examples/configuration_api_examples.cpp)
 - [高级 Stream 封装](../../examples/stream_api_examples.cpp)
 - [helper 与全部公共解析器](../../examples/parser_api_examples.cpp)
-- [Windows Runtime API v18 全部 57 个入口](../../examples/windows_runtime_api_examples.cpp)
+- [Windows Runtime API v19 全部 57 个入口](../../examples/windows_runtime_api_examples.cpp)
 
 GitHub Actions 会在每个受支持平台上编译该平台适用的全部目录程序。
 
@@ -539,7 +539,7 @@ void parse_frame(const prism::Frame& frame) {
 严格 parser 会在 frame type、协议版本或 payload 大小错误时抛异常。`VideoChunkView`
 只在源 `Frame` 存活时有效；`VideoChunk` 拥有自己的字节 vector。
 
-## Windows Runtime API v18
+## Windows Runtime API v19
 
 <a id="example-windows-runtime"></a>
 
@@ -547,8 +547,8 @@ void parse_frame(const prism::Frame& frame) {
 
 完整可编译的 Windows loader 位于
 [`device_info_time_sync.cpp`](../../examples/device_info_time_sync.cpp)。程序加载
-`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v18、SDK
-1.2.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
+`prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v19、SDK
+1.3.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
 
 | Runtime API 字段 | 对应例子 |
 | --- | --- |
@@ -599,5 +599,5 @@ void parse_frame(const prism::Frame& frame) {
 | `set_camera_exposure_limits` | `auto value = api->set_camera_exposure_limits(client, limits, field_mask);` |
 
 使用前必须检查每个函数指针非空。直到所有 SDK 返回对象和 Client 都销毁后才能卸载 DLL。
-Runtime API v18 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
+Runtime API v19 是 Linux/macOS 直接 API 的子集；表中不存在的接口无法通过当前 Windows DLL
 调用。

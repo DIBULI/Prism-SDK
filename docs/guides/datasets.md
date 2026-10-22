@@ -39,8 +39,8 @@ for (const auto& dataset : datasets) {
 
 ## 边界与失败处理
 
-- 需重新构建的 Agent/SDK 1.2.0，旧的同版本二进制不一定包含此扩展；
-  不支持时明确报错，不回退到 HTTP。基础 RuntimeApi v18 不变，新增独立 DatasetRuntimeApi v1。
+- 需重新构建的 Agent/SDK 1.3.0，旧的同版本二进制不一定包含此扩展；
+  不支持时明确报错，不回退到 HTTP。基础 RuntimeApi v19 不变，新增独立 DatasetRuntimeApi v1。
 - 只读既定录制区中的原始数据集，不提供任意路径、删除、写入、远程转换或启停采集接口。
 - Agent 采集或升级中拒绝请求；下载不会替用户停止采集。再次开始采集会使后续读取失败。
 - 每个清单至多 4096 项；拒绝符号链接、硬链接、特殊文件和路径穿越。

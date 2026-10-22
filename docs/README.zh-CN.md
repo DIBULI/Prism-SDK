@@ -2,7 +2,7 @@
 
 [English](README.md) · [仓库概览](../README.zh-CN.md)
 
-当前配套版本：**SDK / Agent 1.2.0**、**Sensor Board 0.4.27**。头文件与库须配套使用。
+当前配套版本：**SDK / Agent 1.3.0**、**Sensor Board 0.5.0**。头文件与库须配套使用。
 除非另有说明，文档中的命令均在 SDK 仓库根目录执行。
 
 ## 1. 快速开始
@@ -16,7 +16,7 @@
 
 | 客户端 | 文档 | 连接方式 |
 | --- | --- | --- |
-| Host `prism::Client` | [Host 接口](reference/host.zh-CN.md) · [English](reference/host.md) | Linux、macOS、Windows 的 USB 连接 |
+| Host `prism::Client` | [Host 接口](reference/host.zh-CN.md) · [English](reference/host.md) | Linux、macOS、Windows 的 USB 或明文 TCP 连接 |
 | RK-local `prism::rklocal::Client` | [RK-local 接口与差异](reference/rk-local.zh-CN.md) · [English](reference/rk-local.md) | RK 内部 Agent socket |
 
 同名方法不代表时钟输入、采集所有权、队列和二进制 ABI 完全相同。替换客户端前请阅读
@@ -27,6 +27,7 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 | 要做什么 | 集中说明 | 语言 |
 | --- | --- | --- |
 | 相机曝光、增益、限制、四路统一自动曝光 | [相机](guides/camera.md) | 英文 |
+| 设备型号、明文 TCP 网络、独立无损 RAW12 | [网络与 RAW12](guides/network-raw.md) | 中英文 |
 | 定位结果、天空图、CORS 账号、RTK 启停、版本与接收诊断 | [GNSS / RTK](guides/gnss-rtk.md#receiver-results-zh) | 中英文分节 |
 | UTC 有效性、手动校时、输入/输出/RTK 模式与持久化 | [时间同步](guides/time-sync.md) | 中英文分节 |
 | 雷达采集、待机/唤醒、MID line、XT32 逐点时间 | [雷达](guides/lidar.md) | 英文 |
@@ -42,7 +43,10 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 
 ## 5. 版本与发布信息
 
+- [v1.3.0 更新说明](update/v1.3.0.zh-CN.md) · [English](update/v1.3.0.md)
+- [1.2.x → 1.3.0 API 变更、兼容性与迁移示例](update/v1.3.0-api-changes.md)
 - [v1.2.0 更新说明](update/v1.2.0.zh-CN.md) · [English](update/v1.2.0.md)
+- [网络、型号与 RAW12 接入](guides/network-raw.md)
 - [包兼容说明](../ORIGIN.md) · [文件校验清单](../SHA256SUMS)
 
 ## 文档维护约定

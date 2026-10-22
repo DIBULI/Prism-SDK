@@ -1,14 +1,15 @@
-# Prism SDK 1.2.0 package and compatibility
+# Prism SDK 1.3.0 package and compatibility
 
 The distribution contains public headers, compiled libraries, examples and
 documentation. Device firmware is distributed separately.
 
 ## Compatibility
 
-- Host SDK, RK-local SDK and required Agent version: **1.2.0**.
-- Matching Sensor Board firmware: **0.4.27**. Use the current firmware package
+- Host SDK, RK-local SDK and required Agent version: **1.3.0**.
+- Matching Sensor Board firmware: **0.5.0**. Use the current firmware package
   for internally aligned IMU output and missing-camera/shared-exposure fixes.
-- Runtime API: **18**. RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
+- Runtime API: **19** (DeviceInfo model field). Network extension: **3** (plain TCP).
+  RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
 - Update headers and libraries together and rebuild consumers. A matching version
   number alone does not establish that an older device has every current feature.
 

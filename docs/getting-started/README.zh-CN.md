@@ -96,12 +96,12 @@ libusb-1.0.0.dylib
 ### Windows x64
 
 使用 Visual Studio 2022 C++ x64 工具链和 CMake。公共 C++ ABI 要求 MSVC 14.x 和
-完全匹配的 SDK 1.2.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
+完全匹配的 SDK 1.3.0 头文件，不支持 MinGW。部署时安装最新版 Microsoft Visual C++
 2015-2022 x64 Redistributable，并确保 Prism USB 接口使用 Windows WinUSB 驱动。将
 `prism_usb_sdk.dll` 放在应用程序旁。
 
 本仓库只发布 DLL，不发布 import library。Windows 应用应通过 `LoadLibraryW` 加载
-DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 18。仓库
+DLL，解析 `prism_usb_sdk_get_runtime_api`，并在使用前验证 Runtime API 版本 19。仓库
 示例已经实现该流程，并固定使用与 DLL 兼容的 `/MD` runtime 和 release iterator ABI，
 即使用户选择 Debug 配置也是如此。
 
@@ -125,7 +125,7 @@ macOS 使用 `shasum -a 256 -c SHA256SUMS`。
 ### Linux 与 macOS 基本流程
 
 本节的 `prism::Client` 直连接口适用于 Linux 和 macOS。Windows 包不包含 import
-library，Windows 应用必须按 `examples/device_info_time_sync.cpp` 使用 Runtime API v18。
+library，Windows 应用必须按 `examples/device_info_time_sync.cpp` 使用 Runtime API v19。
 
 统一包含：
 
@@ -171,7 +171,7 @@ Linux 和 macOS 可用 `synchronizeTimeNtpLike()` 测量设备相对主机的时
 const auto measurement = client.synchronizeTimeNtpLike();
 ```
 
-该测量接口同样要求 Camera、板载 IMU 和 LiDAR 数据流全部停止。Runtime API v18 没有
+该测量接口同样要求 Camera、板载 IMU 和 LiDAR 数据流全部停止。Runtime API v19 没有
 向 Windows 用户暴露这个只测量接口。
 
 `synchronizeSystemTime()` 以主机墙钟为准校准设备，并回读验证：

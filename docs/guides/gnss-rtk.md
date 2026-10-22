@@ -122,7 +122,7 @@ applications own recording and must preserve the gap metadata.
 English usage instructions are maintained in the source comments:
 [RTK control](../../examples/rtk_module_control.cpp) and [continuous positions](../../examples/rtk_position.cpp).
 
-Agent / Host SDK / RK-local SDK: **1.2.0**. Use matching current headers and
+Agent / Host SDK / RK-local SDK: **1.3.0**. Use matching current headers and
 libraries. These wrappers use existing Agent RTK-module commands, without a new
 wire protocol or a Sensor Board firmware change.
 
@@ -238,7 +238,8 @@ Direct C++ linking exports the four methods. Explicit DLL loading can resolve
 `GetRtkModuleControlRuntimeApiFunction` from `<prism/usb/runtime_api.hpp>`.
 Request `kRtkModuleControlRuntimeApiVersion` (1); check non-null and `struct_size`.
 The table exposes `cors_configuration`, `save_cors_configuration`, `start_rtk`,
-`stop_rtk`. Main `RuntimeApi` remains **ABI 18**, unchanged.
+`stop_rtk`. In this SDK release, the main `RuntimeApi` is **ABI 19**;
+the RTK extension has its own version check.
 
 <a id="module-versions"></a>
 
@@ -273,7 +274,7 @@ flags bit0=连接，bit1=应用版本有效，bit2=引导程序版本有效。
 每个版本记录为 major/minor/patch/flags，末字段 bit0 表示诊断应用，引导程序必须为 0。
 无效记录全零；连接信息超过 2 秒则不再上报有效版本。
 
-Windows 动态 SDK RuntimeApi 版本为 18；请将头文件与同次构建的库一起更新。
+Windows 动态 SDK RuntimeApi 版本为 19；请将头文件与同次构建的库一起更新。
 USB 和 RK-local 使用同一解码实现。Web 设备信息页自动刷新，Timesync 页与 Viewer
 可用“读取实际状态”刷新只读快照。
 
@@ -281,13 +282,13 @@ USB 和 RK-local 使用同一解码实现。Web 设备信息页自动刷新，Ti
 
 ## GNSS reception diagnostics / 接收诊断
 
-适用于 Agent / Host SDK / RK-local SDK 1.2.0；使用匹配的当前头文件和库。
+适用于 Agent / Host SDK / RK-local SDK 1.3.0；使用匹配的当前头文件和库。
 
 ### 接口与兼容性
 
 **不修改原接口。** `client.gnssTimingStatus()`、`prism::GnssTimingStatus` 的字段、
 布局和含义保持原样。时间查询命令仍为 0x3a/0xb6，报文仍为 v5、104 字节；
-主 `RuntimeApi` 为 ABI 18；接收诊断使用独立扩展表。
+主 `RuntimeApi` 为 ABI 19；接收诊断使用独立扩展表。
 
 新增独立查询，两种 SDK 使用同一个返回类型和方法签名：
 
@@ -334,7 +335,7 @@ uart_frame_error_count、fifo_overflow_count。flags 位 0..5 依次对应下面
 
 ### Windows 动态运行库
 
-主运行库导出 `prism_usb_sdk_get_runtime_api(18)`。
+主运行库导出 `prism_usb_sdk_get_runtime_api(19)`。
 新增可选导出 `prism_usb_sdk_get_gnss_reception_api(1)`，返回
 `prism::GnssReceptionRuntimeApi`，仅包含版本、大小、`gnss_reception_status` 函数指针。
 定义见 `prism/usb/gnss_reception_runtime_api.hpp`。
@@ -371,7 +372,8 @@ try {
 ### Sensor Board 配套行为
 
 外部输入模式无论 UTC 是否锁定都转发 NMEA/RTCM 及 UART 错误标记。
-输出模式仍禁止接收自身输出。20 ms PPS 最低脉宽、RMC 校验、0..800 ms 配对
-和 UTC 连贯性检查不放宽。
+输出模式仍禁止接收自身输出。Sensor Board 0.5.0 接受至少 **5 ms（5000 us，含边界）**
+的 PPS 高电平；更短的脉冲不得视为有效 PPS。RMC 校验、0..800 ms 配对
+和 UTC 连贯性检查仍然保留。
 
-请使用 Sensor Board 0.4.27 配套固件。接口错误、无接收数据和未锁定 UTC 必须分别报告。
+请使用 Sensor Board 0.5.0 配套固件。接口错误、无接收数据和未锁定 UTC 必须分别报告。

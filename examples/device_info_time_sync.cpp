@@ -15,7 +15,7 @@
 
 namespace {
 
-constexpr char kExpectedSdkVersion[] = "1.2.0";
+constexpr char kExpectedSdkVersion[] = "1.3.0";
 
 struct Options {
   bool synchronize_time = false;
@@ -50,6 +50,7 @@ void printDevice(std::string_view sdk_version,
             << "combined_version=" << versions.combined << '\n'
             << "protocol_version=" << hello.protocol_version << '\n'
             << "product_serial=" << info.product_serial << '\n'
+            << "device_model=" << prism::deviceModelName(info.device_model) << '\n'
             << "usb_speed=" << usb_speed << '\n'
             << "usb3_connected=" << info.usb3_connected << '\n'
             << "sensor_board_online=" << info.sensor_board_online << '\n'

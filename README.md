@@ -1,4 +1,4 @@
-# Prism SDK 1.2.0
+# Prism SDK 1.3.0
 
 **Mixed licensing:** public headers, examples and integration files are
 Apache-2.0; the SDK core libraries remain proprietary and closed-source.
@@ -15,9 +15,9 @@ implementation or device firmware source is published here.
 
 ## Compatibility
 
-- SDK / required Agent: **1.2.0**; opening enforces an exact version match.
-- Qualified Sensor Board: **0.4.27**; USB and RK-local protocol **1**.
-- Windows Runtime API **18**, RTK-module control extension **1**.
+- SDK / required Agent: **1.3.0**; opening enforces an exact version match.
+- Qualified Sensor Board: **0.5.0**; USB and RK-local protocol **1**.
+- Windows Runtime API **19**, RTK-module control extension **1**.
 - Replace headers and libraries together and rebuild your application.
 
 | Platform | Published libraries | Baseline |
@@ -35,9 +35,12 @@ Host SDK prefixes, not ROS adapter binaries or Docker images.
 
 ## What's included
 
-This is the cumulative feature set of 1.2.0, not only the latest refresh.
+This is the cumulative feature set of 1.3.0, not only the latest refresh.
 
 - USB discovery, device/version/status queries, configuration and Wi-Fi hotspot management.
+- Device model in `DeviceInfo`, bounded asynchronous USB reception, and plain TCP network connections.
+- Independent lossless RAW12 image assembly/decoding and explicit profile capture.
+- Full application update packages including Web and network services on capable devices.
 - Four-camera image/metadata and IMU acquisition, stream control and capture examples.
 - Runtime exposure, analog gain, limits and unified automatic exposure.
 - Explicit clock synchronization and separate internal alignment / UTC status.
@@ -50,7 +53,12 @@ This is the cumulative feature set of 1.2.0, not only the latest refresh.
   Agent-side RTK solver or retired raw/smoothed navigation interface.
 - GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
 - [Independent LiDAR standby / wake](docs/guides/lidar.md#standby-wake) (requires the matching current Agent package).
-- [Release notes](docs/update/v1.2.0.md), [package compatibility](ORIGIN.md) and `SHA256SUMS`.
+- [Release notes](docs/update/v1.3.0.md), [package compatibility](ORIGIN.md) and `SHA256SUMS`.
+
+See [network, model and RAW12 integration](docs/guides/network-raw.md).
+The optional RAW12 decoder needs the Zstandard development library; the core SDK
+and existing JPEG examples do not. Enable its example with
+`-DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON` (Linux: `libzstd-dev`; macOS: `zstd`).
 
 ## Build consumer examples
 

@@ -27,15 +27,16 @@
 - [Recommended Integration Pattern](#recommended-integration-pattern)
 <!-- /page-toc -->
 
-This reference describes the Prism Agent SDK `1.2.0` Host client lifecycle and
+This reference describes the Prism Agent SDK `1.3.0` Host client lifecycle and
 core control/stream APIs. Feature guides hold the detailed operational contracts:
 
 `Client::startSensorBoardUpdate(path, options)` and
 `Client::sensorBoardUpdateStatus(task_id)` provide
 [Agent-managed background maintenance](../guides/firmware-update.md#agent-managed-sensor-board-maintenance).
-These direct C++ APIs do not extend the Windows Runtime API v18 table.
+These direct C++ APIs do not extend the Windows Runtime API v19 table.
 
 - [Camera exposure and gain](../guides/camera.md)
+- [Device model, plain TCP and independent RAW12](../guides/network-raw.md)
 - [GNSS results, CORS configuration and RTK start/stop](../guides/gnss-rtk.md)
 - [Time synchronization and TimeSync modes](../guides/time-sync.md)
 - [LiDAR capture, standby/wake and point metadata](../guides/lidar.md)
@@ -53,8 +54,8 @@ The SDK supports Windows WinUSB and Linux/macOS libusb-1.0. The public API is
 kept independent from the host USB backend
 without changing application-level code.
 
-The current USB wire protocol is version 1. Agent and both SDKs are version `1.2.0`. Host SDK and agent semantic versions must match exactly (for
-example, Host SDK `1.2.0` only communicates with agent `1.2.0`). Device opening
+The current USB wire protocol is version 1. Agent and both SDKs are version `1.3.0`. Host SDK and agent semantic versions must match exactly (for
+example, Host SDK `1.3.0` only communicates with agent `1.3.0`). Device opening
 performs this handshake automatically and rejects the connection before
 keepalive or stream traffic on any mismatch.
 
@@ -221,6 +222,7 @@ or IMU streaming is active.
 | `camera_streaming_mask` | Bit 0..3 reports each camera's recent complete-image production independently. Partial masks are valid when a camera is missing or stalled. USB host back-pressure preserves the last observed state rather than misclassifying a blocked producer as a hardware fault. |
 | `sensor_board_error_code`, `sensor_board_error_flags`, `sensor_board_error` | Current sensor-board/camera-pipeline failure classification, machine-readable flags, and readable detail. Covers camera/TC initialization, camera runtime, DDR FIFO/AXI, TC underflow/clock loss, missing cameras, an offline control link, and a four-camera production stall. Bit `0x01000000` is asserted after five seconds without the first produced frame set or four seconds without a subsequent set while host credit is available. Host USB ACK back-pressure is not classified as a sensor-board fault. |
 | `product_serial` | Product/USB gadget serial number. |
+| `device_model` | Verified cached `DeviceModel`; enumeration/legacy v4 returns `Unknown`. Use `deviceModelName()`, not USB names or IPs. |
 | `imu_fps`, `camera_fps` | Current configured IMU and camera rates. |
 | `sensor_board_online` | Whether the inter-board control link is current. |
 | `sensor_board_time_synced` | Whether the sensor-board has a valid UTC source. |
@@ -899,7 +901,11 @@ const auto result = client.upgradeSystem(
     });
 ```
 
-Important rules:
+The following rules describe legacy format v1. Format v2 additionally includes
+`applications.zip` for Web/network services and has different restart and
+verification requirements; see the [full update guide](../guides/firmware-update.md).
+
+Important v1 rules:
 
 - The ZIP must contain exactly `manifest.ini`, `prism-agent`, and `BOOT.BIN`.
 - Video and IMU streams must be stopped before the transaction.
@@ -914,8 +920,8 @@ Important rules:
   and retry the same complete package.
 - The Viewer and public SDK do not accept a standalone `BOOT.BIN`.
 
-Use the repository package-generation script to create the manifest and ZIP;
-do not construct an update archive by hand.
+Use a publisher-provided package; this binary SDK repository does not include
+firmware package-generation tools. Do not construct an update archive by hand.
 
 ## Low-Level Frames
 

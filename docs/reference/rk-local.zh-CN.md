@@ -24,7 +24,7 @@ Agent。公开接口为 **C++17 `prism::rklocal::Client`**。与 Host SDK 的
 
 ## 当前版本
 
-Agent、Host SDK 和 RK-local SDK 均为 **1.2.0**，线协议 **1**，主 Runtime ABI **18**。
+Agent、Host SDK 和 RK-local SDK 均为 **1.3.0**，线协议 **1**，主 Runtime ABI **19**。
 包含 `<prism/rklocal_sdk.hpp>`，使用同套最新头文件与库重新编译；公开 API 为 C++17。
 
 ## 文件与编译
@@ -124,7 +124,8 @@ miniz和OpenSSL libcrypto已静态纳入，无需libusb或libcrypto.so/libssl.so
 - 二进制：两个类ABI不同，必须重新编译、使用成套头文件/库。
   当前不支持同一程序同时链接Host与本机静态库（共有codec符号），按部署位置选择一种SDK。
   本机发布产物仅Linux ARM64；socket权限和采集独占由Agent控制。
-- 升级：共同入口仅接受联合ZIP（manifest.ini、prism-agent、BOOT.BIN）。
+- 升级：共同入口接受联合 ZIP，v1 包含 manifest.ini、prism-agent、BOOT.BIN，
+  v2 还包含 applications.zip；能力与重启要求见[完整升级说明](../guides/firmware-update.md)。
   本机重连原socket，Host重新枚举USB；升级到不同Agent版本后需要匹配SDK。
 
 ## 控制能力示例
@@ -244,7 +245,7 @@ JPEG 缓冲区转移所有权，不额外复制图像字节；对象析构自动
 
 使用 `gnssObservations(cursor, session)` 读取接收机原生 GGA/ADRNAV/GST 报文；
 按接收机解类型、有效性和数据龄期判断定位。`timeSyncRtkStatus()` 查询模块
-启停及执行状态，运行中不等于 FIX。头文件与 Runtime ABI 18 的库必须配套。
+启停及执行状态，运行中不等于 FIX。头文件与 Runtime ABI 19 的库必须配套。
 
 ## CORS 配置和接收机控制
 

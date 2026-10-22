@@ -12,7 +12,7 @@ CORS accounts and receiver positioning controls are in
 
 ## Time model and synchronization APIs / 时间模型与校时接口
 
-适用于 Agent / Host SDK / RK-local SDK **1.2.0** 与 Sensor Board **0.4.27**。
+适用于 Agent / Host SDK / RK-local SDK **1.3.0** 与 Sensor Board **0.5.0**。
 SDK 连接时校验版本，连接和状态查询不会自动校时。
 
 ### 1. 当前时间模型
@@ -72,7 +72,7 @@ is an alignment flag, **not independent evidence of UTC**. Without an establishe
 UTC epoch, retain boot-relative time. Check timing status and dataset epoch
 metadata before combining measurements with external UTC data.
 
-This behavior requires the current 0.4.27 firmware; replacing SDK libraries alone
+This behavior requires the current 0.5.0 firmware; replacing SDK libraries alone
 does not change an older device. Public fields and ABI remain unchanged.
 
 Heartbeat 只提供 RK 系统时间，不携带其他设备状态：
@@ -107,7 +107,7 @@ Host 使用 `synchronizeSystemTime()`；两端该时间输入方式不完全相�
 - `verified` 为成功条件；超时或未确认不代表已回滚。
 - 不应在每次连接时自动执行校时。
 
-刷新后的 1.2.0 Host SDK 在空闲校时期间暂缓发送 USB 心跳，成功返回或异常退出时
+刷新后的 1.3.0 Host SDK 在空闲校时期间暂缓发送 USB 心跳，成功返回或异常退出时
 自动恢复发送，保持原有心跳开关和发送间隔，不要求应用通过断开重连恢复心跳。
 不要为了绕过这一问题关闭采集时的心跳保护。校时失败仍需处理，USB 真正断开时仍需重连；
 该修复不保证 UTC 保持，也不处理时间回退。RK-local/Web 不使用 Host USB 心跳线程。
@@ -118,7 +118,7 @@ Host 使用 `synchronizeSystemTime()`；两端该时间输入方式不完全相�
 Host/RK-local 为 TIME_SET 保留至少 35 秒等待窗口，不放宽 PPS 对齐精度和新鲜度要求。
 部署本轮匹配的 Agent/SDK；不需要更新 Sensor Board，也不改变时间来源或 UTC 保持策略。
 
-The refreshed 1.2.0 Host SDK pauses USB heartbeat writes during idle calibration
+The refreshed 1.3.0 Host SDK pauses USB heartbeat writes during idle calibration
 and releases that pause on both success and exception, preserving the caller's
 enable state and interval. Do not disable the capture watchdog as a workaround.
 Calibration errors remain errors, and a genuinely disconnected USB device still
@@ -141,7 +141,7 @@ RK-local 可使用 `readImu()`、`readFrameSet()`，并遵循
 
 ## TimeSync modes and persistence / 接口模式与持久化
 
-Current baseline: Agent / Host SDK / RK-local SDK **1.2.0**, Sensor Board **0.4.27**.
+Current baseline: Agent / Host SDK / RK-local SDK **1.3.0**, Sensor Board **0.5.0**.
 Use matching headers and libraries containing these APIs.
 
 Sensor Board owns the device timeline in all three modes. RK and Ethernet PTP

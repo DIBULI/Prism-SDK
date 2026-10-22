@@ -1,4 +1,4 @@
-# Prism SDK 1.2.0
+# Prism SDK 1.3.0
 
 **分层许可：**公开头文件、示例和集成文件采用 Apache-2.0；
 SDK 核心库保持闭源；允许随应用分发未修改的二进制并保留版权及许可，
@@ -12,9 +12,9 @@ SDK 核心库保持闭源；允许随应用分发未修改的二进制并保留�
 
 ## 版本与兼容性
 
-- SDK 与设备 Agent 均为 **1.2.0**，连接时严格校验，不兼容其他 Agent 版本。
-- 配套 Sensor Board **0.4.27**，USB/RK-local 协议版本均为 **1**。
-- Windows Runtime API **18**，RTK-module 控制扩展版本 **1**。
+- SDK 与设备 Agent 均为 **1.3.0**，连接时严格校验，不兼容其他 Agent 版本。
+- 配套 Sensor Board **0.5.0**，USB/RK-local 协议版本均为 **1**。
+- Windows Runtime API **19**，RTK-module 控制扩展版本 **1**。
 - 头文件与库须同时更新，应用需要重新编译，不能混用旧库。
 
 | 平台 | 发布文件 | 基线 |
@@ -28,11 +28,14 @@ Linux 动态库内嵌 OpenSSL，使用系统 libusb；Host 静态链接需要安
 OpenSSL 开发包。RK-local 库内嵌其依赖，仅需 pthreads/dl 和系统 C/C++ 运行库。
 `runtime/ros/` 是匹配的 SDK 安装前缀，不包含 ROS adapter 或 Docker 镜像。
 
-## 1.2.0 包含的功能
+## 1.3.0 包含的功能
 
 以下是本版本的累计功能，不仅是最近一次修复。
 
 - USB 发现与连接、设备/版本/状态查询、参数配置及 Wi-Fi 热点管理。
+- `DeviceInfo` 设备型号、有界异步 USB 接收，以及明文 TCP 网络连接。
+- 独立无损 RAW12 图像组帧/解码和显式型号采集接口。
+- 支持的设备可使用包含 Web、网络服务的完整应用升级包。
 - 四路相机图像和元数据、IMU 采集与启停示例。
 - 运行时曝光、模拟增益、限制范围及统一自动曝光。
 - 显式校时，分别查询内部对齐与 UTC 授时状态。
@@ -44,7 +47,11 @@ OpenSSL 开发包。RK-local 库内嵌其依赖，仅需 pthreads/dl 和系统 C
 - 接收机原生 GNSS/RTK 报文、天空图和轨迹模型；不提供 Agent 内部 RTK 解算及旧 raw/smoothed 接口。
 - GNSS 输入诊断、XT32、雷达 line 字段、相机元数据。
 - [独立雷达待机/唤醒](docs/guides/lidar.md#standby-wake)，不改变采集启停行为，需配套当前 Agent。
-- 详见[更新说明](docs/update/v1.2.0.zh-CN.md)及[包兼容说明](ORIGIN.md)。
+- 详见[更新说明](docs/update/v1.3.0.zh-CN.md)及[包兼容说明](ORIGIN.md)。
+
+新增接口见[网络、型号与 RAW12 接入指南](docs/guides/network-raw.md)。
+可选 RAW12 解码示例需要 Zstandard 开发库（Linux：`libzstd-dev`；macOS：`zstd`），
+通过 `-DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON` 启用；核心 SDK 和旧 JPEG 示例不依赖它。
 
 ## 编译示例
 

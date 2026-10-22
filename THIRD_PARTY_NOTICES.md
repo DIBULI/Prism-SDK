@@ -26,3 +26,12 @@ The RK-local ARM64 static archive also embeds Ubuntu OpenSSL 1.1.1f
 (package revision 1.1.1f-1ubuntu2.24) and miniz for joint ZIP validation.
 See runtime/linux-arm64/openssl-LICENSE.txt and runtime/linux-arm64/miniz-LICENSE.txt.
 No dynamic libcrypto/libssl is required by the RK-local archive.
+
+The plaintext TCP network transport does not use OpenSSL/libssl. Linux still
+uses libcrypto for firmware/package SHA-256 validation. The macOS and Windows
+SDKs use their platform hashing APIs and do not embed OpenSSL.
+
+The optional inline RAW12 decoder uses the consumer's Zstandard library. It is
+not embedded in the SDK core binary. Obtain Zstandard and its BSD/GPL licensing
+information from <https://github.com/facebook/zstd>; retain the appropriate
+notices if redistributing that dependency.

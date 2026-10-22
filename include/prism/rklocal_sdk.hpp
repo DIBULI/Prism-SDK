@@ -23,6 +23,16 @@ inline constexpr const char* kDefaultSocketPath = "/run/prism/stream.sock";
 inline constexpr std::size_t kCameraCount = 4;
 inline constexpr uint32_t kWaitForever = UINT32_MAX;
 
+// Read-only capability query; does not acquire a capture session or infer
+// support from product name/version. Setters continue to use Client APIs.
+struct CameraExposureCapabilities {
+  uint8_t profile002_mask = 0;
+  bool ready = false;
+  bool shared = false;
+};
+CameraExposureCapabilities cameraExposureCapabilities(
+    const std::string& control_socket="/run/prism/control.sock",uint32_t timeout_ms=1000);
+
 // Concurrent read-only monitor: unlike Client::open, this does not occupy the
 // single RK-local capture connection. Uses the same cursor/session/result model.
 GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0,
@@ -206,6 +216,9 @@ class Client {
   WifiHotspotStatus wifiHotspotStatus();
   WifiHotspotStatus setWifiHotspotEnabled(bool enabled);
   VideoStatus startVideo1280x1024(uint32_t fps = 0);
+  // Requires four ready profile002 cameras and GPU lossless encoding.
+  // Input/output queue overflow is an explicit error, never frame replacement.
+  VideoStatus startPrism415mVideo();
   ImuStreamStatus startImu(uint32_t sensor_count = 2, uint32_t nominal_rate_hz = 0);
   void stopVideo();
   ImuStreamStatus stopImu();
@@ -254,7 +267,7 @@ class Client {
 
  private:
   UpgradeStatus upgradeAgentImage(const std::vector<uint8_t>& image,
-      const UpgradeOptions& options, const std::function<void(const UpgradeStatus&)>& progress);
+      const UpgradeOptions& options, const std::function<void(const UpgradeStatus&)>& progress, bool full_package = false);
   SensorBoardUpgradeStatus upgradeSensorBoardImage(const std::vector<uint8_t>& image,
       const UpgradeOptions& options, const std::function<void(const SensorBoardUpgradeStatus&)>& progress);
   struct Impl;

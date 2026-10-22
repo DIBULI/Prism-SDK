@@ -3,6 +3,7 @@
 [Documentation index](../README.md)
 
 <!-- page-toc -->
+- [Full application packages](#full-application-packages)
 - [Archive layout](#archive-layout)
 - [Obtain and inspect a package](#obtain-and-inspect-a-package)
 - [Upgrade sequence](#upgrade-sequence)
@@ -14,6 +15,39 @@ Prism system upgrades are distributed as one ZIP file. The user must supply a
 package containing both the RK agent and the sensor-board firmware. The public
 Viewer uses this combined package workflow. The C++ SDK additionally supports
 the standalone maintenance workflow below.
+
+## Full application packages
+
+Format v2 contains exactly `manifest.ini`, `prism-agent`, `BOOT.BIN`, and
+`applications.zip`. It uses the v1 fields below with `format_version=2` and
+adds `applications_file=applications.zip` plus `applications_sha256=<SHA-256>`.
+The inner archive uses the device updater's fixed application allowlist, covering
+Web and network-service application files; user credentials, pairing,
+recordings, network settings and arbitrary installation hooks are not included.
+
+Use a trusted package matching the product and installed full-updater generation.
+The SDK validates the package and queries full-update capability before writes;
+an Agent 1.3.0 version string alone is not proof of capability. There is
+no automatic 1.2.0 bootstrap. V2 requires restart verification and a target
+Agent version matching the running SDK.
+
+For the plaintext TCP gateway, use a full updater with the matching TCP health
+probe. A previously installed TLS-only updater cannot bootstrap this change by
+replacing its own file while already running: its old health check would fail
+and roll back the application transaction. Update that maintenance component
+through an authorized administrative path first. This SDK distribution does not
+perform that device-side migration or silently retry a failed upgrade.
+
+For v2, Sensor Board is written and read-back verified even if its semantic
+version is unchanged. Then the full ZIP is handed to the durable device updater,
+which verifies/stages application files, backs up and installs them, restarts
+services and reports the transaction digest/result. The SDK reconnects to the
+same USB serial or TCP endpoint plus reported serial to verify completion. TCP
+does not provide cryptographic peer identity. A lost COMMIT reply
+is not automatically retried. Application rollback does not roll back the
+separately programmed Sensor Board firmware.
+
+The following three-entry layout and version-skip behavior describe v1 only.
 
 ## Archive layout
 
@@ -31,12 +65,12 @@ are rejected. `manifest.ini` format version 1 contains:
 ```ini
 format=prism-system-update
 format_version=1
-package_version=1.2.0
+package_version=1.3.0
 agent_file=prism-agent
-agent_version=1.2.0
+agent_version=1.3.0
 agent_sha256=<64 lowercase hexadecimal characters>
 sensor_board_file=BOOT.BIN
-sensor_board_version=0.4.27
+sensor_board_version=0.5.0
 sensor_board_sha256=<64 lowercase hexadecimal characters>
 ```
 
@@ -60,7 +94,7 @@ const auto package = prism::inspectSystemUpgradePackage(package_path);
 
 Linux/macOS direct C++ consumers and RK-local use the public helper. Windows
 runtime-loaded clients use the matching function table; see the
-[Windows examples](../examples/interfaces.md#windows-runtime-api-v18).
+[Windows examples](../examples/interfaces.md#windows-runtime-api-v19).
 
 ## Upgrade sequence
 
@@ -115,11 +149,11 @@ and are not the new background maintenance interface below.
 
 ## Agent-managed Sensor Board maintenance
 
-With the refreshed Agent/SDK **1.2.0**, stop all capture and finish recording,
+With the refreshed Agent/SDK **1.3.0**, stop all capture and finish recording,
 but keep Agent/Web running. The image includes an Agent-managed CLI:
 
 ```sh
-sudo prism-sensor-board-upgrade --version 0.4.27 /usr/share/prism/firmware/sensor-board/BOOT.BIN
+sudo prism-sensor-board-upgrade --version 0.5.0 /usr/share/prism/firmware/sensor-board/BOOT.BIN
 prism-sensor-board-upgrade --status
 ```
 
@@ -128,13 +162,14 @@ skips writing; `--force` bypasses only this skip. Without a version, equal-versi
 skip is unavailable. `--no-wait` returns after verified upload and commit.
 `--status` shows the current/latest maintenance task, not UART diagnostics.
 Starting locally requires root. The tool never opens UART or automatically falls
-back to the legacy direct-UART updater. Leave TimeSync RTK mode explicitly first.
+back to the legacy direct-UART updater. Follow the installed updater's busy and
+ownership checks; do not bypass a rejected operation.
 
 Host and RK-local C++ clients share identical methods and result types:
 
 ```cpp
 prism::SensorBoardUpdateOptions options;
-options.version = "0.4.27";
+options.version = "0.5.0";
 options.force = false;
 auto task = client.startSensorBoardUpdate("BOOT.BIN", options);
 // After commit, the connection may close; reconnect and query the same task.
@@ -147,12 +182,12 @@ States are `Idle`, `Receiving`, `Flashing`, `Complete`, `Failed`, `Skipped`,
 `Aborted`. The Agent validates size and SHA-256 before Flash, owns programming,
 read-back and restart/version verification, and rejects conflicting operations.
 Web displays progress without stopping its service. This is a new wire extension;
-an earlier 1.2.0 Agent build reports unsupported rather than falling back.
+an earlier 1.3.0 Agent build reports unsupported rather than falling back.
 
 RK-local also provides free functions with the same names, plus an optional
 control-socket argument. They coexist with an idle Web/capture connection and do
 not require `Client::open()`. `sensorBoardUpdateStatus()` also accepts a timeout.
-The Windows Runtime API v18 table is unchanged: use direct linked C++ methods
+The Windows Runtime API v19 table does not expose standalone maintenance: use direct linked C++ methods
 with the matching MSVC SDK for this new maintenance API, not the runtime table.
 
 An incomplete upload expires after 120 seconds without writing Flash. After

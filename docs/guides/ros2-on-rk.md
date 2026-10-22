@@ -28,11 +28,11 @@ does not start another Agent or replace the host operating system.
 
 This SDK Release does not publish ROS adapter binaries or Docker images.
 The names above are locally built images, not Docker Hub releases. Rebuild the
-adapter against this SDK before using it with Agent 1.2.0; an existing image is
+adapter against this SDK before using it with Agent 1.3.0; an existing image is
 not upgraded by downloading the SDK. Confirm adapter API support independently.
 
-- Agent **1.2.0** must be running with its RK-local socket enabled. The build
-  must use the matching SDK **1.2.0** headers and library.
+- Agent **1.3.0** must be running with its RK-local socket enabled. The build
+  must use the matching SDK **1.3.0** headers and library.
 - Docker must be installed on RK, with enough free root-filesystem space to
   load and unpack the images. Check `df -h /` and `test -S /run/prism/stream.sock`.
 - Close Viewer/USB capture and other RK-local capture clients. Run only one

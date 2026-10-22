@@ -8,7 +8,7 @@ if((CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" OR
 endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  project(PrismSdkExamples VERSION 1.2.0 LANGUAGES C CXX)
+  project(PrismSdkExamples VERSION 1.3.0 LANGUAGES C CXX)
   include(CTest)
 endif()
 
@@ -19,6 +19,7 @@ set(PRISM_SDK_ROOT "${_prism_sdk_default_root}" CACHE PATH
 unset(_prism_sdk_default_root)
 option(PRISM_SDK_USE_STATIC
   "Link the packaged Linux static Host SDK instead of its shared runtime" OFF)
+option(PRISM_SDK_BUILD_RAW12_EXAMPLE "Build the optional Zstandard RAW12 decoder example" OFF)
 
 set(_prism_sdk_include "${PRISM_SDK_ROOT}/include")
 if(NOT EXISTS "${_prism_sdk_include}/prism/usb_sdk.hpp")
@@ -71,8 +72,9 @@ elseif(UNIX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBUSB REQUIRED IMPORTED_TARGET libusb-1.0)
     find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+    find_package(Threads REQUIRED)
     set_target_properties(PrismUsbSdkRuntime PROPERTIES
-      INTERFACE_LINK_LIBRARIES "PkgConfig::LIBUSB;OpenSSL::Crypto")
+      INTERFACE_LINK_LIBRARIES "PkgConfig::LIBUSB;OpenSSL::Crypto;Threads::Threads")
   else()
     set(_prism_sdk_runtime
       "${_prism_sdk_runtime_dir}/libprism_usb_sdk.so")
@@ -156,6 +158,8 @@ endfunction()
 set(_prism_cross_platform_example_sources
   device_info_time_sync.cpp)
 set(_prism_direct_api_example_sources
+  network_connect.cpp
+  profile_raw12_decode.cpp
   camera_imu_capture.cpp
   client_api_examples.cpp
   configuration_api_examples.cpp
@@ -206,6 +210,21 @@ if(WIN32)
       COMMAND prism-windows-runtime-api-examples)
   endif()
 else()
+  prism_add_example(prism-network-connect network_connect.cpp)
+  list(APPEND _prism_supported_example_targets prism-network-connect)
+  if(BUILD_TESTING)
+    add_test(NAME prism-network-connect-help COMMAND prism-network-connect --help)
+  endif()
+  if(PRISM_SDK_BUILD_RAW12_EXAMPLE)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
+    prism_add_example(prism-profile-raw12-decode profile_raw12_decode.cpp)
+    target_link_libraries(prism-profile-raw12-decode PRIVATE PkgConfig::ZSTD)
+    list(APPEND _prism_supported_example_targets prism-profile-raw12-decode)
+    if(BUILD_TESTING)
+      add_test(NAME prism-profile-raw12-self-test COMMAND prism-profile-raw12-decode --self-test)
+    endif()
+  endif()
   prism_add_example(prism-camera-imu-capture camera_imu_capture.cpp)
   prism_add_example(prism-client-api-examples client_api_examples.cpp)
   prism_add_example(prism-configuration-api-examples

@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md) · [Repository overview](../README.md)
 
-Current baseline: **SDK / Agent 1.2.0**, **Sensor Board 0.4.27**. Use matching
+Current baseline: **SDK / Agent 1.3.0**, **Sensor Board 0.5.0**. Use matching
 headers and libraries. Commands in these guides run from the SDK repository root
 unless stated otherwise.
 
@@ -17,7 +17,7 @@ unless stated otherwise.
 
 | Client | Reference | Transport |
 | --- | --- | --- |
-| Host `prism::Client` | [Host API](reference/host.md) · [中文](reference/host.zh-CN.md) | USB on Linux, macOS and Windows |
+| Host `prism::Client` | [Host API](reference/host.md) · [中文](reference/host.zh-CN.md) | USB or plaintext TCP on Linux, macOS and Windows |
 | RK-local `prism::rklocal::Client` | [RK-local API and differences](reference/rk-local.md) · [中文](reference/rk-local.zh-CN.md) | Local Agent socket on RK |
 
 Shared method names do not imply identical clock inputs, capture ownership,
@@ -30,6 +30,7 @@ collect operational constraints and related examples in one place.
 | Task | One place to read | Language |
 | --- | --- | --- |
 | Camera exposure, gain, limits and unified auto-exposure | [Camera](guides/camera.md) | EN |
+| Device model, plaintext TCP network, independent lossless RAW12 | [Network and RAW12](guides/network-raw.md) | EN / 中文 |
 | Receiver results, sky data, CORS accounts, RTK start/stop, versions and diagnostics | [GNSS / RTK](guides/gnss-rtk.md) | EN / 中文 sections |
 | UTC validity, manual time-setting and persistent input/output/RTK modes | [Time synchronization](guides/time-sync.md) | EN / 中文 sections |
 | LiDAR capture, hardware standby/wake, MID line and XT32 point time | [LiDAR](guides/lidar.md) | EN |
@@ -45,6 +46,8 @@ collect operational constraints and related examples in one place.
 
 ## 5. Release and package information
 
+- [v1.3.0 release notes](update/v1.3.0.md) · [中文](update/v1.3.0.zh-CN.md)
+- [1.2.x → 1.3.0 API changes and migration](update/v1.3.0-api-changes.md)
 - [v1.2.0 release notes](update/v1.2.0.md) · [中文](update/v1.2.0.zh-CN.md)
 - [Package compatibility](../ORIGIN.md) · [Package checksums](../SHA256SUMS)
 

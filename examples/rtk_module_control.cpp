@@ -1,5 +1,5 @@
 /*
-RTK-module control example -- Prism-SDK 1.2.0
+RTK-module control example -- Prism-SDK 1.3.0
 ============================================
 Save CORS credentials, inspect control status, and explicitly start/stop RTK.
 The companion rtk_position.cpp reads continuous receiver-native positions.

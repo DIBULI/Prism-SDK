@@ -1,4 +1,5 @@
 #include "prism/usb_sdk.hpp"
+#include "prism/usb/network_runtime_api.hpp"
 
 #ifndef _WIN32
 #error "This example is only supported by the packaged Windows runtime."
@@ -16,7 +17,7 @@
 
 namespace {
 
-constexpr char kExpectedSdkVersion[] = "1.2.0";
+constexpr char kExpectedSdkVersion[] = "1.3.0";
 
 std::wstring runtimePath() {
   std::array<wchar_t, 32768> path{};
@@ -148,6 +149,13 @@ class RuntimeModule {
           !control_->start_rtk || !control_->stop_rtk)
         throw std::runtime_error("incompatible RTK-module control extension");
       module_ = loaded_module;
+      const auto network_entry = reinterpret_cast<prism::GetNetworkRuntimeApiFunction>(
+          GetProcAddress(loaded_module, prism::kNetworkRuntimeApiEntryPoint));
+      const auto* network = network_entry ? network_entry(prism::kNetworkRuntimeApiVersion) : nullptr;
+      if (!network || network->abi_version != prism::kNetworkRuntimeApiVersion ||
+          network->struct_size < sizeof(prism::NetworkRuntimeApi) ||
+          !network->open || !network->is_network || !network->camera_max_fps)
+        throw std::runtime_error("incompatible network extension");
     } catch (...) {
       api_ = nullptr;
       FreeLibrary(loaded_module);
@@ -186,7 +194,7 @@ class RuntimeModule {
 }
 
 // This function is compile-checked but deliberately not executed by main().
-// It provides one minimal call for every RuntimeApi v18 function pointer.
+// It provides one minimal call for every RuntimeApi v19 function pointer.
 [[maybe_unused]] void everyRuntimeApiCall(
     const prism::RuntimeApi& api, prism::Client* client,
     const prism::DeviceInfo& selected_device, const prism::Frame& frame,
@@ -307,7 +315,7 @@ int main() {
   try {
     RuntimeModule module;
     validateAllFunctions(module.api());
-    std::cout << "Validated RuntimeApi v18 and RTK-module control extension v1.\n";
+    std::cout << "Validated RuntimeApi v19 and RTK-module control extension v1.\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "error: " << error.what() << '\n';

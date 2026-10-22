@@ -8,7 +8,7 @@
 
 namespace prism {
 
-constexpr uint32_t kRuntimeApiVersion = 18;  // Additive RTK-module version query.
+constexpr uint32_t kRuntimeApiVersion = 19;  // DeviceInfo layout adds device_model.
 inline constexpr char kRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_runtime_api";
 

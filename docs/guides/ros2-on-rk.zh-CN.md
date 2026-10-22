@@ -27,10 +27,10 @@ ROS 节点运行在 RK3576 本机的 Docker 容器中，通过
 ## 发布状态与前提
 
 本 SDK Release 不发布 ROS adapter 二进制或 Docker 镜像。上表为本地构建名称，
-不是 Docker Hub 发布地址。使用 Agent 1.2.0 前，需要让适配器采用本版 SDK
+不是 Docker Hub 发布地址。使用 Agent 1.3.0 前，需要让适配器采用本版 SDK
 重新编译，并单独确认其接口适配情况；下载 SDK 不会自动更新已有容器。
 
-- RK 运行 Agent **1.2.0**，并启用 RK-local socket。构建使用 SDK **1.2.0**，
+- RK 运行 Agent **1.3.0**，并启用 RK-local socket。构建使用 SDK **1.3.0**，
   使用与之匹配的头文件和库。
 - RK 已安装 Docker；根分区应有足够空间用于加载和解包镜像。
   使用 `df -h /`、`test -S /run/prism/stream.sock` 检查。

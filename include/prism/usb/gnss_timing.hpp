@@ -28,7 +28,7 @@ struct GnssTimingStatus {
   bool pps_detected = false;
   bool pps_valid = false;
   uint32_t pps_high_width_us = 0;
-  uint32_t pps_min_high_us = 20000;
+  uint32_t pps_min_high_us = 5000;
   // Reserved wire-compatibility storage. RK-side PPS precision diagnostics
   // are intentionally not part of the public Host SDK API.
   bool reserved_timing_v3_flag = false;
