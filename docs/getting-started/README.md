@@ -24,7 +24,7 @@
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-Both Linux shared runtimes are built on Ubuntu 20.04/GCC 9, embed OpenSSL,
+Both Linux shared runtimes are built on Ubuntu 20.04/GCC 9, embed OpenSSL libcrypto for SHA-256,
 and dynamically link libusb and the system C/C++ runtime. See ORIGIN.md for
 build provenance. ARM64 RK-local embeds miniz/libcrypto and needs pthreads/dl and the C++ runtime;
 no libusb or dynamic OpenSSL is required.
@@ -62,17 +62,21 @@ For development, either place `libprism_usb_sdk.so` next to an executable with
 an `$ORIGIN` RPATH, or add its directory to the loader search path. The included
 CMake example uses the application-private library approach.
 
-To link the Prism SDK implementation statically, install `libusb-1.0-0-dev`
-and `libssl-dev`, then configure the included example or your consumer with:
+To link the Prism SDK implementation statically, install `libusb-1.0-0-dev`,
+`libssl-dev` and `pkg-config`, then configure the included example or your consumer with:
 
 ```bash
 cmake -S . -B build-static -DPRISM_SDK_USE_STATIC=ON
 cmake --build build-static --config Release
 ```
 
-The resulting executable does not depend on `libprism_usb_sdk.so`. OpenSSL and
+The resulting executable does not depend on `libprism_usb_sdk.so`. OpenSSL libcrypto and
 libusb remain dynamically linked unless the consumer deliberately selects
 compatible static builds of those dependencies.
+
+The full `scripts/test_all_examples.py` suite also builds the optional RAW12
+decoder: install `libzstd-dev` and `pkg-config`. Plain TCP networking does not
+use OpenSSL/libssl; libcrypto is retained for package SHA-256 validation.
 
 ### macOS arm64
 

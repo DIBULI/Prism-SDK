@@ -66,7 +66,8 @@ the format's sizes and CRCs and throws on corruption; do not suppress those
 exceptions or substitute old frames. Device error events also need reporting.
 
 The inline decoder requires Zstandard headers/library for PRZ1. On Linux install
-`libzstd-dev`, or on macOS install `zstd`. The optional example can be built with:
+`libzstd-dev` and `pkg-config`, or on macOS install `zstd` and `pkgconf`.
+The optional example can be built with:
 
 ```sh
 cmake -S . -B build-raw -DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON

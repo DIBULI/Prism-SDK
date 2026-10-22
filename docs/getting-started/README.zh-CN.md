@@ -22,7 +22,7 @@
 | macOS | arm64 | macOS 13.0 | `runtime/macos-arm64/libprism_usb_sdk.dylib` |
 | Windows | x86-64 | Windows 10/11 | `runtime/windows-x64/prism_usb_sdk.dll` |
 
-两个 Linux 动态库均采用 Ubuntu 20.04/GCC 9 构建，静态包含 OpenSSL，动态依赖
+两个 Linux 动态库均采用 Ubuntu 20.04/GCC 9 构建，静态包含用于 SHA-256 的 OpenSSL libcrypto，动态依赖
 libusb 及系统 C/C++ 运行库。来源见 ORIGIN.md。RK-local 静态库内含miniz/libcrypto，依赖pthread/dl和系统C++运行库，
 不需要libusb或动态OpenSSL。
 
@@ -57,7 +57,7 @@ sudo udevadm trigger
 开发时可以把 `libprism_usb_sdk.so` 放在程序旁并配置 `$ORIGIN` RPATH，也可以放进
 系统动态库搜索路径。本仓库示例采用程序私有动态库方式。
 
-如果要静态链接 Prism SDK 实现，安装 `libusb-1.0-0-dev` 和 `libssl-dev`，并在配置
+如果要静态链接 Prism SDK 实现，安装 `libusb-1.0-0-dev`、`libssl-dev` 和 `pkg-config`，并在配置
 仓库示例或使用方时执行：
 
 ```bash
@@ -66,7 +66,10 @@ cmake --build build-static --config Release
 ```
 
 生成的程序不再依赖 `libprism_usb_sdk.so`。除非使用方另外选择兼容的静态版本，
-OpenSSL 和 libusb 默认仍采用动态链接。
+OpenSSL libcrypto 和 libusb 默认仍采用动态链接。
+
+`scripts/test_all_examples.py` 全套自测还会构建可选 RAW12 解码示例，需要安装
+`libzstd-dev` 和 `pkg-config`。明文 TCP 不使用 OpenSSL/libssl；libcrypto 仅保留用于升级包 SHA-256 校验。
 
 ### macOS arm64
 
