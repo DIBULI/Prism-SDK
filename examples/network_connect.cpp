@@ -4,13 +4,13 @@
 #include <stdexcept>
 #include <string>
 
-// Query only. Plain TCP on a trusted LAN; enter the device token on stdin.
+// Query only. Plain TCP on trusted Wi-Fi/Ethernet; enter the Web password on stdin.
 // No acquisition, time synchronization, RTK, settings writes or stored secrets.
 int main(int argc, char** argv) {
   try {
     if (argc == 2 && std::string(argv[1]) == "--help") {
       std::cout << "usage: prism-network-connect numeric-IP [port]\n"
-                   "stdin: device token on one line (plaintext TCP; trusted LAN only)\n";
+                   "stdin: Web admin password on one line (plaintext TCP; trusted networks only)\n";
       return 0;
     }
     if (argc < 2 || argc > 3) throw std::runtime_error("use --help for usage");
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
       options.port = static_cast<uint16_t>(port);
     }
     if (!std::getline(std::cin, options.token))
-      throw std::runtime_error("missing pairing input");
+      throw std::runtime_error("missing Web password input");
     auto client = prism::Client::openNetwork(options);
     std::fill(options.token.begin(), options.token.end(), '\0');
     const auto info = client.deviceInfo();

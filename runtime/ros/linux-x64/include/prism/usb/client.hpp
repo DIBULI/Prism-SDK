@@ -135,6 +135,16 @@ class Client {
   // target brightness shared by all four cameras; manual exposure time is
   // independent for each camera.
   ExposureConfiguration cameraExposure();
+  // 415M-only integer-row live request. Send once; returns without reading or
+  // waiting for sensor application. One outstanding request per connection.
+  // Continue readFrame/full decoding/sendVideoAck/IMU ingestion normally and
+  // pass every returned Frame to finishLiveExposureRows. No transition labels,
+  // STOP/start or frame suppression. Serialize calls on the acquisition thread.
+  // Allow 10s for four cameras. Timeout is UNCONFIRMED: keep receiving, never
+  // retry automatically; a late matching response may still complete it.
+  uint32_t beginLiveExposureRows(uint8_t camera_mask, const std::array<uint16_t,4>& rows);
+  bool finishLiveExposureRows(const Frame&, ExposureConfiguration& applied);
+  bool liveExposureRowsPending() const noexcept;
   ExposureConfiguration setExposureConfiguration(
       const ExposureConfiguration& configuration,
       uint32_t field_mask = kExposureFieldAll);

@@ -56,10 +56,11 @@ def verify_package() -> None:
         installed = {p.relative_to(prefix): p.read_bytes() for p in prefix.rglob("*.hpp")}
         if installed != host_headers:
             raise RuntimeError(f"Host/ROS headers differ for {arch}")
-    for relative in ("prism/usb/runtime_api.hpp", "prism/usb/network_runtime_api.hpp"):
+    for relative in ("prism/usb/runtime_api.hpp", "prism/usb/network_runtime_api.hpp", "prism/usb/profile_runtime_api.hpp"):
         contents = (ROOT / "include" / relative).read_text(encoding="utf-8")
-        pattern = (r"kRuntimeApiVersion\s*=\s*19" if "network_" not in relative
-                   else r"kNetworkRuntimeApiVersion\s*=\s*3")
+        pattern = (r"kProfileRuntimeApiVersion\s*=\s*1" if "profile_" in relative else
+                   r"kNetworkRuntimeApiVersion\s*=\s*4" if "network_" in relative else
+                   r"kRuntimeApiVersion\s*=\s*19")
         if not re.search(pattern, contents):
             raise RuntimeError(f"SDK 1.3.0 ABI mismatch in {relative}")
     manifest = ROOT / "SHA256SUMS"

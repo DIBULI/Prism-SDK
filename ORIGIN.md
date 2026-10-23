@@ -8,7 +8,8 @@ documentation. Device firmware is distributed separately.
 - Host SDK, RK-local SDK and required Agent version: **1.3.0**.
 - Matching Sensor Board firmware: **0.5.0**. Use the current firmware package
   for internally aligned IMU output and missing-camera/shared-exposure fixes.
-- Runtime API: **19** (DeviceInfo model field). Network extension: **3** (plain TCP).
+- Runtime API: **19** (DeviceInfo model field). Network extension: **4** (plain TCP,
+  token equals Web login password). Profile/live-exposure extension: **1**.
   RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
 - Update headers and libraries together and rebuild consumers. A matching version
   number alone does not establish that an older device has every current feature.

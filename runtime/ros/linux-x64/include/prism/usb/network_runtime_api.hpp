@@ -2,7 +2,7 @@
 #include "prism/usb/client.hpp"
 namespace prism {
 // Independently versioned optional extension; use the matching RuntimeApi v19.
-constexpr uint32_t kNetworkRuntimeApiVersion=3; // Plain TCP NetworkOptions, no certificate field.
+constexpr uint32_t kNetworkRuntimeApiVersion=4; // Web password auth; reject old pairing runtimes.
 inline constexpr char kNetworkRuntimeApiEntryPoint[]="prism_usb_sdk_get_network_api";
 struct NetworkRuntimeApi {
   uint32_t abi_version;

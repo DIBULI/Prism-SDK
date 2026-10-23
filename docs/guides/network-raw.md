@@ -19,25 +19,29 @@ Runtime API 19 must be loaded with the matching 1.3.0 DLL and headers.
 ## Network / 网络连接
 
 `prism::Client::openNetwork(NetworkOptions)` uses **plaintext TCP** (default port
-7443), protocol `PRISM-NET/3`, and a device-specific token. There is no TLS or
+7443), protocol `PRISM-NET/4`, and the device Web admin password as token. There is no TLS or
 certificate authentication. Use only a trusted LAN/device hotspot: tokens,
 control commands and sensor data can be observed or modified by a network attacker.
-The token is access control, not cryptographic peer verification. Obtain it over a
-trusted pairing channel; never put it in command lines, URLs or logs.
+The token is access control, not cryptographic peer verification. Use the same
+password as Web login, not a browser session cookie. Never put it in command
+lines, URLs or logs. Failed attempts impose a global 10-second cooldown. The
+current Web password is short and deterministic, not a strong random secret.
 
 The read-only `prism-network-connect numeric-IP [port]` example reads the token
 as one standard-input line, queries DeviceInfo, and closes. Its
 `--help` path does not connect. Windows runtime clients use
-`<prism/usb/network_runtime_api.hpp>` and `kNetworkRuntimeApiVersion` (3) with the
+`<prism/usb/network_runtime_api.hpp>` and `kNetworkRuntimeApiVersion` (4) with the
 matching RuntimeApi 19 client lifetime. No connection implicitly starts RTK.
 
 Update the SDK and device gateway together. Older TLS gateways/clients are not
 compatible; there is no automatic fallback. `NetworkOptions::certificate_sha256`
-is removed; network extension v2 must not be loaded as v3. An installed Viewer
+is removed; network extensions v2/v3 must not be loaded as v4. An installed Viewer
 also needs a matching update, not just a DLL swap.
 
 明文 TCP 不做加密或证书校验，token 也以明文发送。仅用于可信局域网/设备热点，
 不要映射到公网。SDK、网关和使用它的应用必须配套更新；本次发布不自动部署设备。
+令牌即 Web 管理员登录密码，Wi-Fi 和有线均允许；无需独立随机令牌或证书配对。
+见[认证迁移说明](../update/v1.3.0-network-web-password.md)。
 
 Ethernet camera cap is 20 FPS; Wi-Fi/unknown-link cap is 10 FPS. Query
 `client.networkCameraMaxFps()`. Native profile limits still apply: this is not

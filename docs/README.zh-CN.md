@@ -45,6 +45,8 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 
 - [v1.3.0 更新说明](update/v1.3.0.zh-CN.md) · [English](update/v1.3.0.md)
 - [1.2.x → 1.3.0 API 变更、兼容性与迁移示例](update/v1.3.0-api-changes.md)
+- [采集中连续调节曝光行数](update/v1.3.0-live-rows.md)
+- [使用 Web 登录密码进行网络认证](update/v1.3.0-network-web-password.md)
 - [v1.2.0 更新说明](update/v1.2.0.zh-CN.md) · [English](update/v1.2.0.md)
 - [网络、型号与 RAW12 接入](guides/network-raw.md)
 - [包兼容说明](../ORIGIN.md) · [文件校验清单](../SHA256SUMS)

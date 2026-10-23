@@ -29,6 +29,7 @@ struct CameraExposureCapabilities {
   uint8_t profile002_mask = 0;
   bool ready = false;
   bool shared = false;
+  bool manual_rows = false; // explicit v2: idle-only415M, no AE or gain writes
 };
 CameraExposureCapabilities cameraExposureCapabilities(
     const std::string& control_socket="/run/prism/control.sock",uint32_t timeout_ms=1000);
@@ -196,6 +197,11 @@ class Client {
   DeviceConfiguration saveDeviceConfiguration(const DeviceConfiguration& configuration,
       uint32_t field_mask = kDeviceConfigFieldAll);
   ExposureConfiguration cameraExposure();
+  // Same nonblocking 415M-only integer-row contract as prism::Client. Keep
+  // consuming/ACKing all RAW and IMU frames. No automatic timeout retries.
+  uint32_t beginLiveExposureRows(uint8_t camera_mask, const std::array<uint16_t,4>& rows);
+  bool finishLiveExposureRows(const Frame&, ExposureConfiguration& applied);
+  bool liveExposureRowsPending() const noexcept;
   ExposureConfiguration setExposureConfiguration(const ExposureConfiguration& configuration,
       uint32_t field_mask = kExposureFieldAll);
   ExposureConfiguration setAutoExposureTargetBrightness(uint8_t target_brightness);

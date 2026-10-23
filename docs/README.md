@@ -48,6 +48,8 @@ collect operational constraints and related examples in one place.
 
 - [v1.3.0 release notes](update/v1.3.0.md) · [中文](update/v1.3.0.zh-CN.md)
 - [1.2.x → 1.3.0 API changes and migration](update/v1.3.0-api-changes.md)
+- [Continuous exposure rows](update/v1.3.0-live-rows.md)
+- [Network authentication with the Web password](update/v1.3.0-network-web-password.md)
 - [v1.2.0 release notes](update/v1.2.0.md) · [中文](update/v1.2.0.zh-CN.md)
 - [Package compatibility](../ORIGIN.md) · [Package checksums](../SHA256SUMS)
 
