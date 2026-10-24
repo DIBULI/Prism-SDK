@@ -1,4 +1,7 @@
 #include "prism/usb_sdk.hpp"
+#include "prism/usb/camera_control_runtime_api.hpp"
+
+extern "C" const prism::CameraControlRuntimeApi* prism_usb_sdk_get_camera_control_api(uint32_t);
 
 #include <cstdint>
 #include <functional>
@@ -8,6 +11,23 @@
 #include <vector>
 
 namespace prism_sdk_examples {
+
+// Compile-checked examples only: main never connects or writes hardware.
+prism::CameraControlIdleStatus stageNativeCameraSettings(
+    prism::Client& client, const prism::CameraControlIdleStatus& current,
+    const std::array<prism::CameraRowGainConfig,4>& config) {
+  return client.stageCameraControlIdle(current, config);
+}
+uint32_t beginNativeCameraSettings(prism::Client& client,
+    const prism::CameraControlStatus& current,
+    const std::array<prism::CameraRowGainConfig,4>& config) {
+  return client.beginCameraControlSet(current, config);
+}
+bool receiveNativeCameraSettings(prism::Client& client,
+    const prism::Frame& received, prism::CameraControlStatus& status) {
+  // A false result leaves the frame to the normal camera/IMU consumer.
+  return client.finishCameraControl(received, status);
+}
 
 prism::DeviceConfiguration readConfiguration(prism::Client& client) {
   return client.deviceConfiguration();
@@ -183,6 +203,9 @@ prism::SystemUpgradeResult installUpgrade(
 }  // namespace prism_sdk_examples
 
 int main() {
+  if (!prism::validCameraControlRuntimeApi(prism_usb_sdk_get_camera_control_api(1)) ||
+      prism_usb_sdk_get_camera_control_api(0) || prism_usb_sdk_get_camera_control_api(2))
+    throw std::runtime_error("incompatible native camera-control runtime");
   std::cout << "Compile-checked configuration, exposure, acquisition, network, "
                "low-level, and upgrade API examples. No device operation was "
                "performed.\n";

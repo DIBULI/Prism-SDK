@@ -10,6 +10,7 @@
 
 #include "prism/usb/gnss_timing.hpp"
 #include "prism/usb/client.hpp"
+#include "prism/usb/camera_control.hpp"
 #include "prism/usb/streams.hpp"
 #include "prism/usb/lidar_points.hpp"
 
@@ -197,6 +198,19 @@ class Client {
   DeviceConfiguration saveDeviceConfiguration(const DeviceConfiguration& configuration,
       uint32_t field_mask = kDeviceConfigFieldAll);
   ExposureConfiguration cameraExposure();
+  // Idle-only desired RAM config, not sensor readback or persistent storage.
+  // Exact CAS; failures require close/reopen plus fresh GET, no blind replay.
+  CameraControlIdleStatus cameraControlIdle();
+  CameraControlIdleStatus stageCameraControlIdle(const CameraControlIdleStatus&,
+      const std::array<CameraRowGainConfig,4>&);
+  // Matched descriptor4 only; the capture reader issues and finishes requests.
+  // Accepted configuration is separate from observed RAW frame metadata.
+  // No implicit STOP/START, receive/drain, transition flag or automatic retry.
+  uint32_t beginCameraControlGet();
+  uint32_t beginCameraControlSet(const CameraControlStatus& current,
+      const std::array<CameraRowGainConfig,4>& requested);
+  bool finishCameraControl(const Frame&,CameraControlStatus&);
+  bool cameraControlPending() const noexcept;
   // Same nonblocking 415M-only integer-row contract as prism::Client. Keep
   // consuming/ACKing all RAW and IMU frames. No automatic timeout retries.
   uint32_t beginLiveExposureRows(uint8_t camera_mask, const std::array<uint16_t,4>& rows);
@@ -222,9 +236,16 @@ class Client {
   WifiHotspotStatus wifiHotspotStatus();
   WifiHotspotStatus setWifiHotspotEnabled(bool enabled);
   VideoStatus startVideo1280x1024(uint32_t fps = 0);
-  // Requires four ready profile002 cameras and GPU lossless encoding.
+  // New 415M protocol only: four profile002 cameras, 2FPS, 5120x3072 RAW12.
+  // Requires GPU lossless encoding and an exact acknowledgement; no downgrade.
   // Input/output queue overflow is an explicit error, never frame replacement.
   VideoStatus startPrism415mVideo();
+  // New 415M socket preview: Agent thumbnails, originals only for startup save
+  // or requested recording. USB Viewer uses its separate full-RAW API.
+  VideoStatus startPrism415mPreview();
+  uint32_t beginPrism415mRecording(bool enabled);
+  bool finishPrism415mRecording(const Frame&, bool& enabled);
+  bool prism415mRecordingPending() const noexcept;
   ImuStreamStatus startImu(uint32_t sensor_count = 2, uint32_t nominal_rate_hz = 0);
   void stopVideo();
   ImuStreamStatus stopImu();

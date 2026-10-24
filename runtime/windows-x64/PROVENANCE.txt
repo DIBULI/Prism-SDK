@@ -8,3 +8,4 @@ ARCH=windows-x64
 BUILD=matched-runtime-refresh
 TOOLCHAIN=MSVC
 MIN_WINDOWS=10
+CAMERA_CONTROL_API=1

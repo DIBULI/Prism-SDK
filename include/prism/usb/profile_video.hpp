@@ -7,6 +7,13 @@
 #include <zstd.h>
 
 namespace prism::capture {
+// Shared trigger timing is distinct from UTC synchronization. Mode 4 names
+// the same physical external-trigger edge on Sensor Board's common clock;
+// mode 0 has no valid association, mode 3 is legacy local arm/diagnostic time.
+constexpr uint8_t kCommonExternalTriggerTiming=4;
+inline bool validProfileTiming(uint8_t mode,uint64_t stamp) {
+  return mode<=4 && (mode==0?stamp==0:mode==4?stamp!=0:true);
+}
 constexpr uint16_t kIndependentImage = 4;
 constexpr uint8_t kRaw12Zstd = 3;
 constexpr uint8_t kRaw12Rice = 4;
@@ -74,7 +81,7 @@ class ProfileImageAssembler {
 struct Raw12Image {
   uint32_t width=0,height=0,frame_id=0,exposure_us=0,gain_x1024=0;
   uint8_t camera=0,bayer=0,timing_mode=0;
-  uint64_t source_timestamp_us=0; // timing3 is not synchronized exposure/UTC.
+  uint64_t source_timestamp_us=0; // mode4 common trigger, not implicit UTC.
   std::vector<uint8_t> packed; // Two pixels/three bytes, low bits preserved.
 };
 inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
@@ -102,9 +109,11 @@ inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
 inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
   if(bytes.size()<49||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRZ1",4)||
      bytes[4]!=1||bytes[5]!=48||bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>3||bytes[39]!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
     throw std::runtime_error("invalid RAW12 header");
   const auto* p=bytes.data();Raw12Image r;
+  if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
+    throw std::runtime_error("invalid RAW12 timing association");
   r.width=rawLe32(p+8);r.height=rawLe32(p+12);
   const auto size=rawLe32(p+16);
   if(r.width!=5120||r.height!=3072||size!=23592960u)
@@ -131,9 +140,11 @@ inline uint16_t raw12Pixel(const Raw12Image& r,size_t index) {
 inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
   if(bytes.size()<65||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRG1",4)||
      bytes[4]!=1||bytes[5]!=64||bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>3||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
     throw std::runtime_error("invalid GPU RAW12 header");
   const auto *p=bytes.data();Raw12Image r;
+  if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
+    throw std::runtime_error("invalid RAW12 timing association");
   r.width=rawLe32(p+8);r.height=rawLe32(p+12);
   constexpr size_t pixels=5120u*3072u,block=256;
   if(r.width!=5120||r.height!=3072||rawLe32(p+16)!=23592960u||

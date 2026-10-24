@@ -12,6 +12,7 @@
 #include "prism/usb/device_info.hpp"
 #include "prism/usb/datasets.hpp"
 #include "prism/usb/exposure.hpp"
+#include "prism/usb/camera_control.hpp"
 #include "prism/usb/gnss_timing.hpp"
 #include "prism/usb/gnss_reception.hpp"
 #include "prism/usb/gnss_observation.hpp"
@@ -135,6 +136,24 @@ class Client {
   // target brightness shared by all four cameras; manual exposure time is
   // independent for each camera.
   ExposureConfiguration cameraExposure();
+  // Matched415M idle-only, synchronous RAM staging; never touches I2C or
+  // starts/stops capture. Exact idle epoch/revision CAS, no persistence.
+  // Any failed/uncertain reply requires close/reopen and a fresh GET; never
+  // replay a mutation. Serialize with START/STOP on the owning client thread.
+  CameraControlIdleStatus cameraControlIdle();
+  CameraControlIdleStatus stageCameraControlIdle(const CameraControlIdleStatus&,
+      const std::array<CameraRowGainConfig,4>&);
+  // Matched415M live controller. Call on the acquisition thread; each begin
+  // writes ONLY one request, never receives, drains or pauses capture. Keep
+  // readFrame/decode/ACK running and feed frames to finishCameraControl.
+  // No automatic retry, transition labels or RAW suppression. A timeout is
+  // unconfirmed: keep receiving for the late reply; partial writes/invalid
+  // replies require close. SET replies mean accepted, NOT actual exposure.
+  uint32_t beginCameraControlGet();
+  uint32_t beginCameraControlSet(const CameraControlStatus& current,
+      const std::array<CameraRowGainConfig,4>& requested);
+  bool finishCameraControl(const Frame&,CameraControlStatus&);
+  bool cameraControlPending() const noexcept;
   // 415M-only integer-row live request. Send once; returns without reading or
   // waiting for sensor application. One outstanding request per connection.
   // Continue readFrame/full decoding/sendVideoAck/IMU ingestion normally and

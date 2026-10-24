@@ -10,7 +10,7 @@ documentation. Device firmware is distributed separately.
   for internally aligned IMU output and missing-camera/shared-exposure fixes.
 - Runtime API: **19** (DeviceInfo model field). Network extension: **4** (plain TCP,
   token equals Web login password). Profile/live-exposure extension: **1**.
-  RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
+  Native camera-control, RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
 - Update headers and libraries together and rebuild consumers. A matching version
   number alone does not establish that an older device has every current feature.
 

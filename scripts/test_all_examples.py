@@ -56,9 +56,10 @@ def verify_package() -> None:
         installed = {p.relative_to(prefix): p.read_bytes() for p in prefix.rglob("*.hpp")}
         if installed != host_headers:
             raise RuntimeError(f"Host/ROS headers differ for {arch}")
-    for relative in ("prism/usb/runtime_api.hpp", "prism/usb/network_runtime_api.hpp", "prism/usb/profile_runtime_api.hpp"):
+    for relative in ("prism/usb/runtime_api.hpp", "prism/usb/network_runtime_api.hpp", "prism/usb/profile_runtime_api.hpp", "prism/usb/camera_control_runtime_api.hpp"):
         contents = (ROOT / "include" / relative).read_text(encoding="utf-8")
-        pattern = (r"kProfileRuntimeApiVersion\s*=\s*1" if "profile_" in relative else
+        pattern = (r"kCameraControlRuntimeApiVersion\s*=\s*1" if "camera_control_" in relative else
+                   r"kProfileRuntimeApiVersion\s*=\s*1" if "profile_" in relative else
                    r"kNetworkRuntimeApiVersion\s*=\s*4" if "network_" in relative else
                    r"kRuntimeApiVersion\s*=\s*19")
         if not re.search(pattern, contents):
@@ -94,6 +95,8 @@ def verify_package() -> None:
     for path in runtime_paths:
         contents = path.read_bytes()
         relative_path = path.relative_to(ROOT)
+        if b"prism_usb_sdk_get_camera_control_api" not in contents:
+            raise RuntimeError(f"runtime lacks native camera-control extension: {relative_path}")
         if EXPECTED_EXPOSURE_LIMIT not in contents:
             raise RuntimeError(
                 f"runtime lacks the 50 us exposure limit: {relative_path}"

@@ -1,5 +1,6 @@
 #include "prism/usb_sdk.hpp"
 #include "prism/usb/network_runtime_api.hpp"
+#include "prism/usb/camera_control_runtime_api.hpp"
 
 #ifndef _WIN32
 #error "This example is only supported by the packaged Windows runtime."
@@ -134,6 +135,11 @@ class RuntimeModule {
         throw std::runtime_error("incompatible MSVC runtime family");
       }
       validateAllFunctions(*api_);
+      const auto camera_entry = reinterpret_cast<prism::GetCameraControlRuntimeApiFunction>(
+          GetProcAddress(loaded_module, prism::kCameraControlRuntimeApiEntryPoint));
+      if (!camera_entry || !prism::validCameraControlRuntimeApi(camera_entry(1)) ||
+          camera_entry(0) || camera_entry(2))
+        throw std::runtime_error("incompatible native camera-control extension");
       const auto dataset_entry = reinterpret_cast<prism::GetDatasetRuntimeApiFunction>(
           GetProcAddress(loaded_module, prism::kDatasetRuntimeApiEntryPoint));
       const auto* dataset = dataset_entry ? dataset_entry(prism::kDatasetRuntimeApiVersion) : nullptr;

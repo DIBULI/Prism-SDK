@@ -7,3 +7,4 @@ ARCH=linux-x64
 BUILD=matched-runtime-refresh
 BASELINE=Ubuntu 20.04
 GLIBC_MIN=2.31
+CAMERA_CONTROL_API=1

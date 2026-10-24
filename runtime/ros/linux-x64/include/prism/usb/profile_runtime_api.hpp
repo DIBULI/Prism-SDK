@@ -2,7 +2,7 @@
 #include "prism/usb/client.hpp"
 
 namespace prism {
-// Additive extension; the core and network tables have independent ABI versions.
+// Additive extension; RuntimeApi19 and NetworkRuntimeApi3 remain unchanged.
 constexpr uint32_t kProfileRuntimeApiVersion = 1;
 inline constexpr char kProfileRuntimeApiEntryPoint[] = "prism_usb_sdk_get_profile_api";
 struct ProfileRuntimeApi {
