@@ -1,10 +1,14 @@
 #pragma once
 #include "common.hpp"
+#include <stdexcept>
 
 namespace prism {
 // Matched 415M descriptor4 only. Separate from the legacy exposure/us API.
 // Gain uses exact 1/16x units:16=1x,900=56.25x. No float rounding on the wire.
 struct CameraRowGainConfig {
+  // Bounds and target/deadband are GLOBAL. The v1 wire repeats them in each
+  // camera record, but all four copies must agree. AE/AGC are global too.
+  // Only manual values and observed frame values are per-camera.
   uint16_t min_rows=3,max_rows=4096,manual_rows=100;
   uint16_t min_gain_sixteenths=16,max_gain_sixteenths=900,manual_gain_sixteenths=16;
   uint16_t target_raw12=1433,deadband_raw12=100;
@@ -16,6 +20,38 @@ inline bool validCameraRowGainConfig(const CameraRowGainConfig& c) {
       c.min_gain_sixteenths<=c.manual_gain_sixteenths && c.manual_gain_sixteenths<=c.max_gain_sixteenths &&
       c.target_raw12>=1 && c.target_raw12<=4095 && c.deadband_raw12<c.target_raw12 &&
       unsigned(c.target_raw12)+c.deadband_raw12<=4095;
+}
+struct CameraControlGlobalSettings {
+  uint16_t min_rows=3,max_rows=4096;
+  uint16_t min_gain_sixteenths=16,max_gain_sixteenths=900;
+  uint16_t target_raw12=1433,deadband_raw12=100;
+  bool automatic_exposure=false,automatic_gain=false;
+};
+inline bool sharedCameraControlGlobals(const std::array<CameraRowGainConfig,4>& v) {
+  const auto& g=v[0];
+  for(const auto& c:v)if(c.min_rows!=g.min_rows||c.max_rows!=g.max_rows||
+      c.min_gain_sixteenths!=g.min_gain_sixteenths||c.max_gain_sixteenths!=g.max_gain_sixteenths||
+      c.target_raw12!=g.target_raw12||c.deadband_raw12!=g.deadband_raw12||
+      c.automatic_exposure!=g.automatic_exposure||c.automatic_gain!=g.automatic_gain)return false;
+  return true;
+}
+inline CameraControlGlobalSettings cameraControlGlobals(const std::array<CameraRowGainConfig,4>& v) {
+  if(!sharedCameraControlGlobals(v))throw std::invalid_argument("camera bounds/target must be global");
+  const auto& c=v[0];
+  return {c.min_rows,c.max_rows,c.min_gain_sixteenths,c.max_gain_sixteenths,c.target_raw12,c.deadband_raw12,c.automatic_exposure,c.automatic_gain};
+}
+// Pure all-or-nothing expansion. Preserve per-camera manual values;
+// never silently clamp a manual value when changing the global bounds.
+inline std::array<CameraRowGainConfig,4> withCameraControlGlobals(
+    std::array<CameraRowGainConfig,4> v,const CameraControlGlobalSettings& g) {
+  for(auto& c:v){
+    c.min_rows=g.min_rows;c.max_rows=g.max_rows;
+    c.min_gain_sixteenths=g.min_gain_sixteenths;c.max_gain_sixteenths=g.max_gain_sixteenths;
+    c.target_raw12=g.target_raw12;c.deadband_raw12=g.deadband_raw12;
+    c.automatic_exposure=g.automatic_exposure;c.automatic_gain=g.automatic_gain;
+    if(!validCameraRowGainConfig(c))throw std::invalid_argument("global bounds/target invalid for a camera's manual settings");
+  }
+  return v;
 }
 struct CameraRowGainObserved {
   uint32_t source_frame_id=0;
