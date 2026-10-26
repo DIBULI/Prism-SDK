@@ -128,6 +128,7 @@ def expected_targets(kind: str) -> list[str]:
         ]
     targets = [
         "prism-network-connect",
+        "prism-network-camera-imu-capture",
         "prism-profile-raw12-decode",
         "prism-device-info-time-sync",
         "prism-camera-imu-capture",

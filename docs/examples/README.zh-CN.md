@@ -47,14 +47,14 @@ SDK 程序。
 
 ## RTK 使用案例
 
-[`rtk_position.cpp`](../../examples/rtk_position.cpp) 连续读取接收机的 GGA 和独立 ADRNAV
+[`rtk_position.cpp`](../../examples/gnss_rtk/rtk_position.cpp) 连续读取接收机的 GGA 和独立 ADRNAV
 结果，显示 SINGLE/DGNSS/FLOAT/FIX、经纬度、椭球高、历元、卫星数和可选标准差。
 同一源码提供 `prism-rtk-position` 与 `prism-rklocal-rtk-position`，默认只读 30 秒，
 不会自动启动 CORS。已有 `rtk_module_control.cpp` 用于显式保存账号、启动及停止。
 
 编译、CORS 配置、授权发送 GGA、读取、停止及自测的说明统一放在
-[rtk_module_control.cpp](../../examples/rtk_module_control.cpp) 和
-[rtk_position.cpp](../../examples/rtk_position.cpp) 顶部的英文注释中。
+[rtk_module_control.cpp](../../examples/gnss_rtk/rtk_module_control.cpp) 和
+[rtk_position.cpp](../../examples/gnss_rtk/rtk_position.cpp) 顶部的英文注释中。
 
 ## `prism-device-info-time-sync`
 
@@ -199,7 +199,7 @@ DLL 并确认 45 个 Runtime API 入口全部存在，但不会打开或修改�
 运行这些目录程序。
 
 CMake 按平台注册所有示例，Linux ARM64 还编译 RK-local 示例。如果新增
-`examples/*.cpp` 却没有注册 CMake target，配置阶段会直接失败，避免静默漏编。
+`examples/**/*.cpp` 却没有注册 CMake target，配置阶段会直接失败，避免静默漏编。
 
 ## 自动化测试脚本
 
@@ -249,3 +249,8 @@ python3 scripts/test_all_examples.py \
 
 持久配置、曝光控制、Wi-Fi、LiDAR 网络管理、原始帧解析和系统升级等每个公开 SDK
 接口的示例，请参阅 [逐接口 SDK 示例](interfaces.zh-CN.md)。
+
+
+## 网口图像与 IMU
+
+见[网口采集示例](../../examples/network/README.zh-CN.md)，包括编译、密码输入、JPEG 和 IMU CSV 输出说明。所有示例按功能分目录，见[源码索引](../../examples/README.zh-CN.md)。

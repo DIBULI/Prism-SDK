@@ -128,7 +128,7 @@ macOS 使用 `shasum -a 256 -c SHA256SUMS`。
 ### Linux 与 macOS 基本流程
 
 本节的 `prism::Client` 直连接口适用于 Linux 和 macOS。Windows 包不包含 import
-library，Windows 应用必须按 `examples/device_info_time_sync.cpp` 使用 Runtime API v19。
+library，Windows 应用必须按 `examples/device/device_info_time_sync.cpp` 使用 Runtime API v19。
 
 统一包含：
 

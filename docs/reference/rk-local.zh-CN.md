@@ -32,8 +32,8 @@ Agent、Host SDK 和 RK-local SDK 均为 **1.3.0**，线协议 **1**，主 Runti
 - [公共头文件](../../include/prism/rklocal_sdk.hpp)
 - [ARM64 静态库](../../runtime/linux-arm64/libprism_rklocal_sdk.a)
 - [CMake 导入目标](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake)：`Prism::RkLocal`
-- [相机/IMU 示例](../../examples/rklocal_capture.cpp)
-- [只读 GNSS 示例](../../examples/rklocal_gnss_status.cpp)
+- [相机/IMU 示例](../../examples/rklocal/rklocal_capture.cpp)
+- [只读 GNSS 示例](../../examples/rklocal/rklocal_gnss_status.cpp)
 
 在 RK 上从 SDK 仓库根目录运行：
 

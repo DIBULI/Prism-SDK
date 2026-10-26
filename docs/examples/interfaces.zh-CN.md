@@ -37,11 +37,11 @@ using namespace std::chrono_literals;
 
 本手册中的每组片段也都有对应的、经过编译检查的源码目录：
 
-- [Client 生命周期与基础控制](../../examples/client_api_examples.cpp)
-- [配置、采集、网络与升级](../../examples/configuration_api_examples.cpp)
-- [高级 Stream 封装](../../examples/stream_api_examples.cpp)
-- [helper 与全部公共解析器](../../examples/parser_api_examples.cpp)
-- [Windows Runtime API v19 全部 57 个入口](../../examples/windows_runtime_api_examples.cpp)
+- [Client 生命周期与基础控制](../../examples/api/client_api_examples.cpp)
+- [配置、采集、网络与升级](../../examples/api/configuration_api_examples.cpp)
+- [高级 Stream 封装](../../examples/api/stream_api_examples.cpp)
+- [helper 与全部公共解析器](../../examples/api/parser_api_examples.cpp)
+- [Windows Runtime API v19 全部 57 个入口](../../examples/windows/windows_runtime_api_examples.cpp)
 
 GitHub Actions 会在每个受支持平台上编译该平台适用的全部目录程序。
 
@@ -284,7 +284,7 @@ if (assembled_frame.has_all_cameras && assembled_frame.has_metadata) {
 
 只有收到全部 JPEG 和匹配 metadata 后才能 ACK。如果更新的 frame ID 证明旧帧分块不会
 再到达，应丢弃并 ACK 旧残帧。完整实现见
-[`camera_imu_capture.cpp`](../../examples/camera_imu_capture.cpp)。
+[`camera_imu_capture.cpp`](../../examples/camera_imu/camera_imu_capture.cpp)。
 
 <a id="example-lidar-control"></a>
 
@@ -546,7 +546,7 @@ void parse_frame(const prism::Frame& frame) {
 ### 加载表并调用全部 57 个函数指针接口
 
 完整可编译的 Windows loader 位于
-[`device_info_time_sync.cpp`](../../examples/device_info_time_sync.cpp)。程序加载
+[`device_info_time_sync.cpp`](../../examples/device/device_info_time_sync.cpp)。程序加载
 `prism_usb_sdk.dll`、解析 `prism_usb_sdk_get_runtime_api`、验证 ABI v19、SDK
 1.3.0 和 MSVC 兼容性，并把结果保存到 `api` 后，全部函数指针的最小形式如下：
 

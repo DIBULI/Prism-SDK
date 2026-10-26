@@ -62,6 +62,7 @@ def check_docs(root: Path = ROOT) -> None:
     root = root.resolve()
     paths = set(root.glob("*.md")) | set((root / "docs").rglob("*.md"))
     paths |= set((root / "rk-local-sdk").glob("*.md"))
+    paths |= set((root / "examples").rglob("*.md"))
     raw_texts = {p.resolve(): p.read_text(encoding="utf-8") for p in paths}
     unlisted = {p for p, text in raw_texts.items()
                 if "<!-- documentation-index: unlisted -->" in text}

@@ -48,10 +48,10 @@ An absent/stale result is not a transport failure and must not be shown as live.
 Saved, applied, connected and positioning are different states. See
 [CORS/RTK control](#cors-control), [TimeSync modes](time-sync.md#port-modes),
 [GNSS diagnostics](#reception-diagnostics) and the
-[read-only example](../../examples/gnss_rtk_status.cpp).
+[read-only example](../../examples/gnss_rtk/gnss_rtk_status.cpp).
 
 For English usage instructions, see the source comments in
-[RTK control](../../examples/rtk_module_control.cpp) and [continuous positions](../../examples/rtk_position.cpp).
+[RTK control](../../examples/gnss_rtk/rtk_module_control.cpp) and [continuous positions](../../examples/gnss_rtk/rtk_position.cpp).
 
 <a id="receiver-results-zh"></a>
 
@@ -82,10 +82,10 @@ Agent 转发接收机数据，不再内置 RTK 解算器；SDK 不生成 FIX，�
 `startRtk` 成功仅确认控制执行，不表示卫星已定位或已获得 FIX。
 保存成功、模块应用成功、CORS 连通和定位成功必须分开判断。
 
-RTK 示例使用说明见源码顶部的英文注释：[CORS 与启停](../../examples/rtk_module_control.cpp)、
-[连续读取结果](../../examples/rtk_position.cpp)。
+RTK 示例使用说明见源码顶部的英文注释：[CORS 与启停](../../examples/gnss_rtk/rtk_module_control.cpp)、
+[连续读取结果](../../examples/gnss_rtk/rtk_position.cpp)。
 详见 [CORS/RTK 控制](#cors-control)、[TimeSync](time-sync.md#port-modes)、
-[接收诊断](#reception-diagnostics)和[只读示例](../../examples/gnss_rtk_status.cpp)。
+[接收诊断](#reception-diagnostics)和[只读示例](../../examples/gnss_rtk/gnss_rtk_status.cpp)。
 
 <a id="original-bytes"></a>
 
@@ -120,7 +120,7 @@ applications own recording and must preserve the gap metadata.
 ## CORS configuration and RTK start/stop / CORS 配置及 RTK 启停
 
 English usage instructions are maintained in the source comments:
-[RTK control](../../examples/rtk_module_control.cpp) and [continuous positions](../../examples/rtk_position.cpp).
+[RTK control](../../examples/gnss_rtk/rtk_module_control.cpp) and [continuous positions](../../examples/gnss_rtk/rtk_position.cpp).
 
 Agent / Host SDK / RK-local SDK: **1.3.0**. Use matching current headers and
 libraries. These wrappers use existing Agent RTK-module commands, without a new

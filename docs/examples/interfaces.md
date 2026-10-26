@@ -40,16 +40,16 @@ before setting that Boolean. All stream and idle-only requirements still apply.
 Every snippet in this cookbook is also represented in a compile-checked source
 catalogue:
 
-- [Client lifecycle and basic control](../../examples/client_api_examples.cpp)
-- [Configuration, acquisition, network, and update](../../examples/configuration_api_examples.cpp)
-- [High-level stream wrappers](../../examples/stream_api_examples.cpp)
-- [Helpers and all public parsers](../../examples/parser_api_examples.cpp)
-- [All 57 Windows Runtime API v19 entries](../../examples/windows_runtime_api_examples.cpp)
+- [Client lifecycle and basic control](../../examples/api/client_api_examples.cpp)
+- [Configuration, acquisition, network, and update](../../examples/api/configuration_api_examples.cpp)
+- [High-level stream wrappers](../../examples/api/stream_api_examples.cpp)
+- [Helpers and all public parsers](../../examples/api/parser_api_examples.cpp)
+- [All 57 Windows Runtime API v19 entries](../../examples/windows/windows_runtime_api_examples.cpp)
 
 GitHub Actions builds every applicable catalogue on each supported platform.
 
 RTK-module CORS read/save and explicit start/stop are demonstrated in
-[rtk_module_control.cpp](../../examples/rtk_module_control.cpp); the same source
+[rtk_module_control.cpp](../../examples/gnss_rtk/rtk_module_control.cpp); the same source
 builds against Host and RK-local. See [consent and timeout semantics](../guides/gnss-rtk.md#cors-control).
 Windows loads the independent `RtkModuleControlRuntimeApi` extension; the
 Windows catalogue validates its version, size and all four function pointers.
@@ -301,7 +301,7 @@ if (assembled_frame.has_all_cameras && assembled_frame.has_metadata) {
 ACK only after all JPEGs and matching metadata are received. Retire and ACK an
 older incomplete frame when a newer frame ID proves the old chunks will not
 arrive. See the complete
-[`camera_imu_capture.cpp`](../../examples/camera_imu_capture.cpp) implementation.
+[`camera_imu_capture.cpp`](../../examples/camera_imu/camera_imu_capture.cpp) implementation.
 
 <a id="example-lidar-control"></a>
 
@@ -568,7 +568,7 @@ wrong. `VideoChunkView` is valid only while its source `Frame` remains alive;
 ### Load the table and call all 57 function-pointer interfaces
 
 The complete buildable Windows loader is
-[`device_info_time_sync.cpp`](../../examples/device_info_time_sync.cpp). After it
+[`device_info_time_sync.cpp`](../../examples/device/device_info_time_sync.cpp). After it
 loads `prism_usb_sdk.dll`, resolves `prism_usb_sdk_get_runtime_api`, validates
 ABI v19/SDK 1.3.0/MSVC compatibility, and stores the result in `api`, the
 function-pointer calls have these direct forms:

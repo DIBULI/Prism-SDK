@@ -1,10 +1,13 @@
 # Prism SDK 示例源码
 
-可运行的源码和 CMake target 保留在本目录。RTK 使用说明放在示例源码的英文注释中；
-通用编译与接口文档仍位于 `docs/`：
+- [网口连接、图像与 IMU 采集](network/README.zh-CN.md)
+- [USB 图像与 IMU](camera_imu/)
+- [设备信息与时间同步](device/)
+- [GNSS / RTK](gnss_rtk/)
+- [LiDAR](lidar/)
+- [RAW12 解码](raw12/)
+- [接口演示](api/)
+- [Windows RuntimeApi](windows/)
+- [RK 本地采集](rklocal/)
 
-- [编译及运行示例](../docs/examples/README.zh-CN.md)
-- RTK 使用说明（源码顶部英文注释）：[CORS 与启停](rtk_module_control.cpp)、[连续定位](rtk_position.cpp)
-- [English example guide](../docs/examples/README.md)
-- [逐接口示例](../docs/examples/interfaces.zh-CN.md)
-- [SDK 文档目录](../docs/README.zh-CN.md)
+[编译与运行指南](../docs/examples/README.zh-CN.md) · [English](README.md)

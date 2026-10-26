@@ -50,15 +50,15 @@ other SDK programs before running an example.
 
 ## RTK example
 
-[`rtk_position.cpp`](../../examples/rtk_position.cpp) continuously reads receiver GGA
+[`rtk_position.cpp`](../../examples/gnss_rtk/rtk_position.cpp) continuously reads receiver GGA
 and independent ADRNAV results: SINGLE/DGNSS/FLOAT/FIX, coordinates, ellipsoidal height,
 epoch, satellites and optional standard deviations. The same source builds
 `prism-rtk-position` and `prism-rklocal-rtk-position`. It is read-only for 30 seconds
 by default and never starts CORS. `rtk_module_control.cpp` provides explicit save/start/stop.
 
 Build commands, CORS setup, explicit GGA consent, monitoring, stop and test instructions
-are maintained in English at the top of [rtk_module_control.cpp](../../examples/rtk_module_control.cpp)
-and [rtk_position.cpp](../../examples/rtk_position.cpp).
+are maintained in English at the top of [rtk_module_control.cpp](../../examples/gnss_rtk/rtk_module_control.cpp)
+and [rtk_position.cpp](../../examples/gnss_rtk/rtk_position.cpp).
 
 ## `prism-device-info-time-sync`
 
@@ -219,7 +219,7 @@ entries are present, but it does not open or modify a device. CTest runs these
 catalogues after compilation.
 
 CMake registers all examples by platform, including RK-local targets on Linux ARM64.
-Configuration fails if a new `examples/*.cpp` file is not registered as a target,
+Configuration fails if a new `examples/**/*.cpp` file is not registered as a target,
 so future examples cannot be silently omitted.
 
 ## Automated test script
@@ -277,3 +277,8 @@ without a complete Camera frame set or LiDAR point batch, respectively.
 For the runnable snippets behind every public SDK interface, including persistent settings,
 exposure control, Wi-Fi, LiDAR network management, raw frame parsing, and
 system upgrades, see the [per-interface SDK examples](interfaces.md).
+
+
+## Network image and IMU capture
+
+See the [network capture example](../../examples/network/README.md) for build commands, password input, JPEG and IMU CSV outputs. Sources are grouped by feature in the [example index](../../examples/README.md).

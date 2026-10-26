@@ -39,8 +39,8 @@ Use matching current headers/libraries and rebuild consumers. Include
 - [Public C++ header](../../include/prism/rklocal_sdk.hpp)
 - [ARM64 archive](../../runtime/linux-arm64/libprism_rklocal_sdk.a)
 - [Imported CMake target](https://github.com/DIBULI/Prism-SDK/blob/master/cmake/PrismRkLocalSdk.cmake): `Prism::RkLocal`
-- [Camera/IMU example](../../examples/rklocal_capture.cpp)
-- [Read-only GNSS example](../../examples/rklocal_gnss_status.cpp)
+- [Camera/IMU example](../../examples/rklocal/rklocal_capture.cpp)
+- [Read-only GNSS example](../../examples/rklocal/rklocal_gnss_status.cpp)
 
 From the SDK root on RK:
 

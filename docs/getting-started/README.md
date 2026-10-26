@@ -143,7 +143,7 @@ streaming, parsing, update, and Windows Runtime API entry, see the
 The direct `prism::Client` API shown in this section is linkable with the Linux
 and macOS runtimes. The Windows package intentionally has no import library;
 Windows applications must use Runtime API v19 as shown in
-`examples/device_info_time_sync.cpp`.
+`examples/device/device_info_time_sync.cpp`.
 
 Include the umbrella header:
 

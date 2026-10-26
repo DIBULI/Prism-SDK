@@ -156,31 +156,32 @@ function(prism_add_example target source)
 endfunction()
 
 set(_prism_cross_platform_example_sources
-  device_info_time_sync.cpp)
+  device/device_info_time_sync.cpp)
 set(_prism_direct_api_example_sources
-  network_connect.cpp
-  profile_raw12_decode.cpp
-  camera_imu_capture.cpp
-  client_api_examples.cpp
-  configuration_api_examples.cpp
-  lidar_capture.cpp
-  parser_api_examples.cpp
-  stream_api_examples.cpp
-  gnss_rtk_status.cpp
-  rtk_position.cpp
-  rtk_module_control.cpp)
-set(_prism_rklocal_example_sources rklocal_capture.cpp rklocal_gnss_status.cpp)
+  network/network_camera_imu_capture.cpp
+  network/network_connect.cpp
+  raw12/profile_raw12_decode.cpp
+  camera_imu/camera_imu_capture.cpp
+  api/client_api_examples.cpp
+  api/configuration_api_examples.cpp
+  lidar/lidar_capture.cpp
+  api/parser_api_examples.cpp
+  api/stream_api_examples.cpp
+  gnss_rtk/gnss_rtk_status.cpp
+  gnss_rtk/rtk_position.cpp
+  gnss_rtk/rtk_module_control.cpp)
+set(_prism_rklocal_example_sources rklocal/rklocal_capture.cpp rklocal/rklocal_gnss_status.cpp)
 set(_prism_windows_runtime_example_sources
-  windows_runtime_api_examples.cpp)
+  windows/windows_runtime_api_examples.cpp)
 set(_prism_registered_example_sources
   ${_prism_cross_platform_example_sources}
   ${_prism_direct_api_example_sources}
   ${_prism_windows_runtime_example_sources}
   ${_prism_rklocal_example_sources})
 
-# Keep the source inventory strict: adding examples/*.cpp without registering a
+# Keep the source inventory strict: adding examples/**/*.cpp without registering a
 # build target must fail configuration instead of silently escaping CI.
-file(GLOB _prism_discovered_example_sources
+file(GLOB_RECURSE _prism_discovered_example_sources
   RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
   CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/*.c")
 list(SORT _prism_discovered_example_sources)
@@ -188,12 +189,12 @@ list(SORT _prism_registered_example_sources)
 if(NOT "${_prism_discovered_example_sources}" STREQUAL
        "${_prism_registered_example_sources}")
   message(FATAL_ERROR
-    "Every examples/*.cpp file must be registered in examples/CMakeLists.txt. "
+    "Every examples/**/*.cpp file must be registered in examples/CMakeLists.txt. "
     "Discovered: ${_prism_discovered_example_sources}; "
     "registered: ${_prism_registered_example_sources}")
 endif()
 
-prism_add_example(prism-device-info-time-sync device_info_time_sync.cpp)
+prism_add_example(prism-device-info-time-sync device/device_info_time_sync.cpp)
 set(_prism_supported_example_targets prism-device-info-time-sync)
 
 # These examples use the direct Client and stream helper classes. The packaged
@@ -201,7 +202,7 @@ set(_prism_supported_example_targets prism-device-info-time-sync)
 # off the Windows build rather than presenting unsupported linkage instructions.
 if(WIN32)
   prism_add_example(prism-windows-runtime-api-examples
-    windows_runtime_api_examples.cpp)
+    windows/windows_runtime_api_examples.cpp)
   list(APPEND _prism_supported_example_targets
     prism-windows-runtime-api-examples)
 
@@ -210,7 +211,18 @@ if(WIN32)
       COMMAND prism-windows-runtime-api-examples)
   endif()
 else()
-  prism_add_example(prism-network-connect network_connect.cpp)
+  prism_add_example(prism-network-camera-imu-capture network/network_camera_imu_capture.cpp)
+  list(APPEND _prism_supported_example_targets prism-network-camera-imu-capture)
+  if(BUILD_TESTING)
+    add_test(NAME prism-network-camera-imu-help COMMAND prism-network-camera-imu-capture --help)
+    add_test(NAME prism-network-camera-imu-invalid-port
+      COMMAND prism-network-camera-imu-capture --host 127.0.0.1 --output unused --port 65536)
+    add_test(NAME prism-network-camera-imu-invalid-duration
+      COMMAND prism-network-camera-imu-capture --host 127.0.0.1 --output unused --seconds 0)
+    set_tests_properties(prism-network-camera-imu-invalid-port
+      prism-network-camera-imu-invalid-duration PROPERTIES WILL_FAIL TRUE)
+  endif()
+  prism_add_example(prism-network-connect network/network_connect.cpp)
   list(APPEND _prism_supported_example_targets prism-network-connect)
   if(BUILD_TESTING)
     add_test(NAME prism-network-connect-help COMMAND prism-network-connect --help)
@@ -218,23 +230,23 @@ else()
   if(PRISM_SDK_BUILD_RAW12_EXAMPLE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
-    prism_add_example(prism-profile-raw12-decode profile_raw12_decode.cpp)
+    prism_add_example(prism-profile-raw12-decode raw12/profile_raw12_decode.cpp)
     target_link_libraries(prism-profile-raw12-decode PRIVATE PkgConfig::ZSTD)
     list(APPEND _prism_supported_example_targets prism-profile-raw12-decode)
     if(BUILD_TESTING)
       add_test(NAME prism-profile-raw12-self-test COMMAND prism-profile-raw12-decode --self-test)
     endif()
   endif()
-  prism_add_example(prism-camera-imu-capture camera_imu_capture.cpp)
-  prism_add_example(prism-client-api-examples client_api_examples.cpp)
+  prism_add_example(prism-camera-imu-capture camera_imu/camera_imu_capture.cpp)
+  prism_add_example(prism-client-api-examples api/client_api_examples.cpp)
   prism_add_example(prism-configuration-api-examples
-    configuration_api_examples.cpp)
-  prism_add_example(prism-lidar-capture lidar_capture.cpp)
-  prism_add_example(prism-parser-api-examples parser_api_examples.cpp)
-  prism_add_example(prism-stream-api-examples stream_api_examples.cpp)
-  prism_add_example(prism-gnss-rtk-status gnss_rtk_status.cpp)
-  prism_add_example(prism-rtk-position rtk_position.cpp)
-  prism_add_example(prism-rtk-module-control rtk_module_control.cpp)
+    api/configuration_api_examples.cpp)
+  prism_add_example(prism-lidar-capture lidar/lidar_capture.cpp)
+  prism_add_example(prism-parser-api-examples api/parser_api_examples.cpp)
+  prism_add_example(prism-stream-api-examples api/stream_api_examples.cpp)
+  prism_add_example(prism-gnss-rtk-status gnss_rtk/gnss_rtk_status.cpp)
+  prism_add_example(prism-rtk-position gnss_rtk/rtk_position.cpp)
+  prism_add_example(prism-rtk-module-control gnss_rtk/rtk_module_control.cpp)
   list(APPEND _prism_supported_example_targets
     prism-camera-imu-capture
     prism-client-api-examples
@@ -270,11 +282,11 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
    CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
   include("${PRISM_SDK_ROOT}/cmake/PrismRkLocalSdk.cmake")
-  add_executable(prism-rklocal-rtk-module-control rtk_module_control.cpp)
+  add_executable(prism-rklocal-rtk-module-control gnss_rtk/rtk_module_control.cpp)
   target_compile_definitions(prism-rklocal-rtk-module-control PRIVATE PRISM_EXAMPLE_RKLOCAL)
   target_link_libraries(prism-rklocal-rtk-module-control PRIVATE Prism::RkLocal)
   list(APPEND _prism_supported_example_targets prism-rklocal-rtk-module-control)
-  add_executable(prism-rklocal-rtk-position rtk_position.cpp)
+  add_executable(prism-rklocal-rtk-position gnss_rtk/rtk_position.cpp)
   target_compile_definitions(prism-rklocal-rtk-position PRIVATE PRISM_EXAMPLE_RKLOCAL)
   target_link_libraries(prism-rklocal-rtk-position PRIVATE Prism::RkLocal)
   target_compile_options(prism-rklocal-rtk-position PRIVATE -Wall -Wextra -Wpedantic -Werror)
@@ -289,7 +301,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
   endif()
   foreach(_example capture gnss_status)
     string(REPLACE "_" "-" _name "${_example}")
-    add_executable(prism-rklocal-${_name} rklocal_${_example}.cpp)
+    add_executable(prism-rklocal-${_name} rklocal/rklocal_${_example}.cpp)
     target_link_libraries(prism-rklocal-${_name} PRIVATE Prism::RkLocal)
     target_compile_features(prism-rklocal-${_name} PRIVATE cxx_std_17)
     target_compile_options(prism-rklocal-${_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)

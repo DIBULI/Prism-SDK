@@ -24,7 +24,7 @@ use the same SDK lifecycle; model-specific point metadata is described below.
 
 Stop **all** camera, board-IMU and LiDAR streams before standby or wake. After
 waking, start capture explicitly when wanted. Read the
-[capture example](../../examples/lidar_capture.cpp) for data reception and the
+[capture example](../../examples/lidar/lidar_capture.cpp) for data reception and the
 [interface cookbook](../examples/interfaces.md) for stream/parser usage.
 
 <a id="standby-wake"></a>
