@@ -294,8 +294,20 @@ inline std::optional<CameraFrameSet> CameraFrameAssembler::takeCompletedFrame(
     uint32_t frame_id) {
   const auto frame_set = partial_frame_sets_.find(frame_id);
   const auto metadata = metadata_by_frame_.find(frame_id);
+  // Valid carrier metadata declares this frame's populated slots. Zero
+  // exposure denotes an absent slot; never borrow inventory from DeviceInfo.
+  // Unvalidated/legacy metadata retains strict four-slot completion.
+  uint8_t expected = 0x0f;
+  if (metadata != metadata_by_frame_.end() && metadata->second.valid &&
+      metadata->second.cameras == 4) {
+    expected = 0;
+    for (unsigned camera = 0; camera < 4; ++camera)
+      if (metadata->second.exposure_us[camera])
+        expected |= static_cast<uint8_t>(1u << camera);
+  }
   if (frame_set == partial_frame_sets_.end() ||
-      frame_set->second.ready_mask != 0x0fu ||
+      !expected || frame_set->second.ready_mask != expected ||
+      frame_set->second.invalid_mask ||
       metadata == metadata_by_frame_.end()) {
     return std::nullopt;
   }
@@ -309,7 +321,7 @@ inline std::optional<CameraFrameSet> CameraFrameAssembler::takeCompletedFrame(
         completed.metadata.trigger_time_ns / 1000ULL;
   }
   completed.jpeg = std::move(frame_set->second.jpeg);
-  completed.camera_mask = 0x0fu;
+  completed.camera_mask = expected;
   completed.width = frame_set->second.width;
   completed.height = frame_set->second.height;
   partial_frame_sets_.erase(frame_set);
@@ -429,9 +441,7 @@ inline CameraChunkResult CameraFrameAssembler::ingest(
   frame_set.timestamp_us[camera] = image.timestamp_us;
   frame_set.ready_mask =
       static_cast<uint8_t>(frame_set.ready_mask | (1u << camera));
-  if (frame_set.ready_mask == 0x0fu) {
-    result.completed = takeCompletedFrame(chunk.frame_id);
-  }
+  result.completed = takeCompletedFrame(chunk.frame_id);
   pending_images_.erase(key);
   return result;
 }
