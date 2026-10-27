@@ -1,4 +1,5 @@
 #pragma once
+#include "raw12_header.hpp"
 #include "prism/usb/client.hpp"
 #include <array>
 #include <cstring>
@@ -83,6 +84,7 @@ struct Raw12Image {
   uint8_t camera=0,bayer=0,timing_mode=0;
   uint64_t source_timestamp_us=0; // mode4 common trigger, not implicit UTC.
   std::vector<uint8_t> packed; // Two pixels/three bytes, low bits preserved.
+  uint32_t trigger_sequence=0; // Shared trigger group, not the per-camera frame_id.
 };
 inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
   // IEEE CRC-32, slicing-by-eight. Keep the wire/checksum definition unchanged;
@@ -107,8 +109,9 @@ inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
   return ~crc;
 }
 inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
+  const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Zstd);
   if(bytes.size()<49||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRZ1",4)||
-     bytes[4]!=1||bytes[5]!=48||bytes[6]!=12||bytes[7]>3||
+     bytes[6]!=12||bytes[7]>3||
      bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
     throw std::runtime_error("invalid RAW12 header");
   const auto* p=bytes.data();Raw12Image r;
@@ -118,16 +121,17 @@ inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
   const auto size=rawLe32(p+16);
   if(r.width!=5120||r.height!=3072||size!=23592960u)
     throw std::runtime_error("unsupported RAW12 geometry");
-  const auto content=ZSTD_getFrameContentSize(p+48,bytes.size()-48);
-  if(content!=size||ZSTD_findFrameCompressedSize(p+48,bytes.size()-48)!=bytes.size()-48)
+  const auto content=ZSTD_getFrameContentSize(p+envelope.bytes,bytes.size()-envelope.bytes);
+  if(content!=size||ZSTD_findFrameCompressedSize(p+envelope.bytes,bytes.size()-envelope.bytes)!=bytes.size()-envelope.bytes)
     throw std::runtime_error("invalid RAW12 compressed size");
   r.packed.resize(size);
-  auto n=ZSTD_decompress(r.packed.data(),size,p+48,bytes.size()-48);
+  auto n=ZSTD_decompress(r.packed.data(),size,p+envelope.bytes,bytes.size()-envelope.bytes);
   if(ZSTD_isError(n))throw std::runtime_error(std::string("RAW12 decompression: ")+ZSTD_getErrorName(n));
   if(n!=size)throw std::runtime_error("RAW12 decompressed length mismatch");
   const auto crc=rawCrc32(r.packed.data(),size);
   if(crc!=rawLe32(p+20))throw std::runtime_error("RAW12 CRC mismatch: actual="+
       std::to_string(crc)+" expected="+std::to_string(rawLe32(p+20)));
+  r.trigger_sequence=envelope.trigger_sequence;
   r.frame_id=rawLe32(p+24);r.exposure_us=rawLe32(p+28);r.gain_x1024=rawLe32(p+32);
   r.camera=p[37];r.bayer=p[7];r.timing_mode=p[38];
   r.source_timestamp_us=rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32);return r;
@@ -138,8 +142,9 @@ inline uint16_t raw12Pixel(const Raw12Image& r,size_t index) {
       ((index&1)?(r.packed[at+2]>>4):(r.packed[at+2]&15));
 }
 inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
+  const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Rice);
   if(bytes.size()<65||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRG1",4)||
-     bytes[4]!=1||bytes[5]!=64||bytes[6]!=12||bytes[7]>3||
+     bytes[6]!=12||bytes[7]>3||
      bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
     throw std::runtime_error("invalid GPU RAW12 header");
   const auto *p=bytes.data();Raw12Image r;
@@ -148,11 +153,11 @@ inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
   r.width=rawLe32(p+8);r.height=rawLe32(p+12);
   constexpr size_t pixels=5120u*3072u,block=256;
   if(r.width!=5120||r.height!=3072||rawLe32(p+16)!=23592960u||
-     rawLe32(p+52)!=block||rawLe32(p+56)!=bytes.size()-64||
-     rawCrc32(p+64,bytes.size()-64)!=rawLe32(p+48))
+     rawLe32(p+52)!=block||rawLe32(p+56)!=bytes.size()-envelope.bytes||
+     rawCrc32(p+envelope.bytes,bytes.size()-envelope.bytes)!=rawLe32(p+48))
     throw std::runtime_error("invalid GPU RAW12 size or encoded CRC");
   std::vector<uint8_t> u16(pixels*2);
-  size_t at=64;
+  size_t at=envelope.bytes;
   for(size_t base=0;base<pixels;base+=block){
     if(at>=bytes.size())throw std::runtime_error("truncated RAW12 block");
     unsigned mode=p[at],k=mode>=32?mode-32:0;
@@ -196,6 +201,7 @@ inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
     unsigned b=unsigned(u16[2*i+2])|(unsigned(u16[2*i+3])<<8);
     r.packed[i/2*3]=uint8_t(a>>4);r.packed[i/2*3+1]=uint8_t(b>>4);r.packed[i/2*3+2]=uint8_t((a&15)|((b&15)<<4));
   }
+  r.trigger_sequence=envelope.trigger_sequence;
   r.frame_id=rawLe32(p+24);r.exposure_us=rawLe32(p+28);r.gain_x1024=rawLe32(p+32);
   r.camera=p[37];r.bayer=p[7];r.timing_mode=p[38];
   r.source_timestamp_us=rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32);return r;

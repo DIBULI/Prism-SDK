@@ -86,4 +86,6 @@ Host 示例为 `prism-rtk-module-control --help`，顶层 ARM64 构建还提供
 所有接口说明集中在 [docs/](docs/README.zh-CN.md)。完整包验证：
 `python3 scripts/test_all_examples.py --build-dir build-all-examples`。
 
+415M 四路共同组帧号见[触发分组接口说明](docs/update/v1.3.0-trigger-groups.md)。
+
 [网口图像与 IMU 示例](examples/network/README.zh-CN.md) · [按功能浏览全部示例](examples/README.zh-CN.md)

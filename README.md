@@ -1,5 +1,8 @@
 # Prism SDK 1.3.0
 
+See [415M shared trigger groups](docs/update/v1.3.0-trigger-groups.md) for the
+matched Agent and header update used by grouped Viewer previews.
+
 **Mixed licensing:** public headers, examples and integration files are
 Apache-2.0; the SDK core libraries remain proprietary and closed-source.
 Unmodified SDK binaries may be redistributed with applications under the
