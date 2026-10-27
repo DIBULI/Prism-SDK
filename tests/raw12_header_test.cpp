@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 using namespace prism::capture;
 #define CHECK(x) do {if(!(x))throw std::runtime_error("header test line "+std::to_string(__LINE__));}while(0)
 static void put(std::vector<uint8_t>& b,size_t at,uint32_t v){for(unsigned n=0;n<4;++n)b[at+n]=uint8_t(v>>(8*n));}
