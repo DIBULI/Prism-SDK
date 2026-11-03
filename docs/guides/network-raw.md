@@ -58,7 +58,7 @@ recording happens on the device and is downloaded after finalization.
 ## Native RAW8 / 原生 RAW8
 
 Include `<prism/usb/profile_video.hpp>` and explicitly call
-`client.startProfileVideoGpu(fps)` for mixed 1315, or
+`client.startProfileVideoGpu(fps)` for mixed 21315V0, or
 `client.startPrism415rsv0Video(fps)` for 415RSV0 (1 or 2 FPS). Legacy JPEG capture APIs are not automatically
 changed to RAW. `ProfileImageAssembler` holds one bounded assembly per camera;
 feed parsed `VideoChunkView` objects to `ingest()` and consume each completed

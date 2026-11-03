@@ -202,16 +202,16 @@ struct DeviceWifiInfo {
 
 enum class DeviceModel : uint8_t {
   Unknown = 0,
-  Prism41M3 = 1,
+  Prism413GSV0 = 1,
   Prism415RSV0 = 2,
-  Prism1315 = 3,
+  Prism21315V0 = 3,
 };
 
 inline const char* deviceModelName(DeviceModel model) {
   switch (model) {
-    case DeviceModel::Prism41M3: return "41M3";
+    case DeviceModel::Prism413GSV0: return "413GSV0";
     case DeviceModel::Prism415RSV0: return "415RSV0";
-    case DeviceModel::Prism1315: return "1315";
+    case DeviceModel::Prism21315V0: return "21315V0";
     default: return "Unknown";
   }
 }

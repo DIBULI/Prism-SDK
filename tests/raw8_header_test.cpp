@@ -30,5 +30,5 @@ int main()try{
     put(b,52,10);checksum(b);reject(parse); // No fabricated group on local timing.
   }
   reject([]{parseRaw8Header(nullptr,0,0);});
-  std::cout<<"PASS native8 header: genuine shared group, independent1315 timing, every header bit, geometry/depth/codec/bounds\n";return 0;
+  std::cout<<"PASS native8 header: genuine shared group, independent21315V0 timing, every header bit, geometry/depth/codec/bounds\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}

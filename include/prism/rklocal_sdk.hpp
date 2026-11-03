@@ -243,7 +243,7 @@ class Client {
   // Queue overflow is an explicit error, never frame replacement.
   VideoStatus startPrism415rsv0Video();
   VideoStatus startPrism415rsv0Video(uint32_t fps);
-  // Mixed profiles (1315), GPU-only RAW8 plus existing native JPEG cameras.
+  // Mixed profiles (21315V0), GPU-only RAW8 plus existing native JPEG cameras.
   // FPS=0 selects saved rate; otherwise acknowledgement must match exactly.
   VideoStatus startProfileVideoGpu(uint32_t fps = 0);
   // New 415RSV0 socket preview: Agent thumbnails, originals only for startup save

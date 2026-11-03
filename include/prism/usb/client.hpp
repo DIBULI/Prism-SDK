@@ -187,8 +187,8 @@ class Client {
   // Native RAW8/GPU profile capture (options=7). Missing cameras do not block
   // healthy lanes. No-argument entry stays
   // at 1 FPS for binary/source compatibility. Explicit 2 needs capable firmware.
-  // Does not change persistent configuration. Mixed 1315 uses
-  // startProfileVideoGpu (options=3); legacy 41M3 uses options=0.
+  // Does not change persistent configuration. Mixed 21315V0 uses
+  // startProfileVideoGpu (options=3); legacy 413GSV0 uses options=0.
   VideoStatus startPrism415rsv0Video();
   VideoStatus startPrism415rsv0Video(uint32_t fps);
   // Either stop method stops both Camera and IMU acquisition.

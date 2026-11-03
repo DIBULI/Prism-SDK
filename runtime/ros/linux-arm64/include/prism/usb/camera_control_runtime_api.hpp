@@ -2,7 +2,7 @@
 #include "prism/usb/client.hpp"
 
 namespace prism {
-// Additive: legacy RuntimeApi/ProfileRuntimeApi layouts and 41M3 stay intact.
+// Additive: legacy RuntimeApi/ProfileRuntimeApi layouts and 413GSV0 stay intact.
 constexpr uint32_t kCameraControlRuntimeApiVersion = 1;
 inline constexpr char kCameraControlRuntimeApiEntryPoint[] =
     "prism_usb_sdk_get_camera_control_api";
