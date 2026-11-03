@@ -184,7 +184,8 @@ class Client {
   VideoStatus startVideo1280x1024(uint32_t fps = 0);
   VideoStatus startProfileVideo(uint32_t fps = 0);
   VideoStatus startProfileVideoGpu(uint32_t fps = 0);
-  // Strict four-camera RAW12/GPU capture (options=7). No-argument entry stays
+  // Native RAW8/GPU profile capture (options=7). Missing cameras do not block
+  // healthy lanes. No-argument entry stays
   // at 1 FPS for binary/source compatibility. Explicit 2 needs capable firmware.
   // Does not change persistent configuration. Mixed 21315V0 uses
   // startProfileVideoGpu (options=3); legacy 413GSV0 uses options=0.
@@ -192,9 +193,14 @@ class Client {
   VideoStatus startPrism415rsv0Video(uint32_t fps);
   // Either stop method stops both Camera and IMU acquisition.
   void stopVideo();
+  // Process original tail events on the calling thread while awaiting STOP.
+  // Handler must not reenter Client. Deadline/queue/decode failures require
+  // closing the connection; no automatic STOP retry or capture restart.
+  void stopVideo(const std::function<void(const Frame&)>& tail);
   ImuStreamStatus startImu(uint32_t sensor_count = 2,
                            uint32_t nominal_rate_hz = 0);
   ImuStreamStatus stopImu();
+  ImuStreamStatus stopImu(const std::function<void(const Frame&)>& tail);
   void sendVideoAck(uint32_t last_frame_id);
 
   // The model is intentionally mandatory: Mid-360 and Mid-360S use separate
@@ -257,6 +263,7 @@ class Client {
   SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id = 0);
 
  private:
+  Frame commandDraining(FrameType stop, const std::function<void(const Frame&)>& tail);
   VideoStatus startVideoWithOptions(uint32_t fps, uint32_t options);
   UpgradeStatus upgradeAgentImage(
       const std::vector<uint8_t>& image,

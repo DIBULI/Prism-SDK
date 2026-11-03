@@ -19,7 +19,9 @@ implementation or device firmware source is published here.
 ## Compatibility
 
 - SDK / required Agent: **1.3.0**; opening enforces an exact version match.
-- Qualified Sensor Board: **0.5.0**; USB and RK-local protocol **1**.
+- 415RSV0 matching Sensor Board: **0.5.2**; other models need their own firmware.
+  Canonical model names are **415RSV0, 413GSV0, 21315V0**; wire model IDs are unchanged.
+  USB and RK-local protocol **1**. See [compatibility](ORIGIN.md) for validation limits.
 - Windows Runtime API **19**, RTK-module control extension **1**.
 - Replace headers and libraries together and rebuild your application.
 

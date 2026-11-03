@@ -6,8 +6,9 @@ documentation. Device firmware is distributed separately.
 ## Compatibility
 
 - Host SDK, RK-local SDK and required Agent version: **1.3.0**.
-- Matching Sensor Board firmware: **0.5.0**. Use the current firmware package
-  for internally aligned IMU output and missing-camera/shared-exposure fixes.
+- 415RSV0 matching Sensor Board firmware: **0.5.2**, native RAW8.
+  Other models require their own matching firmware; never cross-flash model packages.
+  413GSV0 and 21315V0 naming support does not establish new hardware qualification.
 - Runtime API: **19** (DeviceInfo model field). Network extension: **4** (plain TCP,
   token equals Web login password). Profile/live-exposure extension: **1**.
   Native camera-control, RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
@@ -27,6 +28,9 @@ documentation. Device firmware is distributed separately.
 
 `SHA256SUMS` verifies the distributed files; Release archives also have download
 checksums. Per-platform `PROVENANCE.txt` records public compatibility information.
+The 2026-11-03 refresh rebuilds all four platform libraries from the same source
+revision (recorded in each PROVENANCE.txt), with native RAW8 and canonical model
+names 415RSV0, 413GSV0 and 21315V0. Wire model IDs are unchanged.
 Headers and all platform libraries are updated together, including raw GNSS
 reading and LiDAR speed control. Installing this SDK does not upgrade device
 firmware or restart devices. Platform builds and package checks are separate

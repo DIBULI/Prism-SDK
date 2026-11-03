@@ -37,6 +37,23 @@ inline uint32_t crc32(const uint8_t* p,size_t n){
 inline void require(bool condition,const char* message){
   if(!condition)throw std::runtime_error(message);
 }
+// Classify a CRC syndrome only; never repair bytes. A matching syndrome is
+// consistent with one flipped payload bit, not proof of its physical cause.
+// Bounded frame size and eight running residues keep memory constant.
+inline std::optional<size_t> singleBitCrcDelta(size_t bytes,uint32_t syndrome){
+  if(!syndrome||!bytes||bytes>kRawLimit)return {};
+  static const auto table=[](){std::array<uint32_t,256> t{};
+    for(unsigned i=0;i<256;++i){uint32_t v=i;
+      for(unsigned j=0;j<8;++j)v=(v>>1)^((0u-(v&1u))&0xedb88320u);
+      t[i]=v;}return t;}();
+  std::array<uint32_t,8> residues{};
+  for(unsigned b=0;b<8;++b)residues[b]=table[1u<<b];
+  for(size_t distance=0;distance<bytes;++distance)for(unsigned b=0;b<8;++b){
+    if(residues[b]==syndrome)return (bytes-1-distance)*8+b;
+    residues[b]=(residues[b]>>8)^table[residues[b]&255];
+  }
+  return {};
+}
 enum class OriginalPermission { None, PreparationOrRecording };
 struct View {
   uint8_t camera=0,bayer=0,timing_mode=0;
@@ -50,10 +67,11 @@ struct View {
   // true only for encoded bytes. A separate full-RAW acceptance verifier is
   // required to claim reconstructed native8 pixel CRC validation.
   bool encoded_crc_checked=false;
+  bool encoded_crc_passed=false;
 };
 // Returned views borrow bytes; callers retain the owning frame until all
 // preview/recording consumers finish. No copy of a whole RAW or expanded image.
-inline View parse(const uint8_t* p,size_t n,OriginalPermission permission){
+inline View parse(const uint8_t* p,size_t n,OriginalPermission permission,bool allow_single_bit_warning=false){
   require(p&&n>=kBytes&&n<=kLimit,"Invalid thumbnail envelope length");
   require(!std::memcmp(p,"PTN1",4)&&p[4]==2&&p[5]==64&&p[6]==8&&p[7]<=3&&
     le32(p+8)==kWidth&&le32(p+12)==kHeight&&le32(p+16)==kPixels&&
@@ -64,6 +82,7 @@ inline View parse(const uint8_t* p,size_t n,OriginalPermission permission){
   require(crc32(p,60)==le32(p+60)&&crc32(p+64,kPixels)==le32(p+20),"Thumbnail CRC mismatch");
   const size_t raw=le32(p+48);
   require(raw==n-kBytes&&bool(raw)==bool(p[39]),"Invalid thumbnail recording boundary");
+  bool crc_passed=true;
   if(!raw)require(le32(p+52)==0,"Unexpected absent-original CRC");
   else {
     require(permission==OriginalPermission::PreparationOrRecording,"Unrequested original RAW in preview-only delivery");
@@ -71,7 +90,10 @@ inline View parse(const uint8_t* p,size_t n,OriginalPermission permission){
       const auto h=prism::capture::parseRaw8Header(r,raw,raw);
       require(r[7]==p[7]&&!std::memcmp(r+24,p+24,15)&&!std::memcmp(r+40,p+40,8)&&
         h.trigger_sequence==le32(p+56),"Native RAW8 does not match thumbnail metadata");
-      require(crc32(r,raw)==le32(p+52)&&crc32(r+80,raw-80)==h.encoded_crc,"Native RAW8 encoded CRC mismatch");
+      const auto whole_delta=crc32(r,raw)^le32(p+52),payload_delta=crc32(r+80,raw-80)^h.encoded_crc;
+      crc_passed=!whole_delta&&!payload_delta;
+      require(crc_passed||(allow_single_bit_warning&&whole_delta==payload_delta&&
+          singleBitCrcDelta(raw-80,payload_delta).has_value()),"Native RAW8 encoded CRC mismatch");
   }
   View v;v.camera=p[37];v.bayer=p[7];v.timing_mode=p[38];v.source_frame=le32(p+24);
   v.exposure_us=le32(p+28);v.gain_x1024=le32(p+32);
@@ -81,6 +103,7 @@ inline View parse(const uint8_t* p,size_t n,OriginalPermission permission){
   require((v.timing_mode!=0||v.timestamp_us==0)&&(v.timing_mode!=4||v.timestamp_us!=0),
     "Invalid thumbnail trigger association");
   v.gray=p+64;v.original=raw?p+kBytes:nullptr;v.original_bytes=raw;v.encoded_crc_checked=true;
+  v.encoded_crc_passed=crc_passed;
   return v;
 }
 struct Chunk {
@@ -93,8 +116,8 @@ struct Chunk {
 struct Frame {
   uint8_t camera=0;uint32_t transfer=0;uint64_t timestamp_us=0;
   std::vector<uint8_t> payload;
-  View view(OriginalPermission permission)const {
-    auto result=parse(payload.data(),payload.size(),permission);
+  View view(OriginalPermission permission,bool allow_single_bit_warning=false)const {
+    auto result=parse(payload.data(),payload.size(),permission,allow_single_bit_warning);
     require(result.camera==camera&&result.timestamp_us==timestamp_us,"Thumbnail transport/header identity mismatch");
     return result;
   }
