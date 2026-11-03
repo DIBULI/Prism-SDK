@@ -2,6 +2,8 @@
 
 [English](README.md) · [仓库概览](../README.zh-CN.md)
 
+[1.3.0 简要更新](release-notes/v1.3.0.md)
+
 当前配套版本：**SDK / Agent 1.3.0**、**415RSV0 Sensor Board 0.5.2**（其他型号使用各自配套固件）。头文件与库须配套使用。
 除非另有说明，文档中的命令均在 SDK 仓库根目录执行。
 
