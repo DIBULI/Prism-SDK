@@ -36,4 +36,9 @@ reading and LiDAR speed control. Installing this SDK does not upgrade device
 firmware or restart devices. Platform builds and package checks are separate
 from physical-hardware validation.
 
+The latest 2026-11-03 build also supports the current 415RSV0 image envelopes
+used by Agent revision `0db22e6644c525906d1edc553e64fab5ca457974`.
+Older RAW8 recordings remain readable. Rebuild Viewer and other consumers with
+this matching package; an older 1.3.0 binary is not a substitute.
+
 [Setup](docs/getting-started/README.md) · [API differences](docs/reference/rk-local.md)

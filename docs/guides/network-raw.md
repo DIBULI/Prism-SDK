@@ -96,6 +96,6 @@ retain the assembler and check actual sequence continuity/integrity.
 `trigger_sequence` with the appropriate common-trigger timing mode identifies a
 shared group. Never derive a group from arrival order or force timestamps equal.
 
-解码返回原生 8 位像素，不右移、不扩成 12 位。尺寸、CRC、分片异常必须提示，
+解码返回原生 8 位像素，不右移、不扩成 12 位。尺寸、格式、分片异常必须提示，
 不能以旧帧填补；普通读超时不等于丢样本。缺目不阻塞其他已完成图像。
 ROS adapter 和 Viewer 也必须使用匹配版本；SDK 更新不代表应用已完成更新或实测。

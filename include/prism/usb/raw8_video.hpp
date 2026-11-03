@@ -18,12 +18,12 @@ struct Raw8Image {
 };
 inline Raw8Image decodeRaw8(const uint8_t* p,size_t n) {
   Raw8Image r;r.header=parseRaw8Header(p,n,n);
-  if(raw8PayloadCrc32(p+80,n-80)!=r.header.encoded_crc)
+  if(r.header.payload_crc_checked&&raw8PayloadCrc32(p+80,n-80)!=r.header.encoded_crc)
     throw std::runtime_error("Native RAW8 encoded CRC mismatch");
   r.pixels.resize(kRaw8Bytes);
   if(r.header.codec==kRaw8Rice){
     decodeRaw8RicePayload(p+80,n-80,r.pixels.data(),r.pixels.size());
-    if(raw8PayloadCrc32(r.pixels.data(),r.pixels.size())!=r.header.raw_crc)
+    if(r.header.payload_crc_checked&&raw8PayloadCrc32(r.pixels.data(),r.pixels.size())!=r.header.raw_crc)
       throw std::runtime_error("Native RAW8 decoded CRC mismatch");
     return r;
   }
@@ -31,7 +31,7 @@ inline Raw8Image decodeRaw8(const uint8_t* p,size_t n) {
      ZSTD_findFrameCompressedSize(p+80,n-80)!=n-80)
     throw std::runtime_error("Invalid native RAW8 compressed size");
   const auto size=ZSTD_decompress(r.pixels.data(),r.pixels.size(),p+80,n-80);
-  if(ZSTD_isError(size)||size!=kRaw8Bytes||raw8PayloadCrc32(r.pixels.data(),size)!=r.header.raw_crc)
+  if(ZSTD_isError(size)||size!=kRaw8Bytes||(r.header.payload_crc_checked&&raw8PayloadCrc32(r.pixels.data(),size)!=r.header.raw_crc))
     throw std::runtime_error("Native RAW8 decoded size/CRC mismatch");
   return r;
 }

@@ -18,6 +18,13 @@ int main()try{
     auto parse=[&]{return parseRaw8Header(b.data(),b.size(),b.size(),kRaw8Rice);};
     CHECK(parse().bytes==80&&parse().trigger_sequence==99&&parse().camera==camera);
     CHECK(parseRaw8Header(b.data(),80,b.size()).trigger_sequence==99);
+    CHECK(parse().payload_crc_checked);
+    b[4]=2;checksum(b);
+    CHECK(!parse().payload_crc_checked&&parse().trigger_sequence==99);
+    b[81]^=1;CHECK(!parse().payload_crc_checked);b[81]^=1;
+    for(size_t at:{size_t(20),size_t(48)}){put(b,at,1);checksum(b);reject(parse);put(b,at,0);}
+    b[4]=3;checksum(b);reject(parse);
+    b[4]=1;checksum(b);
     reject([&]{parseRaw8Header(b.data(),79,b.size());});
     reject([&]{parseRaw8Header(b.data(),80,b.size(),kRaw8Zstd);});
     for(size_t i=0;i<80;++i)for(unsigned bit=0;bit<8;++bit){

@@ -68,32 +68,38 @@ struct View {
   // required to claim reconstructed native8 pixel CRC validation.
   bool encoded_crc_checked=false;
   bool encoded_crc_passed=false;
+  bool metadata_checked=false;
 };
 // Returned views borrow bytes; callers retain the owning frame until all
 // preview/recording consumers finish. No copy of a whole RAW or expanded image.
 inline View parse(const uint8_t* p,size_t n,OriginalPermission permission,bool allow_single_bit_warning=false){
   require(p&&n>=kBytes&&n<=kLimit,"Invalid thumbnail envelope length");
-  require(!std::memcmp(p,"PTN1",4)&&p[4]==2&&p[5]==64&&p[6]==8&&p[7]<=3&&
+  require(!std::memcmp(p,"PTN1",4)&&(p[4]==2||p[4]==3)&&p[5]==64&&p[6]==8&&p[7]<=3&&
     le32(p+8)==kWidth&&le32(p+12)==kHeight&&le32(p+16)==kPixels&&
     p[36]==2&&p[37]<4&&p[38]<=4&&p[39]<=1,
     "Invalid thumbnail identity/geometry");
   require(!p[7]&&le32(p+24)&&((p[38]<=3&&!le32(p+56))||(p[38]==4&&le32(p+56))),
     "Invalid RAW8 thumbnail trigger");
-  require(crc32(p,60)==le32(p+60)&&crc32(p+64,kPixels)==le32(p+20),"Thumbnail CRC mismatch");
+  const bool check_payload=p[4]==2;
+  require(crc32(p,60)==le32(p+60),"Thumbnail header CRC mismatch");
+  require(check_payload?crc32(p+64,kPixels)==le32(p+20):le32(p+20)==0,"Thumbnail CRC mismatch");
   const size_t raw=le32(p+48);
   require(raw==n-kBytes&&bool(raw)==bool(p[39]),"Invalid thumbnail recording boundary");
-  bool crc_passed=true;
+  bool crc_passed=check_payload;
   if(!raw)require(le32(p+52)==0,"Unexpected absent-original CRC");
   else {
     require(permission==OriginalPermission::PreparationOrRecording,"Unrequested original RAW in preview-only delivery");
     const auto* r=p+kBytes;
       const auto h=prism::capture::parseRaw8Header(r,raw,raw);
+      require(h.payload_crc_checked==check_payload,"Thumbnail/original CRC policy mismatch");
       require(r[7]==p[7]&&!std::memcmp(r+24,p+24,15)&&!std::memcmp(r+40,p+40,8)&&
         h.trigger_sequence==le32(p+56),"Native RAW8 does not match thumbnail metadata");
+      if(check_payload){
       const auto whole_delta=crc32(r,raw)^le32(p+52),payload_delta=crc32(r+80,raw-80)^h.encoded_crc;
       crc_passed=!whole_delta&&!payload_delta;
       require(crc_passed||(allow_single_bit_warning&&whole_delta==payload_delta&&
           singleBitCrcDelta(raw-80,payload_delta).has_value()),"Native RAW8 encoded CRC mismatch");
+      }else require(le32(p+52)==0,"Unexpected original CRC in metadata-only envelope");
   }
   View v;v.camera=p[37];v.bayer=p[7];v.timing_mode=p[38];v.source_frame=le32(p+24);
   v.exposure_us=le32(p+28);v.gain_x1024=le32(p+32);
@@ -102,7 +108,8 @@ inline View parse(const uint8_t* p,size_t n,OriginalPermission permission,bool a
       prism::capture::parseRaw8Header(p+kBytes,raw,raw).codec:0;v.trigger_sequence=le32(p+56);
   require((v.timing_mode!=0||v.timestamp_us==0)&&(v.timing_mode!=4||v.timestamp_us!=0),
     "Invalid thumbnail trigger association");
-  v.gray=p+64;v.original=raw?p+kBytes:nullptr;v.original_bytes=raw;v.encoded_crc_checked=true;
+  v.gray=p+64;v.original=raw?p+kBytes:nullptr;v.original_bytes=raw;v.encoded_crc_checked=check_payload;
+  v.metadata_checked=true;
   v.encoded_crc_passed=crc_passed;
   return v;
 }
