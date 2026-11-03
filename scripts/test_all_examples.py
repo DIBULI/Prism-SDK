@@ -129,7 +129,7 @@ def expected_targets(kind: str) -> list[str]:
     targets = [
         "prism-network-connect",
         "prism-network-camera-imu-capture",
-        "prism-profile-raw12-decode",
+        "prism-profile-raw8-decode",
         "prism-device-info-time-sync",
         "prism-camera-imu-capture",
         "prism-client-api-examples",
@@ -155,7 +155,7 @@ def configure(build_dir: Path, kind: str, generator: str | None) -> None:
             [
                 f"-DCMAKE_BUILD_TYPE={CONFIGURATION}",
                 "-DCMAKE_CXX_FLAGS=-Werror",
-                "-DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON",
+                "-DPRISM_SDK_BUILD_RAW8_EXAMPLE=ON",
             ]
         )
         if kind == "macos":

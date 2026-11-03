@@ -49,8 +49,14 @@ SAME(wifiHotspotStatus);
 SAME(setWifiHotspotEnabled);
 SAME(startVideo1280x1024);
 SAME(startImu);
-SAME(stopVideo);
-SAME(stopImu);
+using Tail = const std::function<void(const prism::Frame&)>&;
+#define SAME_STOP(name, Result, Args) static_assert(std::is_same_v< \
+  Method<decltype(static_cast<Result(H::*)Args>(&H::name))>::type, \
+  Method<decltype(static_cast<Result(L::*)Args>(&L::name))>::type>, #name)
+SAME_STOP(stopVideo, void, ());
+SAME_STOP(stopVideo, void, (Tail));
+SAME_STOP(stopImu, prism::ImuStreamStatus, ());
+SAME_STOP(stopImu, prism::ImuStreamStatus, (Tail));
 SAME(sendVideoAck);
 SAME(startLidar);
 SAME(stopLidar);

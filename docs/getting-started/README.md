@@ -74,7 +74,7 @@ The resulting executable does not depend on `libprism_usb_sdk.so`. OpenSSL libcr
 libusb remain dynamically linked unless the consumer deliberately selects
 compatible static builds of those dependencies.
 
-The full `scripts/test_all_examples.py` suite also builds the optional RAW12
+The full `scripts/test_all_examples.py` suite also builds the optional RAW8
 decoder: install `libzstd-dev` and `pkg-config`. Plain TCP networking does not
 use OpenSSL/libssl; libcrypto is retained for package SHA-256 validation.
 

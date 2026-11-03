@@ -19,7 +19,7 @@ set(PRISM_SDK_ROOT "${_prism_sdk_default_root}" CACHE PATH
 unset(_prism_sdk_default_root)
 option(PRISM_SDK_USE_STATIC
   "Link the packaged Linux static Host SDK instead of its shared runtime" OFF)
-option(PRISM_SDK_BUILD_RAW12_EXAMPLE "Build the optional Zstandard RAW12 decoder example" OFF)
+option(PRISM_SDK_BUILD_RAW8_EXAMPLE "Build the optional native RAW8 lossless decoder example" OFF)
 
 set(_prism_sdk_include "${PRISM_SDK_ROOT}/include")
 if(NOT EXISTS "${_prism_sdk_include}/prism/usb_sdk.hpp")
@@ -160,7 +160,7 @@ set(_prism_cross_platform_example_sources
 set(_prism_direct_api_example_sources
   network/network_camera_imu_capture.cpp
   network/network_connect.cpp
-  raw12/profile_raw12_decode.cpp
+  raw8/profile_raw8_decode.cpp
   camera_imu/camera_imu_capture.cpp
   api/client_api_examples.cpp
   api/configuration_api_examples.cpp
@@ -227,14 +227,14 @@ else()
   if(BUILD_TESTING)
     add_test(NAME prism-network-connect-help COMMAND prism-network-connect --help)
   endif()
-  if(PRISM_SDK_BUILD_RAW12_EXAMPLE)
+  if(PRISM_SDK_BUILD_RAW8_EXAMPLE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
-    prism_add_example(prism-profile-raw12-decode raw12/profile_raw12_decode.cpp)
-    target_link_libraries(prism-profile-raw12-decode PRIVATE PkgConfig::ZSTD)
-    list(APPEND _prism_supported_example_targets prism-profile-raw12-decode)
+    prism_add_example(prism-profile-raw8-decode raw8/profile_raw8_decode.cpp)
+    target_link_libraries(prism-profile-raw8-decode PRIVATE PkgConfig::ZSTD)
+    list(APPEND _prism_supported_example_targets prism-profile-raw8-decode)
     if(BUILD_TESTING)
-      add_test(NAME prism-profile-raw12-self-test COMMAND prism-profile-raw12-decode --self-test)
+      add_test(NAME prism-profile-raw8-self-test COMMAND prism-profile-raw8-decode --self-test)
     endif()
   endif()
   prism_add_example(prism-camera-imu-capture camera_imu/camera_imu_capture.cpp)

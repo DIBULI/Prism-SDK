@@ -30,7 +30,7 @@ collect operational constraints and related examples in one place.
 | Task | One place to read | Language |
 | --- | --- | --- |
 | Camera exposure, gain, limits and unified auto-exposure | [Camera](guides/camera.md) | EN |
-| Device model, plaintext TCP network, independent lossless RAW12 | [Network and RAW12](guides/network-raw.md) | EN / 中文 |
+| Device model, plaintext TCP network, independent lossless RAW8 | [Network and RAW8](guides/network-raw.md) | EN / 中文 |
 | Receiver results, sky data, CORS accounts, RTK start/stop, versions and diagnostics | [GNSS / RTK](guides/gnss-rtk.md) | EN / 中文 sections |
 | UTC validity, manual time-setting and persistent input/output/RTK modes | [Time synchronization](guides/time-sync.md) | EN / 中文 sections |
 | LiDAR capture, hardware standby/wake, MID line and XT32 point time | [LiDAR](guides/lidar.md) | EN |

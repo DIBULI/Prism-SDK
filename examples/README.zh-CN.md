@@ -5,7 +5,7 @@
 - [设备信息与时间同步](device/)
 - [GNSS / RTK](gnss_rtk/)
 - [LiDAR](lidar/)
-- [RAW12 解码](raw12/)
+- [RAW8 解码](raw8/)
 - [接口演示](api/)
 - [Windows RuntimeApi](windows/)
 - [RK 本地采集](rklocal/)

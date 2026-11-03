@@ -68,7 +68,7 @@ cmake --build build-static --config Release
 生成的程序不再依赖 `libprism_usb_sdk.so`。除非使用方另外选择兼容的静态版本，
 OpenSSL libcrypto 和 libusb 默认仍采用动态链接。
 
-`scripts/test_all_examples.py` 全套自测还会构建可选 RAW12 解码示例，需要安装
+`scripts/test_all_examples.py` 全套自测还会构建可选 RAW8 解码示例，需要安装
 `libzstd-dev` 和 `pkg-config`。明文 TCP 不使用 OpenSSL/libssl；libcrypto 仅保留用于升级包 SHA-256 校验。
 
 ### macOS arm64

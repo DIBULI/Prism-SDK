@@ -27,7 +27,7 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 | 要做什么 | 集中说明 | 语言 |
 | --- | --- | --- |
 | 相机曝光、增益、限制、四路统一自动曝光 | [相机](guides/camera.md) | 英文 |
-| 设备型号、明文 TCP 网络、独立无损 RAW12 | [网络与 RAW12](guides/network-raw.md) | 中英文 |
+| 设备型号、明文 TCP 网络、独立无损 RAW8 | [网络与 RAW8](guides/network-raw.md) | 中英文 |
 | 定位结果、天空图、CORS 账号、RTK 启停、版本与接收诊断 | [GNSS / RTK](guides/gnss-rtk.md#receiver-results-zh) | 中英文分节 |
 | UTC 有效性、手动校时、输入/输出/RTK 模式与持久化 | [时间同步](guides/time-sync.md) | 中英文分节 |
 | 雷达采集、待机/唤醒、MID line、XT32 逐点时间 | [雷达](guides/lidar.md) | 英文 |
@@ -48,7 +48,7 @@ RK-local 差异表。接口签名以[公共头文件](../include/prism/)为准�
 - [采集中连续调节曝光行数](update/v1.3.0-live-rows.md)
 - [使用 Web 登录密码进行网络认证](update/v1.3.0-network-web-password.md)
 - [v1.2.0 更新说明](update/v1.2.0.zh-CN.md) · [English](update/v1.2.0.md)
-- [网络、型号与 RAW12 接入](guides/network-raw.md)
+- [网络、型号与 RAW8 接入](guides/network-raw.md)
 - [包兼容说明](../ORIGIN.md) · [文件校验清单](../SHA256SUMS)
 
 ## 文档维护约定

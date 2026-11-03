@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 namespace prism {
-// Matched 415M descriptor4 only. Separate from the legacy exposure/us API.
+// Matched 415RSV0 descriptor4 only. Separate from the legacy exposure/us API.
 // Gain uses exact 1/16x units:16=1x,900=56.25x. No float rounding on the wire.
 struct CameraRowGainConfig {
   // Bounds and target/deadband are GLOBAL. The v1 wire repeats them in each

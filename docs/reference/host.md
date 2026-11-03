@@ -36,7 +36,7 @@ core control/stream APIs. Feature guides hold the detailed operational contracts
 These direct C++ APIs do not extend the Windows Runtime API v19 table.
 
 - [Camera exposure and gain](../guides/camera.md)
-- [Device model, plain TCP and independent RAW12](../guides/network-raw.md)
+- [Device model, plain TCP and independent RAW8](../guides/network-raw.md)
 - [GNSS results, CORS configuration and RTK start/stop](../guides/gnss-rtk.md)
 - [Time synchronization and TimeSync modes](../guides/time-sync.md)
 - [LiDAR capture, standby/wake and point metadata](../guides/lidar.md)

@@ -30,7 +30,7 @@
 Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的完整操作约束统一见：
 
 - [相机曝光与增益](../guides/camera.md)
-- [设备型号、明文 TCP 与独立 RAW12](../guides/network-raw.md)
+- [设备型号、明文 TCP 与独立 RAW8](../guides/network-raw.md)
 - [GNSS 结果、CORS 配置与 RTK 启停](../guides/gnss-rtk.md)
 - [时间同步与 TimeSync 模式](../guides/time-sync.md)
 - [雷达采集、待机/唤醒与逐点元数据](../guides/lidar.md)

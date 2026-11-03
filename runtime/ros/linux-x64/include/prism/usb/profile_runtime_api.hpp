@@ -8,7 +8,7 @@ inline constexpr char kProfileRuntimeApiEntryPoint[] = "prism_usb_sdk_get_profil
 struct ProfileRuntimeApi {
   uint32_t abi_version;
   uint32_t struct_size;
-  VideoStatus (*start_415m)(Client*, uint32_t fps);
+  VideoStatus (*start_415rsv0)(Client*, uint32_t fps);
   VideoStatus (*start_mixed_gpu)(Client*, uint32_t fps);
   uint32_t (*begin_live_rows)(Client*, uint8_t mask, const std::array<uint16_t,4>& rows);
   bool (*finish_live_rows)(Client*, const Frame&, ExposureConfiguration& applied);

@@ -1,4 +1,4 @@
-# Device model, network and lossless RAW12
+# Device model, network and lossless RAW8
 
 [Documentation](../README.md) · [中文目录](../README.zh-CN.md)
 
@@ -55,32 +55,36 @@ recording happens on the device and is downloaded after finalization.
 网络 SDK 的 TCP 通道不等于 Web 缩略图 API。Viewer 的 Web 预览模式仍只显示缩略图，
 录制在设备端保存无损 RAW，结束后再下载。凭据不要写入普通设置文件。
 
-## Independent RAW12 / 独立 RAW12
+## Native RAW8 / 原生 RAW8
 
 Include `<prism/usb/profile_video.hpp>` and explicitly call
-`client.startProfileVideo(fps)`. Legacy JPEG capture APIs are not automatically
+`client.startProfileVideoGpu(fps)` for mixed 1315, or
+`client.startPrism415rsv0Video(fps)` for 415RSV0 (1 or 2 FPS). Legacy JPEG capture APIs are not automatically
 changed to RAW. `ProfileImageAssembler` holds one bounded assembly per camera;
 feed parsed `VideoChunkView` objects to `ingest()` and consume each completed
 image independently. Do not wait for four cameras as a single output barrier.
 
-Use `decodeRaw12(image.encoded, image.format)` to obtain packed 12-bit samples.
-`Raw12Image::packed` stores two pixels per three bytes; `raw12Pixel(image, index)`
-reads a valid pixel index. Check dimensions before indexing. Decoding verifies
-the format's sizes and CRCs and throws on corruption; do not suppress those
-exceptions or substitute old frames. Device error events also need reporting.
+Use `decodeRawImage(image.encoded, image.format)`. `RawImage::pixels` contains
+one original sensor byte per pixel, in the range 0–255; do not right-shift it.
+The GPU lossless format is PRG8 (`kRaw8Rice`, wire value 0x82). Its 80-byte header,
+encoded payload and fully decoded pixels each have an integrity check. Dimensions,
+depth, camera and source metadata must agree with the transport envelope. Invalid
+data throws; do not suppress exceptions or substitute old frames. Device error
+events also need reporting. The public profile path rejects retired pixel formats
+and the isolated CPU-reference codec; it never silently falls back to CPU encoding.
 
-The inline decoder requires Zstandard headers/library for PRZ1. On Linux install
+The shared inline decoder currently requires Zstandard headers/library. On Linux install
 `libzstd-dev` and `pkg-config`, or on macOS install `zstd` and `pkgconf`.
 The optional example can be built with:
 
 ```sh
-cmake -S . -B build-raw -DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON
+cmake -S . -B build-raw -DPRISM_SDK_BUILD_RAW8_EXAMPLE=ON
 cmake --build build-raw --target prism-all-examples --parallel
 ctest --test-dir build-raw --output-on-failure
-build-raw/examples/prism-profile-raw12-decode recording.prg
+build-raw/examples/prism-profile-raw8-decode image.pr8
 ```
 
-The example only reads and validates one complete PRG1/PRZ1 encoded image; it
+The example only reads and validates one complete PRG8 encoded image; it
 does not modify source files, connect hardware, or interpret an entire dataset
 ZIP as an image. `--self-test` uses explicitly synthetic data.
 
@@ -88,6 +92,10 @@ ZIP as an image. `--self-test` uses explicitly synthetic data.
 timestamp or proof of UTC lock. A read timeout alone is not a missing sample;
 retain the assembler and check actual sequence continuity/integrity.
 
-解码返回 packed12，不丢弃低 4 位。尺寸、CRC、分片异常必须提示，不能以旧帧填补；
-普通读超时不等于丢样本。流连续性告警的 ROS 日志策略仍属于 ROS adapter，
-本 SDK 发布不更新 ROS node。
+`frame_id` is the source's own image number. Only a validated nonzero
+`trigger_sequence` with the appropriate common-trigger timing mode identifies a
+shared group. Never derive a group from arrival order or force timestamps equal.
+
+解码返回原生 8 位像素，不右移、不扩成 12 位。尺寸、CRC、分片异常必须提示，
+不能以旧帧填补；普通读超时不等于丢样本。缺目不阻塞其他已完成图像。
+ROS adapter 和 Viewer 也必须使用匹配版本；SDK 更新不代表应用已完成更新或实测。

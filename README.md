@@ -1,6 +1,6 @@
 # Prism SDK 1.3.0
 
-See [415M shared trigger groups](docs/update/v1.3.0-trigger-groups.md) for the
+See [415RSV0 shared trigger groups](docs/update/v1.3.0-trigger-groups.md) for the
 matched Agent and header update used by grouped Viewer previews.
 
 **Mixed licensing:** public headers, examples and integration files are
@@ -42,7 +42,7 @@ This is the cumulative feature set of 1.3.0, not only the latest refresh.
 
 - USB discovery, device/version/status queries, configuration and Wi-Fi hotspot management.
 - Device model in `DeviceInfo`, bounded asynchronous USB reception, and plain TCP network connections.
-- Independent lossless RAW12 image assembly/decoding and explicit profile capture.
+- Independent lossless RAW8 image assembly/decoding and explicit profile capture.
 - Full application update packages including Web and network services on capable devices.
 - Four-camera image/metadata and IMU acquisition, stream control and capture examples.
 - Runtime exposure, analog gain, limits and unified automatic exposure.
@@ -58,10 +58,10 @@ This is the cumulative feature set of 1.3.0, not only the latest refresh.
 - [Independent LiDAR standby / wake](docs/guides/lidar.md#standby-wake) (requires the matching current Agent package).
 - [Release notes](docs/update/v1.3.0.md), [package compatibility](ORIGIN.md) and `SHA256SUMS`.
 
-See [network, model and RAW12 integration](docs/guides/network-raw.md).
-The optional RAW12 decoder needs the Zstandard development library; the core SDK
+See [network, model and RAW8 integration](docs/guides/network-raw.md).
+The optional RAW8 decoder needs the Zstandard development library; the core SDK
 and existing JPEG examples do not. Enable its example with
-`-DPRISM_SDK_BUILD_RAW12_EXAMPLE=ON` (Linux: `libzstd-dev`; macOS: `zstd`).
+`-DPRISM_SDK_BUILD_RAW8_EXAMPLE=ON` (Linux: `libzstd-dev`; macOS: `zstd`).
 
 ## Build consumer examples
 

@@ -30,7 +30,7 @@ struct CameraExposureCapabilities {
   uint8_t profile002_mask = 0;
   bool ready = false;
   bool shared = false;
-  bool manual_rows = false; // explicit v2: idle-only415M, no AE or gain writes
+  bool manual_rows = false; // explicit v2: idle-only415RSV0, no AE or gain writes
 };
 CameraExposureCapabilities cameraExposureCapabilities(
     const std::string& control_socket="/run/prism/control.sock",uint32_t timeout_ms=1000);
@@ -211,7 +211,7 @@ class Client {
       const std::array<CameraRowGainConfig,4>& requested);
   bool finishCameraControl(const Frame&,CameraControlStatus&);
   bool cameraControlPending() const noexcept;
-  // Same nonblocking 415M-only integer-row contract as prism::Client. Keep
+  // Same nonblocking 415RSV0-only integer-row contract as prism::Client. Keep
   // consuming/ACKing all RAW and IMU frames. No automatic timeout retries.
   uint32_t beginLiveExposureRows(uint8_t camera_mask, const std::array<uint16_t,4>& rows);
   bool finishLiveExposureRows(const Frame&, ExposureConfiguration& applied);
@@ -236,19 +236,38 @@ class Client {
   WifiHotspotStatus wifiHotspotStatus();
   WifiHotspotStatus setWifiHotspotEnabled(bool enabled);
   VideoStatus startVideo1280x1024(uint32_t fps = 0);
-  // New 415M protocol only: four profile002 cameras, 2FPS, 5120x3072 RAW12.
+  // Native RAW8: four profile002 cameras, 1/2FPS, 5120x3072. No-arg uses 2FPS.
   // Requires GPU lossless encoding and an exact acknowledgement; no downgrade.
-  // Input/output queue overflow is an explicit error, never frame replacement.
-  VideoStatus startPrism415mVideo();
-  // New 415M socket preview: Agent thumbnails, originals only for startup save
+  // Requires raw_camera_imu_frames=true. Assemble and ACK independent transfers
+  // through readFrame/sendVideoAck; the C four-JPEG assembler does not ACK them.
+  // Queue overflow is an explicit error, never frame replacement.
+  VideoStatus startPrism415rsv0Video();
+  VideoStatus startPrism415rsv0Video(uint32_t fps);
+  // Mixed profiles (1315), GPU-only RAW8 plus existing native JPEG cameras.
+  // FPS=0 selects saved rate; otherwise acknowledgement must match exactly.
+  VideoStatus startProfileVideoGpu(uint32_t fps = 0);
+  // New 415RSV0 socket preview: Agent thumbnails, originals only for startup save
   // or requested recording. USB Viewer uses its separate full-RAW API.
-  VideoStatus startPrism415mPreview();
-  uint32_t beginPrism415mRecording(bool enabled);
-  bool finishPrism415mRecording(const Frame&, bool& enabled);
-  bool prism415mRecordingPending() const noexcept;
+  VideoStatus startPrism415rsv0Preview();
+  uint32_t beginPrism415rsv0Recording(bool enabled);
+  bool finishPrism415rsv0Recording(const Frame&, bool& enabled);
+  bool prism415rsv0RecordingPending() const noexcept;
+  // Close-record preserves the real 2FPS cadence. Only after all four RAW
+  // tails are received and durable may the caller explicitly restore preview.
+  // No automatic restore on close acknowledgement; no frame/IMU consumption
+  // inside these asynchronous methods. Failures are sticky until teardown.
+  uint32_t beginPrism415rsv0PreviewRestore(bool drained_and_synced);
+  bool finishPrism415rsv0PreviewRestore(const Frame&);
+  // Last observed source rate in milliFPS; zero while changing/failed/stopped.
+  uint16_t prism415rsv0SourceMilliFps() const noexcept;
   ImuStreamStatus startImu(uint32_t sensor_count = 2, uint32_t nominal_rate_hz = 0);
   void stopVideo();
+  // Process original tail events on the calling thread while awaiting STOP.
+  // Handler must not reenter Client. Deadline/queue/decode failures require
+  // closing the connection; no automatic STOP retry or capture restart.
+  void stopVideo(const std::function<void(const Frame&)>& tail);
   ImuStreamStatus stopImu();
+  ImuStreamStatus stopImu(const std::function<void(const Frame&)>& tail);
   void sendVideoAck(uint32_t last_frame_id);
   LidarStatus startLidar(LidarModel model);
   LidarStatus stopLidar();
@@ -293,6 +312,8 @@ class Client {
   SensorBoardUpdateJob sensorBoardUpdateStatus(uint64_t task_id = 0);
 
  private:
+  Frame commandDraining(FrameType stop, const std::function<void(const Frame&)>& tail);
+  VideoStatus startGpuProfile(uint32_t fps, uint32_t options);
   UpgradeStatus upgradeAgentImage(const std::vector<uint8_t>& image,
       const UpgradeOptions& options, const std::function<void(const UpgradeStatus&)>& progress, bool full_package = false);
   SensorBoardUpgradeStatus upgradeSensorBoardImage(const std::vector<uint8_t>& image,

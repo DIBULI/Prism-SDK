@@ -29,6 +29,7 @@ class ImuStream {
 
   void start(uint32_t sensor_count = 2, uint32_t nominal_rate_hz = 0);
   void stop();
+  void stop(const std::function<void(const Frame&)>& tail);
   bool active() const noexcept;
   bool handleFrame(const Frame& frame);
 

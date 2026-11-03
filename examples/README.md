@@ -5,7 +5,7 @@
 - [Device information and time sync](device/)
 - [GNSS / RTK](gnss_rtk/)
 - [LiDAR](lidar/)
-- [RAW12 decoding](raw12/)
+- [RAW8 decoding](raw8/)
 - [API examples](api/)
 - [Windows RuntimeApi](windows/)
 - [RK-local capture](rklocal/)

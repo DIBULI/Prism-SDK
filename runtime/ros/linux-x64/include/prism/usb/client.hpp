@@ -136,14 +136,14 @@ class Client {
   // target brightness shared by all four cameras; manual exposure time is
   // independent for each camera.
   ExposureConfiguration cameraExposure();
-  // Matched415M idle-only, synchronous RAM staging; never touches I2C or
+  // Matched415RSV0 idle-only, synchronous RAM staging; never touches I2C or
   // starts/stops capture. Exact idle epoch/revision CAS, no persistence.
   // Any failed/uncertain reply requires close/reopen and a fresh GET; never
   // replay a mutation. Serialize with START/STOP on the owning client thread.
   CameraControlIdleStatus cameraControlIdle();
   CameraControlIdleStatus stageCameraControlIdle(const CameraControlIdleStatus&,
       const std::array<CameraRowGainConfig,4>&);
-  // Matched415M live controller. Call on the acquisition thread; each begin
+  // Matched415RSV0 live controller. Call on the acquisition thread; each begin
   // writes ONLY one request, never receives, drains or pauses capture. Keep
   // readFrame/decode/ACK running and feed frames to finishCameraControl.
   // No automatic retry, transition labels or RAW suppression. A timeout is
@@ -154,7 +154,7 @@ class Client {
       const std::array<CameraRowGainConfig,4>& requested);
   bool finishCameraControl(const Frame&,CameraControlStatus&);
   bool cameraControlPending() const noexcept;
-  // 415M-only integer-row live request. Send once; returns without reading or
+  // 415RSV0-only integer-row live request. Send once; returns without reading or
   // waiting for sensor application. One outstanding request per connection.
   // Continue readFrame/full decoding/sendVideoAck/IMU ingestion normally and
   // pass every returned Frame to finishLiveExposureRows. No transition labels,
@@ -188,8 +188,8 @@ class Client {
   // at 1 FPS for binary/source compatibility. Explicit 2 needs capable firmware.
   // Does not change persistent configuration. Mixed 1315 uses
   // startProfileVideoGpu (options=3); legacy 41M3 uses options=0.
-  VideoStatus startPrism415mVideo();
-  VideoStatus startPrism415mVideo(uint32_t fps);
+  VideoStatus startPrism415rsv0Video();
+  VideoStatus startPrism415rsv0Video(uint32_t fps);
   // Either stop method stops both Camera and IMU acquisition.
   void stopVideo();
   ImuStreamStatus startImu(uint32_t sensor_count = 2,
