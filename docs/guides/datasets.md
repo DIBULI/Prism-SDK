@@ -11,6 +11,13 @@ Host USB `prism::Client` 与 RK-local `prism::rklocal::Client` 提供相同的 C
 **SDK 只导出原始格式**：不生成 ROS1/ROS2 bag，不重编码图像，不重写点云或时间戳。
 Viewer 可以在下载完成后自行转换 ROS bag；ROS Adapter 不提供离线数据集下载。
 
+415RSV0 相机数据包含 `camera0.pr8-stream` 至 `camera3.pr8-stream` 及对应的
+`camera0.jsonl` 至 `camera3.jsonl` 索引。413GSV0 继续使用 `camera-data-*.bin`
+和 `cam*.tum`。下载清单还支持录制器生成的 `camera*.mjpg-stream` 和
+`lidar-events.bin` / `lidar-events.jsonl`，仅下载实际存在的文件。
+若 415RSV0 相机文件未出现在清单中，请同时更新设备 Agent 和主机 SDK / Viewer
+到包含相机文件下载修复的 1.3.0 构建；仅替换主机 SDK 无法修复旧 Agent 的清单。
+
 ## 接口
 
 ```cpp
