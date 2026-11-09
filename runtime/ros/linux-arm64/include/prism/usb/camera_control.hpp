@@ -15,7 +15,7 @@ struct CameraRowGainConfig {
   bool automatic_exposure=false,automatic_gain=false;
 };
 inline bool validCameraRowGainConfig(const CameraRowGainConfig& c) {
-  return c.min_rows>=3 && c.max_rows<=4096 && c.min_rows<=c.manual_rows && c.manual_rows<=c.max_rows &&
+  return c.min_rows>=3 && c.max_rows<=8192 && c.min_rows<=c.manual_rows && c.manual_rows<=c.max_rows &&
       c.min_gain_sixteenths>=16 && c.max_gain_sixteenths<=900 &&
       c.min_gain_sixteenths<=c.manual_gain_sixteenths && c.manual_gain_sixteenths<=c.max_gain_sixteenths &&
       c.target_raw12>=1 && c.target_raw12<=4095 && c.deadband_raw12<c.target_raw12 &&

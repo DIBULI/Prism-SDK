@@ -275,7 +275,8 @@ struct HelloInfo {
 };
 
 // Semantic version embedded in this Host SDK library. The agent must report
-// exactly the same version before Client::open/openFirst succeeds.
+// a supported protocol profile before Client::open/openFirst succeeds.
+// SDK 1.3.0 additionally negotiates the legacy 1.2.0/1.2.1 HELLO profiles.
 std::string hostSdkVersion();
 
 struct DeviceVersions {

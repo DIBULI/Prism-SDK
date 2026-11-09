@@ -5,8 +5,9 @@ documentation. Device firmware is distributed separately.
 
 ## Compatibility
 
-- Host SDK, RK-local SDK and required Agent version: **1.3.0**.
-- 415RSV0 matching Sensor Board firmware: **0.5.2**, native RAW8.
+- Host SDK and RK-local SDK: **1.3.0**. Host USB connections also support
+  legacy Agent **1.2.0/1.2.1** HELLO profiles; RK-local remains version-matched.
+- Current production Sensor Board firmware: **0.5.3**, with native RAW8 on 415RSV0.
   Other models require their own matching firmware; never cross-flash model packages.
   413GSV0 and 21315V0 naming support does not establish new hardware qualification.
 - Runtime API: **19** (DeviceInfo model field). Network extension: **4** (plain TCP,

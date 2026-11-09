@@ -1,5 +1,7 @@
 #pragma once
 #include "raw8_video.hpp"
+#include "raw12_header.hpp"
+#include <zstd.h>
 #include "prism/usb/client.hpp"
 #include <array>
 #include <cstring>
@@ -15,6 +17,7 @@ inline bool validProfileTiming(uint8_t mode,uint64_t stamp) {
   return mode<=4 && (mode==0?stamp==0:mode==4?stamp!=0:true);
 }
 constexpr uint16_t kIndependentImage = 4;
+constexpr uint8_t kRaw12Zstd=3, kRaw12Rice=4;
 constexpr size_t kProfileImageLimit = 25u * 1024u * 1024u;
 struct ProfileGpuFault { uint8_t camera=0;bool unavailable=false; };
 // GPU errors do not impersonate command replies and do not suppress other
@@ -47,7 +50,7 @@ class ProfileImageAssembler {
   std::optional<ProfileImage> ingest(const VideoChunkView& c) {
     if(c.camera_id>=4)throw std::runtime_error("invalid camera ID");
     auto& s=slots_[c.camera_id];
-    const bool raw=c.format==kRaw8Rice;
+    const bool raw=c.format==kRaw8Rice||c.format==kRaw12Rice||c.format==kRaw12Zstd;
     if(!(c.flags&kIndependentImage)||(c.flags&~7u)||
        !(raw?(c.width==5120&&c.height==3072):(c.format==2&&c.width==1280&&c.height==1024))||
        !c.encoded_size||c.encoded_size>kProfileImageLimit||!c.data||!c.chunk_size||
@@ -80,8 +83,9 @@ struct RawImage {
   uint32_t width=0,height=0,frame_id=0,exposure_us=0,gain_x1024=0;
   uint8_t camera=0,bayer=0,timing_mode=0;
   uint64_t source_timestamp_us=0; // mode4 common trigger, not implicit UTC.
-  std::vector<uint8_t> pixels; // One unmodified sensor byte per pixel.
+  std::vector<uint8_t> pixels; // RAW8 bytes or packed RAW12 (two pixels/three bytes).
   uint32_t trigger_sequence=0; // Shared trigger group, not the per-camera frame_id.
+  uint32_t source_frame_step=1; // Physical IDs retained when board selects before DDR.
   uint8_t source_bits=8;
 };
 inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
@@ -106,7 +110,127 @@ inline uint32_t rawCrc32(const uint8_t* p,size_t n) {
   while(n--)crc=(crc>>8)^table[0][(crc^*p++)&255];
   return ~crc;
 }
+struct Raw12Image {
+  uint32_t width=0,height=0,frame_id=0,exposure_us=0,gain_x1024=0;
+  uint8_t camera=0,bayer=0,timing_mode=0;
+  uint64_t source_timestamp_us=0; // mode4 common trigger, not implicit UTC.
+  std::vector<uint8_t> packed; // Two pixels/three bytes, low bits preserved.
+  uint32_t trigger_sequence=0; // Shared trigger group, not the per-camera frame_id.
+  uint32_t source_frame_step=1; // Physical IDs retained when board selects before DDR.
+};
+inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
+  const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Zstd);
+  if(bytes.size()<49||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRZ1",4)||
+     bytes[6]!=12||bytes[7]>3||
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
+    throw std::runtime_error("invalid RAW12 header");
+  const auto* p=bytes.data();Raw12Image r;
+  if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
+    throw std::runtime_error("invalid RAW12 timing association");
+  r.width=rawLe32(p+8);r.height=rawLe32(p+12);
+  const auto size=rawLe32(p+16);
+  if(r.width!=5120||r.height!=3072||size!=23592960u)
+    throw std::runtime_error("unsupported RAW12 geometry");
+  const auto content=ZSTD_getFrameContentSize(p+envelope.bytes,bytes.size()-envelope.bytes);
+  if(content!=size||ZSTD_findFrameCompressedSize(p+envelope.bytes,bytes.size()-envelope.bytes)!=bytes.size()-envelope.bytes)
+    throw std::runtime_error("invalid RAW12 compressed size");
+  r.packed.resize(size);
+  auto n=ZSTD_decompress(r.packed.data(),size,p+envelope.bytes,bytes.size()-envelope.bytes);
+  if(ZSTD_isError(n))throw std::runtime_error(std::string("RAW12 decompression: ")+ZSTD_getErrorName(n));
+  if(n!=size)throw std::runtime_error("RAW12 decompressed length mismatch");
+  const auto crc=rawCrc32(r.packed.data(),size);
+  if(crc!=rawLe32(p+20))throw std::runtime_error("RAW12 CRC mismatch: actual="+
+      std::to_string(crc)+" expected="+std::to_string(rawLe32(p+20)));
+  r.trigger_sequence=envelope.trigger_sequence;r.source_frame_step=envelope.source_frame_step;
+  r.frame_id=rawLe32(p+24);r.exposure_us=rawLe32(p+28);r.gain_x1024=rawLe32(p+32);
+  r.camera=p[37];r.bayer=p[7];r.timing_mode=p[38];
+  r.source_timestamp_us=rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32);return r;
+}
+inline uint16_t raw12Pixel(const Raw12Image& r,size_t index) {
+  const size_t at=(index/2)*3;
+  return uint16_t(r.packed[at+(index&1)])*16+
+      ((index&1)?(r.packed[at+2]>>4):(r.packed[at+2]&15));
+}
+inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
+  const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Rice);
+  if(bytes.size()<65||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRG1",4)||
+     bytes[6]!=12||bytes[7]>3||
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
+    throw std::runtime_error("invalid GPU RAW12 header");
+  const auto *p=bytes.data();Raw12Image r;
+  if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
+    throw std::runtime_error("invalid RAW12 timing association");
+  r.width=rawLe32(p+8);r.height=rawLe32(p+12);
+  constexpr size_t pixels=5120u*3072u,block=256;
+  if(r.width!=5120||r.height!=3072||rawLe32(p+16)!=23592960u||
+     rawLe32(p+52)!=block||rawLe32(p+56)!=bytes.size()-envelope.bytes||
+     rawCrc32(p+envelope.bytes,bytes.size()-envelope.bytes)!=rawLe32(p+48))
+    throw std::runtime_error("invalid GPU RAW12 size or encoded CRC");
+  std::vector<uint8_t> u16(pixels*2);
+  size_t at=envelope.bytes;
+  for(size_t base=0;base<pixels;base+=block){
+    if(at>=bytes.size())throw std::runtime_error("truncated RAW12 block");
+    unsigned mode=p[at],k=mode>=32?mode-32:0;
+    if(!(mode<=12||(mode>=32&&mode<=43)))throw std::runtime_error("invalid RAW12 block mode");
+    size_t n=0,header=mode==12?1:5;
+    if(mode>=32){
+      if(bytes.size()-at<7)throw std::runtime_error("truncated Rice header");
+      header=7;n=7+size_t(p[at+1])+(size_t(p[at+2])<<8);
+    }else n=mode==12?385:5+((block-2)*mode+7)/8;
+    if(n<header||n>385||n>bytes.size()-at)throw std::runtime_error("invalid RAW12 block size");
+    const uint8_t *data=p+at+header;size_t pos=0,length=n-header;
+    uint32_t bits=0;unsigned held=0;
+    auto take=[&](unsigned count){
+      while(held<count){if(pos>=length)throw std::runtime_error("truncated RAW12 bits");bits|=uint32_t(data[pos++])<<held;held+=8;}
+      unsigned value=bits&((1u<<count)-1);bits>>=count;held-=count;return value;
+    };
+    uint16_t previous[2]={};
+    auto store=[&](size_t i,unsigned value){u16[2*(base+i)]=uint8_t(value);u16[2*(base+i)+1]=uint8_t(value>>8);previous[i&1]=uint16_t(value);};
+    if(mode!=12){
+      const auto *seed=p+at+(mode>=32?3:1);
+      unsigned a=unsigned(seed[0])|(unsigned(seed[1])<<8),b=unsigned(seed[2])|(unsigned(seed[3])<<8);
+      if(a>4095||b>4095)throw std::runtime_error("invalid RAW12 seed");
+      store(0,a);store(1,b);
+    }
+    for(size_t i=mode==12?0:2;i<block;i++){
+      unsigned q=0;
+      if(mode>=32){unsigned zeros=0;while(!take(1)){if(++zeros>(4095u>>k))throw std::runtime_error("Rice quotient overflow");}q=(zeros<<k)|take(k);}
+      else q=take(mode);
+      if(q>4095)throw std::runtime_error("RAW12 residual overflow");
+      int delta=(q&1)?-int((q+1)/2):int(q/2);
+      store(i,mode==12?q:unsigned(int(previous[i&1])+delta)&4095u);
+    }
+    if(pos!=length||held>=8||bits)throw std::runtime_error("noncanonical RAW12 padding");
+    at+=n;
+  }
+  if(at!=bytes.size()||rawCrc32(u16.data(),u16.size())!=rawLe32(p+20))
+    throw std::runtime_error("RAW12 decoded CRC or length mismatch");
+  r.packed.resize(pixels/2*3);
+  for(size_t i=0;i<pixels;i+=2){
+    unsigned a=unsigned(u16[2*i])|(unsigned(u16[2*i+1])<<8);
+    unsigned b=unsigned(u16[2*i+2])|(unsigned(u16[2*i+3])<<8);
+    r.packed[i/2*3]=uint8_t(a>>4);r.packed[i/2*3+1]=uint8_t(b>>4);r.packed[i/2*3+2]=uint8_t((a&15)|((b&15)<<4));
+  }
+  r.trigger_sequence=envelope.trigger_sequence;r.source_frame_step=envelope.source_frame_step;
+  r.frame_id=rawLe32(p+24);r.exposure_us=rawLe32(p+28);r.gain_x1024=rawLe32(p+32);
+  r.camera=p[37];r.bayer=p[7];r.timing_mode=p[38];
+  r.source_timestamp_us=rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32);return r;
+}
+inline Raw12Image decodeRaw12(const std::vector<uint8_t>& bytes,uint8_t format=0){
+  if(bytes.size()<4)throw std::runtime_error("truncated RAW12 envelope");
+  if((format==0||format==kRaw12Zstd)&&!std::memcmp(bytes.data(),"PRZ1",4))return decodeRaw12Zstd(bytes);
+  if((format==0||format==kRaw12Rice)&&!std::memcmp(bytes.data(),"PRG1",4))return decodeRaw12Rice(bytes);
+  throw std::runtime_error("RAW12 format/header mismatch");
+}
+
 inline RawImage decodeRawImage(const std::vector<uint8_t>& bytes,uint8_t format=0) {
+  if(bytes.size()>=4 && (!std::memcmp(bytes.data(),"PRG1",4)||!std::memcmp(bytes.data(),"PRZ1",4))){
+    auto decoded=decodeRaw12(bytes,format);RawImage r;
+    r.source_bits=12;r.source_frame_step=decoded.source_frame_step;r.width=decoded.width;r.height=decoded.height;r.camera=decoded.camera;
+    r.frame_id=decoded.frame_id;r.bayer=decoded.bayer;r.timing_mode=decoded.timing_mode;
+    r.source_timestamp_us=decoded.source_timestamp_us;r.trigger_sequence=decoded.trigger_sequence;
+    r.exposure_us=decoded.exposure_us;r.gain_x1024=decoded.gain_x1024;r.pixels=std::move(decoded.packed);return r;
+  }
   const auto h=parseRaw8Header(bytes.data(),bytes.size(),bytes.size());
   if((format&&format!=h.codec)||h.codec!=kRaw8Rice)
     throw std::runtime_error("RAW8 format/header mismatch");
@@ -116,7 +240,13 @@ inline RawImage decodeRawImage(const std::vector<uint8_t>& bytes,uint8_t format=
   r.bayer=h.bayer;r.timing_mode=h.timing_mode;r.source_timestamp_us=h.timestamp_us;
   r.trigger_sequence=h.trigger_sequence;r.pixels=std::move(decoded.pixels);return r;
 }
-inline uint8_t rawPixel(const RawImage& r,size_t index) {
+inline uint16_t rawPixel(const RawImage& r,size_t index) {
+  if(r.source_bits==12){
+    if(r.pixels.size()!=size_t(r.width)*r.height/2*3||index>=size_t(r.width)*r.height)
+      throw std::runtime_error("RAW12 pixel range/geometry mismatch");
+    const size_t at=index/2*3;return uint16_t(r.pixels[at+(index&1)])*16+
+      ((index&1)?r.pixels[at+2]>>4:r.pixels[at+2]&15);
+  }
   if(r.source_bits!=8||r.pixels.size()!=size_t(r.width)*r.height||index>=r.pixels.size())
     throw std::runtime_error("RAW8 pixel range/geometry mismatch");
   return r.pixels[index];

@@ -165,6 +165,11 @@ class Client {
 
   GnssTimingStatus gnssTimingStatus();
   GnssReceptionStatus gnssReceptionStatus();
+  // Read-only asynchronous queries: match returned sequence and parse the
+  // corresponding response from readFrame() on the capture reader.
+  uint32_t beginGnssTimingStatus();
+  uint32_t beginGnssReceptionStatus();
+  uint32_t beginDeviceInformationRead(FrameType type);
   GnssObservations gnssObservations(uint64_t cursor=0, uint64_t session=0);
   GnssRawBatch gnssRaw(uint64_t cursor=0, uint64_t session=0);
   RtkCorrectionStatus rtkCorrectionStatus();

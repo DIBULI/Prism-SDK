@@ -38,6 +38,8 @@ struct NetworkInfo {
   std::string summary;
 };
 
+NetworkInfo parseNetworkInfo(const Frame& frame);
+
 struct VideoStatus {
   bool enabled = false;
   uint8_t cameras = 0;

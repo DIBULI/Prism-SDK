@@ -54,10 +54,13 @@ The SDK supports Windows WinUSB and Linux/macOS libusb-1.0. The public API is
 kept independent from the host USB backend
 without changing application-level code.
 
-The current USB wire protocol is version 1. Agent and both SDKs are version `1.3.0`. Host SDK and agent semantic versions must match exactly (for
-example, Host SDK `1.3.0` only communicates with agent `1.3.0`). Device opening
-performs this handshake automatically and rejects the connection before
-keepalive or stream traffic on any mismatch.
+The current USB wire protocol is version 1. Agent and both SDKs are version
+`1.3.0`. Host SDK 1.3.0 also supports Agent `1.2.0` and `1.2.1` HELLO profiles.
+An explicit version rejection permits one retry with that supported profile;
+the response must still match the expected protocol, application and negotiated
+version. Unknown versions and transport errors are rejected before keepalive
+or stream traffic. RK-local SDK remains version-matched. Legacy devices do not
+gain newer firmware features; optional unsupported commands still report errors.
 
 ## IMU start/stop ownership
 
