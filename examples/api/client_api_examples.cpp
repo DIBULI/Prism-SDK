@@ -122,7 +122,7 @@ prism::WifiHotspotStatus setWifiHotspot(
 }  // namespace prism_sdk_examples
 
 int main() {
-  if (prism::hostSdkVersion() != "1.3.0") {
+  if (prism::hostSdkVersion() != "1.3.1") {
     std::cerr << "SDK headers/runtime version mismatch\n";
     return 1;
   }

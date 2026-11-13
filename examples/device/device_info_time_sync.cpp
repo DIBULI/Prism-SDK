@@ -15,7 +15,7 @@
 
 namespace {
 
-constexpr char kExpectedSdkVersion[] = "1.3.0";
+constexpr char kExpectedSdkVersion[] = "1.3.1";
 
 struct Options {
   bool synchronize_time = false;
