@@ -27,7 +27,7 @@
 - [Recommended Integration Pattern](#recommended-integration-pattern)
 <!-- /page-toc -->
 
-This reference describes the Prism Agent SDK `1.3.0` Host client lifecycle and
+This reference describes the Prism Agent SDK `1.3.1` Host client lifecycle and
 core control/stream APIs. Feature guides hold the detailed operational contracts:
 
 `Client::startSensorBoardUpdate(path, options)` and
@@ -54,12 +54,12 @@ The SDK supports Windows WinUSB and Linux/macOS libusb-1.0. The public API is
 kept independent from the host USB backend
 without changing application-level code.
 
-The current USB wire protocol is version 1. Agent and both SDKs are version
-`1.3.0`. Host SDK 1.3.0 also supports Agent `1.2.0` and `1.2.1` HELLO profiles.
+The current USB wire protocol is version 1. SDK `1.3.1` supports Agent
+`1.3.0` and `1.3.1`, plus legacy Agent `1.2.0` and `1.2.1` HELLO profiles.
 An explicit version rejection permits one retry with that supported profile;
 the response must still match the expected protocol, application and negotiated
 version. Unknown versions and transport errors are rejected before keepalive
-or stream traffic. RK-local SDK remains version-matched. Legacy devices do not
+or stream traffic. RK-local SDK supports Agent 1.3.0 and 1.3.1. Legacy devices do not
 gain newer firmware features; optional unsupported commands still report errors.
 
 ## IMU start/stop ownership
@@ -987,7 +987,7 @@ try {
 For a production host application:
 
 1. Open the device with `Client::openFirst()` or a selected `DeviceInfo`; this
-   already enforces exact protocol and semantic-version matching.
+   already validates the protocol and supported Agent compatibility profiles.
 2. Optionally call `hello()` again to display current process/update details.
 3. Call `networkInfo()` if the UI needs board network status.
 4. Read or change WiFi hotspot state while the device is idle.

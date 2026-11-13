@@ -30,7 +30,7 @@ Web Client may remain connected. Starting locally requires root. See the
 
 ## Current version
 
-Agent and both SDKs use **1.3.0**, protocol **1**. Main Runtime ABI is **19**.
+SDK **1.3.1** supports Agent **1.3.0 / 1.3.1**, protocol **1**. Main Runtime ABI is **19**.
 Use matching current headers/libraries and rebuild consumers. Include
 `<prism/rklocal_sdk.hpp>`; the public API is C++17.
 
@@ -137,7 +137,7 @@ types and defaults. Compile tests compare same-named public interfaces and param
 - Joint ZIP upgrades require manifest.ini, prism-agent and BOOT.BIN; format v2 adds
   applications.zip. See the [full update guide](../guides/firmware-update.md) for
   capability and restart requirements. Local reconnects to the same socket;
-  Host re-enumerates USB. A different Agent version needs matching SDK.
+  Host re-enumerates USB. Other Agent versions require an explicitly supported SDK compatibility profile.
 
 ## Control operations
 

@@ -24,7 +24,7 @@ Agent。公开接口为 **C++17 `prism::rklocal::Client`**。与 Host SDK 的
 
 ## 当前版本
 
-Agent、Host SDK 和 RK-local SDK 均为 **1.3.0**，线协议 **1**，主 Runtime ABI **19**。
+SDK **1.3.1** 支持 Agent **1.3.0 / 1.3.1**，线协议 **1**，主 Runtime ABI **19**。
 包含 `<prism/rklocal_sdk.hpp>`，使用同套最新头文件与库重新编译；公开 API 为 C++17。
 
 ## 文件与编译

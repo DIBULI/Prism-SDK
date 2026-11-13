@@ -1,12 +1,13 @@
-# Prism SDK 1.3.0 package and compatibility
+# Prism SDK 1.3.1 package and compatibility
 
 The distribution contains public headers, compiled libraries, examples and
 documentation. Device firmware is distributed separately.
 
 ## Compatibility
 
-- Host SDK and RK-local SDK: **1.3.0**. Host USB connections also support
-  legacy Agent **1.2.0/1.2.1** HELLO profiles; RK-local remains version-matched.
+- Host SDK and RK-local SDK: **1.3.1**, compatible with Agent **1.3.0/1.3.1**.
+  Host connections also support legacy Agent **1.2.0/1.2.1** HELLO profiles.
+  Unknown protocol versions remain rejected; legacy devices retain their feature limits.
 - Current production Sensor Board firmware: **0.5.3**, with native RAW8 on 415RSV0.
   Other models require their own matching firmware; never cross-flash model packages.
   413GSV0 and 21315V0 naming support does not establish new hardware qualification.

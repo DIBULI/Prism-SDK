@@ -26,7 +26,7 @@
 - [推荐集成顺序](#推荐集成顺序)
 <!-- /page-toc -->
 
-本文档说明 Prism Agent SDK `1.3.0` 的 Host 生命周期与基础控制、数据流接口。
+本文档说明 Prism Agent SDK `1.3.1` 的 Host 生命周期与基础控制、数据流接口。
 Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的完整操作约束统一见：
 
 - [相机曝光与增益](../guides/camera.md)
@@ -44,7 +44,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 #include "prism/usb_sdk.hpp"
 ```
 
-> 当前线协议版本为 `1`，Agent、Host SDK 与 RK-local SDK 均为 `1.3.0`。Host SDK 与 agent 的语义版本必须完全一致。例如 Host SDK `1.3.0` 只接受 agent `1.3.0`。打开设备时 SDK 会自动执行严格的 `HELLO` 校验，版本不匹配时不会进入兼容模式。
+> 当前线协议版本为 `1`。Host SDK `1.3.1` 支持 Agent `1.3.0 / 1.3.1` 及旧版 `1.2.0 / 1.2.1`；RK-local SDK 支持 `1.3.0 / 1.3.1`。仅在明确的版本拒绝后按已支持协议重试一次；未知版本仍拒绝，旧设备不会因此获得新功能。
 
 ## 运行要求
 
@@ -56,7 +56,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 | macOS | libusb-1.0，SHA-256 使用系统 CommonCrypto；不需要 udev 规则 |
 | 默认 VID | `0x2207` |
 | 默认 PID | `0x1201` |
-| Host SDK | `1.3.0` |
+| Host SDK | `1.3.1` |
 | 线协议 | `1` |
 
 Linux 首次安装 udev 规则：
@@ -769,7 +769,7 @@ try {
 ## 推荐集成顺序
 
 1. 使用 `enumerate()` 展示序列号，并打开用户选择的设备。
-2. 依赖打开阶段的严格版本握手，不实现降级协议。
+2. 使用 SDK 内置的有限版本兼容握手，不自行放宽协议校验。
 3. 使用 `deviceVersions()` 展示 agent 与 sensor-board 组合版本。
 4. 在非传输阶段读取或变更 WiFi 热点状态，以及读取或保存持久化配置。
 5. 用户点击采集后再启动图像和 IMU。
