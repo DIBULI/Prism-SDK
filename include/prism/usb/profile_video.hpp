@@ -122,7 +122,7 @@ inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
   const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Zstd);
   if(bytes.size()<49||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRZ1",4)||
      bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
     throw std::runtime_error("invalid RAW12 header");
   const auto* p=bytes.data();Raw12Image r;
   if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
@@ -155,7 +155,7 @@ inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
   const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Rice);
   if(bytes.size()<65||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRG1",4)||
      bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
     throw std::runtime_error("invalid GPU RAW12 header");
   const auto *p=bytes.data();Raw12Image r;
   if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
