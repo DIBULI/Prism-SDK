@@ -30,7 +30,7 @@ Web Client may remain connected. Starting locally requires root. See the
 
 ## Current version
 
-SDK **1.3.1** supports Agent **1.3.0 / 1.3.1**, protocol **1**. Main Runtime ABI is **19**.
+SDK **1.4.0** supports Agent **1.3.0 / 1.3.1 / 1.4.0**, protocol **1**. Main Runtime ABI is **19**.
 Use matching current headers/libraries and rebuild consumers. Include
 `<prism/rklocal_sdk.hpp>`; the public API is C++17.
 

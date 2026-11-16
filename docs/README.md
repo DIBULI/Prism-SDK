@@ -2,11 +2,12 @@
 
 [简体中文](README.zh-CN.md) · [Repository overview](../README.md)
 
-[1.3.1 release summary](release-notes/v1.3.1.md)
+[1.4.0 release summary](release-notes/v1.4.0.md)
+[Previous 1.3.1 update](release-notes/v1.3.1.md)
 
 [1.3.0 release summary](release-notes/v1.3.0.md)
 
-Current baseline: **SDK / Agent 1.3.1**, **415RSV0 Sensor Board 0.5.3** (other models require their own matched firmware). Use matching
+Current baseline: **SDK / Agent 1.4.0**, **415RSV0 Sensor Board 0.5.4** (other models require their own matched firmware). Use matching
 headers and libraries. Commands in these guides run from the SDK repository root
 unless stated otherwise.
 

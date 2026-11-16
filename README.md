@@ -1,4 +1,4 @@
-# Prism SDK 1.3.1
+# Prism SDK 1.4.0
 
 See [415RSV0 shared trigger groups](docs/update/v1.3.0-trigger-groups.md) for the
 matched Agent and header update used by grouped Viewer previews.
@@ -18,10 +18,11 @@ implementation or device firmware source is published here.
 
 ## Compatibility
 
-- SDK **1.3.1** supports Agent **1.3.0 / 1.3.1**. Host SDK also supports legacy **1.2.0 / 1.2.1** HELLO profiles.
-- 415RSV0 matching Sensor Board: **0.5.3**; other models need their own firmware.
-  Canonical model names are **415RSV0, 413GSV0, 21315V0**; wire model IDs are unchanged.
+- SDK **1.4.0** supports Agent **1.3.0 / 1.3.1 / 1.4.0**. Host SDK also supports legacy **1.2.0 / 1.2.1** HELLO profiles.
+- Current matching Sensor Board: **0.5.4**; each model needs its own firmware.
+  Canonical model names are **415RSV0, 413GSV0, 21312V0**; wire model IDs are unchanged.
   USB and RK-local protocol **1**. See [compatibility](ORIGIN.md) for validation limits.
+- 21312V0 uses JPEG on cam0/3 and 4096×3072 native RAW8 on cam1/2.
 - Windows Runtime API **19**, RTK-module control extension **1**.
 - Replace headers and libraries together and rebuild your application.
 

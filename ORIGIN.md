@@ -1,16 +1,16 @@
-# Prism SDK 1.3.1 package and compatibility
+# Prism SDK 1.4.0 package and compatibility
 
 The distribution contains public headers, compiled libraries, examples and
 documentation. Device firmware is distributed separately.
 
 ## Compatibility
 
-- Host SDK and RK-local SDK: **1.3.1**, compatible with Agent **1.3.0/1.3.1**.
+- Host SDK and RK-local SDK: **1.4.0**, compatible with Agent **1.3.0/1.3.1/1.4.0**.
   Host connections also support legacy Agent **1.2.0/1.2.1** HELLO profiles.
   Unknown protocol versions remain rejected; legacy devices retain their feature limits.
-- Current production Sensor Board firmware: **0.5.3**, with native RAW8 on 415RSV0.
+- Current matching Sensor Board firmware: **0.5.4**, with native RAW8 on 415RSV0 and 21312V0.
   Other models require their own matching firmware; never cross-flash model packages.
-  413GSV0 and 21315V0 naming support does not establish new hardware qualification.
+  413GSV0 and 21312V0 naming support does not establish new hardware qualification.
 - Runtime API: **19** (DeviceInfo model field). Network extension: **4** (plain TCP,
   token equals Web login password). Profile/live-exposure extension: **1**.
   Native camera-control, RTK-module control, raw dataset, LiDAR power and speed extensions: **1**.
@@ -30,17 +30,16 @@ documentation. Device firmware is distributed separately.
 
 `SHA256SUMS` verifies the distributed files; Release archives also have download
 checksums. Per-platform `PROVENANCE.txt` records public compatibility information.
-The 2026-11-03 refresh rebuilds all four platform libraries from the same source
+The 1.4.0 update rebuilds all four platform libraries from the same source
 revision (recorded in each PROVENANCE.txt), with native RAW8 and canonical model
-names 415RSV0, 413GSV0 and 21315V0. Wire model IDs are unchanged.
+names 415RSV0, 413GSV0 and 21312V0. Wire model IDs are unchanged.
 Headers and all platform libraries are updated together, including raw GNSS
 reading and LiDAR speed control. Installing this SDK does not upgrade device
 firmware or restart devices. Platform builds and package checks are separate
 from physical-hardware validation.
 
-The latest 2026-11-03 build also supports the current 415RSV0 image envelopes
-used by Agent revision `0db22e6644c525906d1edc553e64fab5ca457974`.
-Older RAW8 recordings remain readable. Rebuild Viewer and other consumers with
-this matching package; an older 1.3.0 binary is not a substitute.
+The update retains earlier 415RSV0 image-envelope support and adds 21312V0
+4096×3072 RAW8 decoding. Rebuild Viewer and other consumers with matching headers
+and libraries; renaming an older SDK binary does not upgrade it.
 
 [Setup](docs/getting-started/README.md) · [API differences](docs/reference/rk-local.md)

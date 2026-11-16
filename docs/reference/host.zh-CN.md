@@ -26,7 +26,7 @@
 - [推荐集成顺序](#推荐集成顺序)
 <!-- /page-toc -->
 
-本文档说明 Prism Agent SDK `1.3.1` 的 Host 生命周期与基础控制、数据流接口。
+本文档说明 Prism Agent SDK `1.4.0` 的 Host 生命周期与基础控制、数据流接口。
 Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的完整操作约束统一见：
 
 - [相机曝光与增益](../guides/camera.md)
@@ -44,7 +44,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 #include "prism/usb_sdk.hpp"
 ```
 
-> 当前线协议版本为 `1`。Host SDK `1.3.1` 支持 Agent `1.3.0 / 1.3.1` 及旧版 `1.2.0 / 1.2.1`；RK-local SDK 支持 `1.3.0 / 1.3.1`。仅在明确的版本拒绝后按已支持协议重试一次；未知版本仍拒绝，旧设备不会因此获得新功能。
+> 当前线协议版本为 `1`。Host SDK `1.4.0` 支持 Agent `1.3.0 / 1.3.1 / 1.4.0` 及旧版 `1.2.0 / 1.2.1`；RK-local SDK 支持 `1.3.0 / 1.3.1 / 1.4.0`。仅在明确的版本拒绝后按已支持协议重试一次；未知版本仍拒绝，旧设备不会因此获得新功能。
 
 ## 运行要求
 
@@ -56,7 +56,7 @@ Windows 使用 DLL Runtime API，Linux/macOS 使用直接 C++ 链接。功能的
 | macOS | libusb-1.0，SHA-256 使用系统 CommonCrypto；不需要 udev 规则 |
 | 默认 VID | `0x2207` |
 | 默认 PID | `0x1201` |
-| Host SDK | `1.3.1` |
+| Host SDK | `1.4.0` |
 | 线协议 | `1` |
 
 Linux 首次安装 udev 规则：

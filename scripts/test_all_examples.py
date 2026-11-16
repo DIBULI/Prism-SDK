@@ -63,7 +63,7 @@ def verify_package() -> None:
                    r"kNetworkRuntimeApiVersion\s*=\s*4" if "network_" in relative else
                    r"kRuntimeApiVersion\s*=\s*19")
         if not re.search(pattern, contents):
-            raise RuntimeError(f"SDK 1.3.0 ABI mismatch in {relative}")
+            raise RuntimeError(f"SDK {version} ABI mismatch in {relative}")
     manifest = ROOT / "SHA256SUMS"
     checked = 0
     for line_number, line in enumerate(manifest.read_text(encoding="utf-8").splitlines(), 1):

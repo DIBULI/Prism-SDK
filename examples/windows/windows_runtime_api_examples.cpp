@@ -18,7 +18,7 @@
 
 namespace {
 
-constexpr char kExpectedSdkVersion[] = "1.3.1";
+constexpr char kExpectedSdkVersion[] = "1.4.0";
 
 std::wstring runtimePath() {
   std::array<wchar_t, 32768> path{};
