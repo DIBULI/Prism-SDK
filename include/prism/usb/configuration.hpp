@@ -26,7 +26,10 @@ constexpr bool isGnssUartBaudSupported(uint32_t baud_rate) {
 }
 
 constexpr bool isCameraFpsSupported(uint32_t fps) {
-  return fps >= 1u && fps <= 30u;
+  return (fps >= 1u && fps <= 30u) || fps == 36u;
+}
+constexpr bool isMixed21312FpsSupported(uint32_t fps) {
+  return fps == 12u || fps == 24u || fps == 36u;
 }
 
 struct DeviceConfiguration {

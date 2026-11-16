@@ -33,13 +33,22 @@ as one standard-input line, queries DeviceInfo, and closes. Its
 `<prism/usb/network_runtime_api.hpp>` and `kNetworkRuntimeApiVersion` (4) with the
 matching RuntimeApi 19 client lifetime. No connection implicitly starts RTK.
 
-Update the SDK and device gateway together. Older TLS gateways/clients are not
-compatible; there is no automatic fallback. `NetworkOptions::certificate_sha256`
+At connection time, HELLO reports the actual Agent version. The SDK confirms a
+supported version instead of forcing every device to use 1.3.0. An explicit
+version rejection permits one fresh TCP connection because old Agents close the
+rejected session. Subsequent queries reuse the confirmed version. Authentication
+and transport failures do not trigger retries; no capture command is replayed.
+USB retains its existing same-connection HELLO compatibility negotiation.
+
+For an existing `PRISM-NET/4` gateway, this fix only requires a client SDK/Viewer
+update. Older TLS gateways/clients require matching SDK and device gateway
+updates; there is no automatic TLS fallback. `NetworkOptions::certificate_sha256`
 is removed; network extensions v2/v3 must not be loaded as v4. An installed Viewer
 also needs a matching update, not just a DLL swap.
 
 明文 TCP 不做加密或证书校验，token 也以明文发送。仅用于可信局域网/设备热点，
-不要映射到公网。SDK、网关和使用它的应用必须配套更新；本次发布不自动部署设备。
+不要映射到公网。已使用 `PRISM-NET/4` 的设备只需更新客户端 SDK/Viewer，
+HELLO 会按设备返回的版本协商；无需为本次连接修复更新设备固件。
 令牌即 Web 管理员登录密码，Wi-Fi 和有线均允许；无需独立随机令牌或证书配对。
 见[认证迁移说明](../update/v1.3.0-network-web-password.md)。
 

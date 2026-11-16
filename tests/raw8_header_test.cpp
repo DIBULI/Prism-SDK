@@ -36,6 +36,22 @@ int main()try{
     for(uint8_t mode:{1,2,3}){b[38]=mode;put(b,40,2345678);checksum(b);CHECK(parse().trigger_sequence==0);}
     put(b,52,10);checksum(b);reject(parse); // No fabricated group on local timing.
   }
+  for(unsigned camera:{1u,2u}) {
+    constexpr uint32_t pixels=4096u*3072u;
+    std::vector<uint8_t> b(80+pixels/256*3,0);
+    std::memcpy(b.data(),"PRG8",4);b[4]=1;b[5]=80;b[6]=8;
+    b[36]=2;b[37]=uint8_t(camera);b[38]=4;put(b,8,4096);put(b,12,3072);put(b,16,pixels);
+    put(b,24,7);put(b,40,1234567);put(b,52,13);
+    put(b,56,b.size()-80);put(b,60,256);put(b,64,pixels/256);put(b,68,3);put(b,72,6000);checksum(b);
+    auto parse=[&]{return parseRaw8Header(b.data(),80,b.size(),kRaw8Rice);};
+    CHECK(parse().width==4096&&parse().height==3072&&parse().raw_bytes==pixels&&parse().source_frame_step==3);
+    for(unsigned wrong:{0u,3u}){b[37]=uint8_t(wrong);checksum(b);reject(parse);}b[37]=uint8_t(camera);
+    for(auto field:{8u,16u,56u,64u,68u,72u}){
+      const auto old=rawHeaderLe32(b.data()+field);put(b,field,old+1);checksum(b);reject(parse);put(b,field,old);
+    }
+    b[38]=2;checksum(b);reject(parse);
+    b[38]=0;put(b,40,0);put(b,52,0);checksum(b);CHECK(parse().timing_mode==0);
+  }
   reject([]{parseRaw8Header(nullptr,0,0);});
-  std::cout<<"PASS native8 header: genuine shared group, independent21315V0 timing, every header bit, geometry/depth/codec/bounds\n";return 0;
+  std::cout<<"PASS native8 header: shared group, cropped21312V0 timing, geometry/depth/codec/bounds\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}

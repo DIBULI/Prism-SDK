@@ -204,14 +204,15 @@ enum class DeviceModel : uint8_t {
   Unknown = 0,
   Prism413GSV0 = 1,
   Prism415RSV0 = 2,
-  Prism21315V0 = 3,
+  Prism21312V0 = 3,
+  Prism21315V0 = Prism21312V0,  // Source compatibility; same wire model ID.
 };
 
 inline const char* deviceModelName(DeviceModel model) {
   switch (model) {
     case DeviceModel::Prism413GSV0: return "413GSV0";
     case DeviceModel::Prism415RSV0: return "415RSV0";
-    case DeviceModel::Prism21315V0: return "21315V0";
+    case DeviceModel::Prism21312V0: return "21312V0";
     default: return "Unknown";
   }
 }

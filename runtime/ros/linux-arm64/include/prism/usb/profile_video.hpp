@@ -52,7 +52,7 @@ class ProfileImageAssembler {
     auto& s=slots_[c.camera_id];
     const bool raw=c.format==kRaw8Rice||c.format==kRaw12Rice||c.format==kRaw12Zstd;
     if(!(c.flags&kIndependentImage)||(c.flags&~7u)||
-       !(raw?(c.width==5120&&c.height==3072):(c.format==2&&c.width==1280&&c.height==1024))||
+       !(raw?((c.width==5120||c.width==4096)&&c.height==3072):(c.format==2&&c.width==1280&&c.height==1024))||
        !c.encoded_size||c.encoded_size>kProfileImageLimit||!c.data||!c.chunk_size||
        c.data_size!=c.chunk_size||c.chunk_offset>c.encoded_size||
        c.chunk_size>c.encoded_size-c.chunk_offset) {
@@ -122,7 +122,7 @@ inline Raw12Image decodeRaw12Zstd(const std::vector<uint8_t>& bytes) {
   const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Zstd);
   if(bytes.size()<49||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRZ1",4)||
      bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
     throw std::runtime_error("invalid RAW12 header");
   const auto* p=bytes.data();Raw12Image r;
   if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
@@ -155,7 +155,7 @@ inline Raw12Image decodeRaw12Rice(const std::vector<uint8_t>& bytes) {
   const auto envelope=parseRaw12Header(bytes.data(),bytes.size(),bytes.size(),kRaw12Rice);
   if(bytes.size()<65||bytes.size()>kProfileImageLimit||std::memcmp(bytes.data(),"PRG1",4)||
      bytes[6]!=12||bytes[7]>3||
-     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0||rawLe32(bytes.data()+60)!=0)
+     bytes[36]!=2||bytes[37]>3||bytes[38]>4||bytes[39]!=0)
     throw std::runtime_error("invalid GPU RAW12 header");
   const auto *p=bytes.data();Raw12Image r;
   if(!validProfileTiming(p[38],rawLe32(p+40)|(uint64_t(rawLe32(p+44))<<32)))
@@ -235,7 +235,7 @@ inline RawImage decodeRawImage(const std::vector<uint8_t>& bytes,uint8_t format=
   if((format&&format!=h.codec)||h.codec!=kRaw8Rice)
     throw std::runtime_error("RAW8 format/header mismatch");
   auto decoded=decodeRaw8(bytes);
-  RawImage r;r.width=5120;r.height=3072;r.frame_id=h.frame_id;
+  RawImage r;r.width=h.width;r.height=h.height;r.frame_id=h.frame_id;r.source_frame_step=h.source_frame_step;
   r.exposure_us=h.exposure_us;r.gain_x1024=h.gain_x1024;r.camera=h.camera;
   r.bayer=h.bayer;r.timing_mode=h.timing_mode;r.source_timestamp_us=h.timestamp_us;
   r.trigger_sequence=h.trigger_sequence;r.pixels=std::move(decoded.pixels);return r;

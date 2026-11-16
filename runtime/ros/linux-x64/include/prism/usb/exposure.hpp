@@ -47,7 +47,7 @@ constexpr uint32_t kCameraGainStepX1024 = 32;
 constexpr uint32_t kCameraDefaultGainX1024 = 1024;
 
 constexpr uint32_t cameraMaxExposureUs(uint32_t camera_fps) {
-  return camera_fps >= 1u && camera_fps <= 30u
+  return (camera_fps >= 1u && camera_fps <= 30u) || camera_fps == 36u
              ? 1000000u / camera_fps - kCameraExposureHeadroomUs
              : 0u;
 }
