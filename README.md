@@ -57,6 +57,8 @@ This is the cumulative feature set of 1.3.0, not only the latest refresh.
 - Current TimeSync modes, RTK-module firmware versions, 4G/control diagnostics.
 - Receiver-native GNSS/RTK observations, sky/trajectory display helpers; no
   Agent-side RTK solver or retired raw/smoothed navigation interface.
+- [Dual-antenna heading](docs/guides/gnss-rtk.md#dual-antenna-heading): heading,
+  pitch, baseline and solution validity from receiver observations.
 - GNSS input diagnostics, XT32 support, LiDAR line fields and camera metadata.
 - [Independent LiDAR standby / wake](docs/guides/lidar.md#standby-wake) (requires the matching current Agent package).
 - [Release notes](docs/update/v1.3.0.md), [package compatibility](ORIGIN.md) and `SHA256SUMS`.

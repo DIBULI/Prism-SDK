@@ -2,6 +2,7 @@
 // Shared, transport-independent display model. No positioning solver, no
 // smoothing or invented satellite geometry. Times are Agent monotonic ms.
 #include "prism/usb/gnss_observation.hpp"
+#include "prism/usb/gnss_heading.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -51,6 +52,7 @@ inline bool utcValid(const std::string& s) {
   return s[6]=='.'&&s.size()>7&&s.substr(7).find_first_not_of("0123456789")==s.npos;
 }
 inline bool checksum(const std::string& s) {
+  if(s.rfind("#UNIHEADINGA,",0)==0)return gnssHeadingChecksum(s);
   bool a=s.rfind("#ADRNAVA,",0)==0;auto star=s.find('*');
   if(s.size()>1023||star==s.npos||star+(a?9:3)!=s.size()||(!a&&(s.empty()||s[0]!='$')))return false;
   uint32_t expected=0,crc=0;
@@ -131,6 +133,7 @@ class Model {
   }
   void sentence(const GnssObservation& r) {
     const auto& s=r.sentence;if(!checksum(s)){++rejected;return;}
+    if(s.rfind("#UNIHEADINGA,",0)==0)return; // Parsed separately from position fixes.
     auto star=s.find('*');
     if(s[0]=='#') {
       auto semi=s.find(';');if(semi==s.npos||semi>star)return;
@@ -187,9 +190,11 @@ class Model {
  public:
   uint64_t cursor=0,session=0,now=0,rejected=0,gaps=0;
   Position gnss,rtk;Origin origin;std::deque<Point> gnss_track,rtk_track;
+  GnssHeadingTracker heading;
   void clearTracks(){origin={};gnss_track.clear();rtk_track.clear();last_gga_.clear();last_rtk_.clear();++segment_;}
   void apply(const GnssObservations& b) {
     if(session&&b.session!=session){*this=Model{};}
+    heading.apply(b);
     if(b.gap){++gaps;++segment_;pending_.clear();complete_.clear();used_.clear();gnss.valid=rtk.valid=false;}
     session=b.session;now=b.device_monotonic_ms;
     for(const auto& r:b.records)if(r.sequence>cursor||b.gap){if(fresh(now,r.received_ms,5000))sentence(r);}

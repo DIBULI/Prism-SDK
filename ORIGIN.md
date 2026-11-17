@@ -42,4 +42,18 @@ The update retains earlier 415RSV0 image-envelope support and adds 21312V0
 4096×3072 RAW8 decoding. Rebuild Viewer and other consumers with matching headers
 and libraries; renaming an older SDK binary does not upgrade it.
 
+## Heading interface update (2026-11-17)
+
+`gnss_heading.hpp` and the shared GNSS display model add header-only parsing
+of UNIHEADINGA through the existing GNSS observation API. This additive update
+uses the 1.4.0 runtime libraries already in this package; their recorded build
+provenance remains unchanged. No transport command, exported symbol or runtime
+table changes. Rebuild consumers with the updated headers.
+
+The Agent must include the heading observation patch from source revision
+`66235007f241c34eb0848dc94bb06d0c5803f82b`; older Agents may omit heading
+observations even when raw GNSS forwarding works. Live Agent reporting was
+verified on 413GSV0 with RTK Module 1.0.3 and Sensor Board 0.5.3. This establishes
+transport and parser behavior, not antenna calibration or fixed-heading accuracy.
+
 [Setup](docs/getting-started/README.md) · [API differences](docs/reference/rk-local.md)

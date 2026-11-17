@@ -377,3 +377,44 @@ try {
 和 UTC 连贯性检查仍然保留。
 
 请使用 Sensor Board 0.5.0 配套固件。接口错误、无接收数据和未锁定 UTC 必须分别报告。
+
+## Dual-antenna heading
+
+`<prism/usb/gnss_heading.hpp>` provides `parseGnssHeading(sentence)` and
+`GnssHeadingTracker`. Feed the existing read-only GNSS observation responses
+to the tracker on each poll, including empty responses:
+
+```cpp
+prism::GnssHeadingTracker heading;
+uint64_t cursor = 0, session = 0;
+// Repeat at 100 ms; handle transport exceptions as unavailable data.
+auto batch = client.gnssObservations(cursor, session);
+heading.apply(batch);
+cursor = batch.cursor;
+session = batch.session;
+if (heading.value().valid) {
+    const auto& h = heading.value();
+    // h.heading_deg, h.pitch_deg, h.baseline_m, h.fixed
+}
+```
+
+USB, network and the RK-local observation interface carry the same sentences.
+The Agent needs the UNIHEADINGA observation patch described in
+[package compatibility](../../ORIGIN.md#heading-interface-update-2026-11-17).
+No new Sensor Board byte transport or runtime ABI is needed. Older Agents
+may provide only raw heading bytes; an empty heading result is not zero degrees.
+
+The parser checks CRC, field counts and numeric ranges. It reports solution
+status/type, GPS/UTC epoch, receiver output delay, tracked/used satellites,
+heading, pitch, baseline and reported angular standard deviations. Heading is
+ANT1 toward ANT2, clockwise from true north. Heading FIX/FLOAT is independent
+of the absolute positioning solution and does not establish calibrated accuracy.
+
+The tracker clears validity on no solution, bad messages, stream gaps or
+session changes, rejects non-advancing receiver epochs and expires data after
+1000 ms by default, including receiver output delay. Invalid angles are empty
+optionals. On query exceptions the caller must mark the connection unavailable.
+Existing GNSS observation recordings retain the original heading sentences.
+
+双天线定向与绝对位置解状态分开判断。无解、过期或断流时不保留有效角度，
+不能把位置单点解或历史定向角度当作当前固定定向解。
