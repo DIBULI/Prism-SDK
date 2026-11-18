@@ -203,6 +203,8 @@ class Client {
   DeviceConfiguration saveDeviceConfiguration(const DeviceConfiguration& configuration,
       uint32_t field_mask = kDeviceConfigFieldAll);
   ExposureConfiguration cameraExposure();
+  ExposureGroupConfiguration cameraExposureGroup(uint8_t group);
+  ExposureGroupConfiguration setCameraExposureGroup(const ExposureGroupConfiguration& configuration);
   // Idle-only desired RAM config, not sensor readback or persistent storage.
   // Exact CAS; failures require close/reopen plus fresh GET, no blind replay.
   CameraControlIdleStatus cameraControlIdle();

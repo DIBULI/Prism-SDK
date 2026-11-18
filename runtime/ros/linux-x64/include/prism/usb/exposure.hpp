@@ -12,6 +12,21 @@ constexpr uint16_t kExposurePayloadSize = 44;
 constexpr uint16_t kExposureLimitsProtocolVersion = 2;
 constexpr uint16_t kExposureLimitsPayloadSize = 28;
 
+// Mixed21312 descriptor5 only. Group0 is cam0/3; group1 is cam1/2.
+// The two entries are ordered by camera ID. Updates replace exactly one bank.
+struct ExposureGroupConfiguration {
+  uint8_t group = 0, automatic_camera_mask = 9, target_brightness = 35;
+  bool unified_automatic = false;
+  uint32_t min_exposure_us = 50, max_exposure_us = 995000;
+  uint32_t effective_max_exposure_us = 0;
+  uint32_t min_gain_x1024 = 1024, max_gain_x1024 = 126976;
+  std::array<uint32_t, 2> manual_exposure_us{200,200};
+  std::array<uint32_t, 2> gain_x1024{1024,1024};
+};
+std::vector<uint8_t> makeExposureGroupGetPayload(uint8_t group);
+std::vector<uint8_t> makeExposureGroupSetPayload(const ExposureGroupConfiguration&);
+ExposureGroupConfiguration parseExposureGroupConfiguration(const Frame&);
+
 constexpr uint32_t kExposureFieldTargetBrightness = 1u << 0;
 constexpr uint32_t kExposureFieldCamera0 = 1u << 1;
 constexpr uint32_t kExposureFieldCamera1 = 1u << 2;

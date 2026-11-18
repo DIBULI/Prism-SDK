@@ -136,6 +136,8 @@ class Client {
   // target brightness shared by all four cameras; manual exposure time is
   // independent for each camera.
   ExposureConfiguration cameraExposure();
+  ExposureGroupConfiguration cameraExposureGroup(uint8_t group);
+  ExposureGroupConfiguration setCameraExposureGroup(const ExposureGroupConfiguration& configuration);
   // Matched415RSV0 idle-only, synchronous RAM staging; never touches I2C or
   // starts/stops capture. Exact idle epoch/revision CAS, no persistence.
   // Any failed/uncertain reply requires close/reopen and a fresh GET; never

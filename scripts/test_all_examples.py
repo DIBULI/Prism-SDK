@@ -97,6 +97,8 @@ def verify_package() -> None:
         relative_path = path.relative_to(ROOT)
         if b"prism_usb_sdk_get_camera_control_api" not in contents:
             raise RuntimeError(f"runtime lacks native camera-control extension: {relative_path}")
+        if b"prism_usb_sdk_get_exposure_group_api" not in contents:
+            raise RuntimeError(f"runtime lacks exposure-group extension: {relative_path}")
         if EXPECTED_EXPOSURE_LIMIT not in contents:
             raise RuntimeError(
                 f"runtime lacks the 50 us exposure limit: {relative_path}"

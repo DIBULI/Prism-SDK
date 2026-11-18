@@ -27,10 +27,16 @@ inline Raw12Header parseRaw12Header(const uint8_t* p,size_t available,size_t tot
       rawHeaderLe32(p+8)==5120&&rawHeaderLe32(p+12)==3072&&rawHeaderLe32(p+16)==23592960);
   const auto stamp=uint64_t(rawHeaderLe32(p+40))|uint64_t(rawHeaderLe32(p+44))<<32;
   require((p[38]==0&&!stamp)||(p[38]>=1&&p[38]<=3)||(p[38]==4&&stamp));
-  if(rice)require(rawHeaderLe32(p+52)==256&&rawHeaderLe32(p+56)==total-header&&rawHeaderLe32(p+60)==0);
+  if(rice)require(rawHeaderLe32(p+52)==256&&rawHeaderLe32(p+56)==total-header&&
+      (selected||rawHeaderLe32(p+60)==0));
   Raw12Header result;result.bytes=header;
   if(selected){
-    require(rice&&(p[37]==1||p[37]==2)&&p[38]==2&&stamp&&
+    result.trigger_sequence=rawHeaderLe32(p+60);
+    // Native source IDs advance by three; the common trigger group belongs
+    // to the shared 12/24/36-Hz scheduler and is not a native frame counter.
+    require(rice&&(p[37]==1||p[37]==2)&&
+        ((p[38]==4&&stamp&&result.trigger_sequence)||
+         (p[38]==0&&!stamp&&!result.trigger_sequence))&&
         rawHeaderLe32(p+64)==3&&rawHeaderLe32(p+68)==6000&&rawHeaderLe32(p+72)==2000&&
         rawHeaderCrc32(p,76)==rawHeaderLe32(p+76));
     result.source_frame_step=3;

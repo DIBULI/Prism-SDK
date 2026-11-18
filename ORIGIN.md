@@ -57,3 +57,12 @@ verified on 413GSV0 with RTK Module 1.0.3 and Sensor Board 0.5.3. This establish
 transport and parser behavior, not antenna calibration or fixed-heading accuracy.
 
 [Setup](docs/getting-started/README.md) · [API differences](docs/reference/rk-local.md)
+
+## Exposure group update (2026-11-18)
+
+All four Host runtimes and the ARM64 RK-local library are rebuilt together
+for the additive 21312V0 exposure-group API. The per-platform provenance records
+the exact source revision and build run. Group 0 controls cam0/cam3; group 1
+controls cam1/cam2, with independent targets and bounds and a 28x RAW gain cap.
+Matching Agent and Sensor Board profile descriptor version 5 are required.
+See [camera controls](docs/guides/camera.md#21312v0-exposure-groups).

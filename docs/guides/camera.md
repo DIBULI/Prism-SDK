@@ -3,9 +3,45 @@
 [Documentation index](../README.md)
 
 <!-- page-toc -->
+- [21312V0 exposure groups](#21312v0-exposure-groups)
 - [SDK API](#sdk-api)
 - [Current wire format](#current-wire-format)
 <!-- /page-toc -->
+
+## 21312V0 exposure groups
+
+With the matching Agent and Sensor Board exposing profile descriptor version 5,
+21312V0 uses two independent control banks: group `0` contains the 1.3M global
+cameras cam0/cam3, and group `1` contains the 12M RAW8 cameras cam1/cam2.
+Each bank retains its own brightness target, exposure bounds, gain bounds,
+automatic-camera mask and manual settings. Unified automatic exposure is
+available only for group 0. Updating one bank leaves the other unchanged.
+
+Read the bank before changing it; setters replace the complete selected bank:
+
+```cpp
+auto raw = client.cameraExposureGroup(1);
+raw.target_brightness = 30;
+auto applied = client.setCameraExposureGroup(raw);
+```
+
+The two manual entries follow ascending camera ID: cam0/cam3 or cam1/cam2.
+The RAW gain ceiling is 28x (`28672` in x1024 units), with steps of `64`.
+For the qualified 18 us mode, RAW exposure bounds are 54..18432 us; the
+requested interval must contain at least one sensor row. Read the returned
+effective exposure ceiling and actual frame metadata when checking applied
+settings. These controls remain runtime-only.
+
+Host and RK-local clients provide `cameraExposureGroup` and
+`setCameraExposureGroup`. Dynamically loaded Host clients use the additive
+`exposure_group_runtime_api.hpp` extension, version 1, exported as
+`prism_usb_sdk_get_exposure_group_api`; Runtime API 19 remains unchanged.
+Use matching headers and libraries and verify device support before writing.
+Older firmware does not gain this feature from an SDK update; unsupported
+commands must be reported, not retried through the legacy four-camera setter.
+
+The legacy shared-bank description below applies to devices using the legacy
+exposure API. It does not override the two-bank contract above.
 
 Camera exposure is runtime-only. It is not part of
 `DeviceConfiguration`, is never written to `/var/lib/prism`, and resets to the
