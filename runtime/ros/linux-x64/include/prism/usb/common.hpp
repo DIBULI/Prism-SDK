@@ -134,7 +134,13 @@ enum class LidarModel : uint8_t {
   Mid360 = 1,
   Mid360S = 2,
   Xt32 = 3,  // Hesai PandarXT-32 (not XT32M2X).
+  Mid360L = 4,
 };
+
+constexpr bool isLivoxModel(LidarModel model) {
+  return model == LidarModel::Mid360 || model == LidarModel::Mid360S ||
+         model == LidarModel::Mid360L;
+}
 
 enum class UsbLinkSpeed : uint8_t {
   Unknown = 0,

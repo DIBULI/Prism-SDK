@@ -19,7 +19,7 @@ template<class ClientType>
 LidarPowerStatus lidarPowerCommand(ClientType &client,LidarModel model,
                                    uint8_t action,uint32_t timeout_ms) {
   const auto m=static_cast<uint8_t>(model);
-  if(m<1||m>3||action>2||!timeout_ms||timeout_ms>30000)
+  if((!isLivoxModel(model)&&model!=LidarModel::Xt32)||action>2||!timeout_ms||timeout_ms>30000)
     throw std::invalid_argument("invalid LiDAR power model/action/timeout (1..30000 ms)");
   std::vector<uint8_t> p{1,0,12,0,m,action,0,0,0,0,0,0};
   for(unsigned i=0;i<4;++i)p[8+i]=uint8_t(timeout_ms>>(8*i));

@@ -11,6 +11,7 @@ inline const char* lidarModelName(LidarModel model) {
     case LidarModel::None: return "None";
     case LidarModel::Mid360: return "Livox Mid-360";
     case LidarModel::Mid360S: return "Livox Mid-360S";
+    case LidarModel::Mid360L: return "Livox Mid-360L";
     case LidarModel::Xt32: return "Hesai PandarXT-32";
   }
   return "Unknown";
@@ -19,7 +20,7 @@ inline const char* lidarModelName(LidarModel model) {
 // Dataset point representation, little endian. Never serialize sizeof(LidarPoint).
 inline size_t lidarStoredPointStride(LidarModel model) {
   if (model == LidarModel::Xt32) return 24u;
-  if (model == LidarModel::Mid360 || model == LidarModel::Mid360S) return 16u;
+  if (isLivoxModel(model)) return 16u;
   throw std::invalid_argument("unsupported LiDAR point model");
 }
 

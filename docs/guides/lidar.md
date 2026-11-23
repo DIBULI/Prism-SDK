@@ -2,12 +2,12 @@
 
 [Documentation index](../README.md)
 
-This guide applies to both Host and RK-local clients. All three supported models
+This guide applies to both Host and RK-local clients. All four supported models
 use the same SDK lifecycle; model-specific point metadata is described below.
 
 - [Capture versus hardware power control](#capture-vs-power)
 - [Standby, wake, confirmation and timeouts](#standby-wake)
-- [MID360S normal/low speed](#speed)
+- [MID360S / MID360L motor speed](#speed)
 - [MID360 / MID360S line metadata](#livox-line)
 - [XT32 preparation and per-point timestamps](#xt32)
 
@@ -40,7 +40,7 @@ Host `prism::Client` and RK-local `prism::rklocal::Client` share the C++ API:
 
 ```cpp
 // Use an already opened, idle client. Choose the actual attached radar.
-const auto model = prism::LidarModel::Xt32; // or Mid360 / Mid360S
+const auto model = prism::LidarModel::Xt32; // or Mid360 / Mid360S / Mid360L
 auto before = client.lidarPowerStatus(model, 3000);
 auto idle = client.setLidarStandby(model, true, 15000);
 auto awake = client.setLidarStandby(model, false, 15000);
@@ -85,11 +85,12 @@ these APIs.
 
 <a id="speed"></a>
 
-## MID360S normal/low speed
+## MID360S / MID360L motor speed
 
 Both clients expose `lidarSpeedStatus(model, timeout_ms=3000)` and
-`setLidarSpeedMode(model, mode, timeout_ms=10000)`. Use model `Mid360S` and
-`LidarSpeedMode::Normal` or `LidarSpeedMode::Low`. Stop all capture streams first.
+`setLidarSpeedMode(model, mode, timeout_ms=10000)`. Model `Mid360S` supports
+`LidarSpeedMode::Normal` and `LidarSpeedMode::Low`; `Mid360L` also supports
+`LidarSpeedMode::High`. Stop all capture streams first.
 These operations do not change network configuration or start acquisition.
 Readback, not a successful send alone, confirms the requested mode.
 
@@ -99,8 +100,16 @@ Do not assume that a setting survives power cycling; query after reconnecting.
 The matched SDK provides the version-1 speed extension while retaining Runtime
 API 19. Update the complete headers/runtime package together.
 
-MID360S 支持独立正常/低速切换，先停止全部采集，再设置并回读确认。
+MID360S 支持正常/低速，MID360L 另支持高速；先停止全部采集，再设置并回读确认。
 MID360、XT32 不支持此接口；不要根据命令发送成功或重启前的状态推断当前转速。
+
+MID360L is Prism model 4 and Livox discovery device type 41. Select its own
+model/configuration for capture, standby/wake and speed control. The matched
+1.4.0 Agent and SDK implement these operations; firmware/model readback is
+required. MID360L point line IDs remain unknown (`line_valid=false`) rather
+than borrowing MID360S line mapping. Offline protocol, capture/parser and
+Viewer fixtures pass; physical MID360L streaming, time sync and motor modes
+await a connected device.
 
 
 <a id="livox-line"></a>

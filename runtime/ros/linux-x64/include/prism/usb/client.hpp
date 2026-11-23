@@ -205,7 +205,7 @@ class Client {
   ImuStreamStatus stopImu(const std::function<void(const Frame&)>& tail);
   void sendVideoAck(uint32_t last_frame_id);
 
-  // The model is intentionally mandatory: Mid-360 and Mid-360S use separate
+  // The model is intentionally mandatory: Mid-360, Mid-360S and Mid-360L use separate
   // SDK2 configuration schemas and the Agent never guesses from discovery.
   LidarStatus startLidar(LidarModel model);
   LidarStatus stopLidar();

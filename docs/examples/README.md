@@ -149,7 +149,7 @@ Platforms: Linux x86-64 and macOS arm64.
 This finite-duration example uses `LidarStream` to receive point batches and
 LiDAR IMU samples in the same USB receive loop. The LiDAR model is mandatory
 because Mid360 and Mid360S use different configurations and the SDK does not
-guess the model.
+guess the model. MID-360L uses `--model mid360l` with the matching 1.4.0 Agent.
 
 Capture a Mid360 for ten seconds:
 
