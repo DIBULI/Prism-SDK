@@ -18,6 +18,17 @@ the standalone maintenance workflow below.
 
 ## Full application packages
 
+Current 1.4.0 builds also support integrated format v3: one user-selected ZIP
+contains a validated full package and uses its Agent's embedded installer setup.
+This automatically upgrades the installer on 1.3.x devices; no separate bridge
+package is needed. The Sensor Board is programmed once. All application checks
+and qualified RK Loader write/readback finish before success is reported. After
+success, restart the whole device once to activate the Loader. Intermediate
+Agent service and Sensor Board restarts are automatic, without an RK reboot.
+Use the updated 1.4.0 SDK/Viewer build for v3 packages. 1.2.x is outside this
+upgrade's compatibility scope. Existing boot-chain and hardware qualification
+checks remain mandatory; a rejected or interrupted update is not success.
+
 Format v2 contains exactly `manifest.ini`, `prism-agent`, `BOOT.BIN`, and
 `applications.zip`. It uses the v1 fields below with `format_version=2` and
 adds `applications_file=applications.zip` plus `applications_sha256=<SHA-256>`.
