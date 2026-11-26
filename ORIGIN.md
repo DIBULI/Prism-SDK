@@ -66,3 +66,23 @@ the exact source revision and build run. Group 0 controls cam0/cam3; group 1
 controls cam1/cam2, with independent targets and bounds and a 28x RAW gain cap.
 Matching Agent and Sensor Board profile descriptor version 5 are required.
 See [camera controls](docs/guides/camera.md#21312v0-exposure-groups).
+
+## Upgrade file path repair
+
+All Host runtimes read system upgrade package paths as UTF-8, including Chinese
+directories and filenames on Windows. File-open and size errors are reported
+separately. Package validation and size limits are unchanged. Use the matching
+updated Viewer 1.4.0 to receive this repair; device firmware alone cannot change
+how a desktop application opens a local file.
+
+Full system upgrades accept supported Agent 1.3.0 / 1.3.1 / 1.4.0 targets,
+including using SDK/Viewer 1.4.0 to update a 1.3.0 device to 1.3.1. USB,
+network and RK-local use the same target compatibility rule. Restart checks
+remain mandatory: the exact target version, changed process and successful
+transaction receipt must be verified. Unknown full-package target versions
+and disabled restart verification are rejected before writing.
+
+The optional device-log extension exports bounded current/previous-boot service
+and kernel diagnostics as ZIP. Requires Agent 1.4.0+ with the extension and an
+idle capture state. Uses the existing USB/network connection, with no SSH,
+automatic STOP or device-file deletion. See [device logs](docs/guides/device-logs.md).

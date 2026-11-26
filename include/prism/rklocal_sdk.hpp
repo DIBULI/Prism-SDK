@@ -192,6 +192,8 @@ class Client {
   uint64_t ping();
   // Same read-only/raw-file contract as Host SDK, over the RK-local socket.
   std::vector<RecordedDataset> recordedDatasets();
+  DeviceLogArchive deviceLogArchive(const DeviceLogProgress& progress = {},
+                                    const DeviceLogCancel& cancel = {});
   RecordedDatasetManifest recordedDatasetFiles(const std::string& dataset);
   RecordedDatasetChunk readRecordedDatasetFile(const std::string& dataset,
       const RecordedDatasetFile& file, uint64_t offset,

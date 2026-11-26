@@ -79,6 +79,8 @@ enum class FrameType : uint8_t {
   DatasetList = 0x46,
   DatasetFiles = 0x47,
   DatasetRead = 0x48,
+  DeviceLogs = 0x56,
+  DeviceLogsResponse = 0xc8,
   LidarPowerGet = 0x49,
   LidarPowerSet = 0x4a,
   LidarPowerResponse = 0xc0,

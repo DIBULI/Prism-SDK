@@ -40,7 +40,10 @@ Use a trusted package matching the product and installed full-updater generation
 The SDK validates the package and queries full-update capability before writes;
 an Agent 1.3.0 version string alone is not proof of capability. There is
 no automatic 1.2.0 bootstrap. V2 requires restart verification and a target
-Agent version matching the running SDK.
+Agent version supported by the running SDK. SDK 1.4.0 can verify 1.3.0, 1.3.1
+and 1.4.0 targets over USB, network or RK-local. It checks the exact requested
+version, changed process and successful transaction digest after reconnecting;
+unknown targets are rejected before upload.
 
 For the plaintext TCP gateway, use a full updater with the matching TCP health
 probe. A previously installed TLS-only updater cannot bootstrap this change by
@@ -113,14 +116,14 @@ The device must be open and camera, IMU and LiDAR streaming must be stopped.
 
 1. The Host SDK validates the entire ZIP, manifest, embedded agent version, and
    both SHA-256 values.
-2. Using the currently matching SDK/Agent pair, the SDK compares the reported
+2. Using the negotiated SDK/Agent profile, the SDK compares the reported
    Sensor Board version with the package. A known matching version is skipped;
    otherwise the SDK stages `BOOT.BIN` on RK and relays it to Sensor Board.
 3. When flashing is needed, Sensor Board commits only after QSPI update-slot
    read-back succeeds. A same-version skip sends no OTA transaction.
 4. The SDK uploads and commits the agent as the final transaction.
-5. If the target version changed, close the old host application and reconnect
-   only with the Host SDK whose semantic version exactly matches the new agent.
+5. With restart verification enabled, SDK 1.4.0 reconnects and verifies
+   supported Agent 1.3.0 / 1.3.1 / 1.4.0 targets, including changed versions.
 
 When Sensor Board is flashed, its image crosses two links, so progress counts
 host-to-RK staging and RK-to-sensor-board transfer separately. A same-version skip
@@ -153,9 +156,12 @@ auto result = client.upgradeSystem(
 ```
 
 `SystemUpgradeResult::complete` is true when the Sensor Board commit is
-verified (or its matching version was skipped) and the final Agent commit is accepted. For a same-version reinstall
-with restart verification enabled, the restarted process must also be
-verified. Component-level update frames remain an internal transport detail
+verified (or its matching version was skipped) and the final Agent commit is accepted.
+With restart verification enabled, a supported target's exact version and
+restarted process must also be verified, for both same-version reinstalls and
+version changes. Full packages additionally require the successful matching
+transaction receipt and never permit disabling restart verification.
+Component-level update frames remain an internal transport detail
 and are not the new background maintenance interface below.
 
 ## Agent-managed Sensor Board maintenance

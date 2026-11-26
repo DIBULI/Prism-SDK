@@ -11,6 +11,7 @@
 #include "prism/usb/configuration.hpp"
 #include "prism/usb/device_info.hpp"
 #include "prism/usb/datasets.hpp"
+#include "prism/usb/device_logs.hpp"
 #include "prism/usb/exposure.hpp"
 #include "prism/usb/camera_control.hpp"
 #include "prism/usb/gnss_timing.hpp"
@@ -85,6 +86,12 @@ class Client {
   // Original recorded files only, no ROS conversion. Idle-only, read-only;
   // all requests use the existing USB connection, never HTTP or shell commands.
   std::vector<RecordedDataset> recordedDatasets();
+  // Read-only, idle-only. Uses the current USB/network connection. Requires
+  // Agent's optional log extension; no SSH/HTTP, STOP, power change or deletion.
+  // At most 4 MiB of recent current/previous-boot service/kernel text, compressed
+  // on this computer. Old Agent reports unsupported; connection remains usable.
+  DeviceLogArchive deviceLogArchive(const DeviceLogProgress& progress = {},
+                                    const DeviceLogCancel& cancel = {});
   RecordedDatasetManifest recordedDatasetFiles(const std::string& dataset);
   RecordedDatasetChunk readRecordedDatasetFile(const std::string& dataset,
       const RecordedDatasetFile& file, uint64_t offset,
